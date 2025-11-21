@@ -17,15 +17,7 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
   const { workflowData, updateWorkflowData } = useWorkflow();
 
   const handleNext = () => {
-    // Validation: check if essential fields are filled
-    const hasDesign = !!workflowData.designFile;
-    const hasMeasurements = workflowData.measurements.chestWidth && 
-                           workflowData.measurements.length;
-    
-    if (!hasDesign || !hasMeasurements) {
-      alert('Please upload a design file and add measurements before continuing');
-      return false;
-    }
+    // Allow progression without validation
     return true;
   };
 
@@ -43,7 +35,7 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
           <h3 className="text-sm font-semibold text-foreground mb-3">Design File</h3>
           <Card className="border-border">
             <CardContent className="p-6">
-              <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-emerald-500/50 transition-colors cursor-pointer">
+              <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer">
                 <Upload className="w-8 h-8 mx-auto mb-3 text-muted-foreground" />
                 <p className="text-sm font-medium text-foreground mb-1">
                   Upload your design sketch or mockup

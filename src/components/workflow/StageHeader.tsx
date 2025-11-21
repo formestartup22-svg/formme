@@ -16,8 +16,8 @@ export const StageHeader = ({ icon: Icon, title, description, contextInfo }: Sta
   return (
     <div className="mb-6">
       <div className="flex items-center gap-3 mb-2">
-        <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-950/30 flex items-center justify-center">
-          <Icon className="w-5 h-5 text-emerald-600" />
+        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+          <Icon className="w-5 h-5 text-primary" />
         </div>
         <h2 className="text-2xl font-bold text-foreground">{title}</h2>
       </div>
