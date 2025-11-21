@@ -13,7 +13,6 @@ import { FactoryCommunication } from './FactoryCommunication';
 import { FactoryDocuments } from './FactoryDocuments';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
 
 interface TechPackStageProps {
   design: Design;
@@ -32,34 +31,33 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
 
   const handleGenerateTechPack = async () => {
     setIsGenerating(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-techpack', {
-        body: {
-          designData: {
-            name: design.name,
-            garmentType: 'T-Shirt',
-            fabric: workflowData.fabric,
-            gsm: workflowData.gsm,
-            print: workflowData.print,
-            measurements: workflowData.measurements,
-            constructionNotes: workflowData.constructionNotes,
-          }
-        }
-      });
+    
+    // Simulate tech pack generation (backend integration needed)
+    setTimeout(() => {
+      const mockTechPack = `TECH PACK - ${design.name}
 
-      if (error) throw error;
+GARMENT SPECIFICATIONS
+- Type: T-Shirt
+- Fabric: ${workflowData.fabric || 'Not specified'}
+- GSM: ${workflowData.gsm || 'Not specified'}
+- Print Type: ${workflowData.print || 'Not specified'}
 
-      if (data?.techPackContent) {
-        setGeneratedTechPack(data.techPackContent);
-        setShowTechPackDialog(true);
-        toast.success('Tech pack generated successfully!');
-      }
-    } catch (error) {
-      console.error('Error generating tech pack:', error);
-      toast.error('Failed to generate tech pack. Please try again.');
-    } finally {
+MEASUREMENTS
+- Chest Width: ${workflowData.measurements.chestWidth || 'Not specified'} inches
+- Length: ${workflowData.measurements.length || 'Not specified'} inches
+- Sleeve Length: ${workflowData.measurements.sleeveLength || 'Not specified'} inches
+
+CONSTRUCTION NOTES
+${workflowData.constructionNotes || 'No additional notes'}
+
+---
+Note: This is a preview. Connect backend for AI-generated tech packs.`;
+      
+      setGeneratedTechPack(mockTechPack);
+      setShowTechPackDialog(true);
       setIsGenerating(false);
-    }
+      toast.success('Tech pack preview generated!');
+    }, 1500);
   };
 
   const handleDownloadTechPack = () => {
