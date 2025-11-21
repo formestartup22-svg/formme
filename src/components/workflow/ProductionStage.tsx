@@ -1,73 +1,98 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Image, CheckCircle } from 'lucide-react';
+import { Factory as FactoryIcon, Image } from 'lucide-react';
 import { Design } from '@/data/workflowData';
+import { useWorkflow } from '@/context/WorkflowContext';
+import { StageHeader } from './StageHeader';
+import { StageNavigation } from './StageNavigation';
 
 interface ProductionStageProps {
   design: Design;
 }
 
 const ProductionStage = ({ design }: ProductionStageProps) => {
+  const { workflowData, updateWorkflowData } = useWorkflow();
+
+  const handleNext = () => {
+    if (!workflowData.firstBatchApproved) {
+      alert('Please review and approve the first batch before continuing');
+      return false;
+    }
+    return true;
+  };
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      <Card className="border-border">
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
-            <Image className="w-4 h-4 text-emerald-600" />
-            <CardTitle className="text-base">Lab Dips Review</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-3 gap-2">
-            {['Navy', 'Green', 'Gray'].map((color) => (
-              <div key={color} className="space-y-1.5">
-                <div className="aspect-square bg-muted rounded border" />
-                <p className="text-xs text-center">{color}</p>
+    <div>
+      <StageHeader
+        icon={FactoryIcon}
+        title="Production Approval"
+        description="Sample approved! Factory is now producing your order. Review first batch photos before full production continues."
+        contextInfo={[
+          { label: 'Quantity', value: `${workflowData.quantity} units` },
+          { label: 'Factory', value: workflowData.selectedFactory?.name || '' },
+          { label: 'Status', value: 'In Production' }
+        ]}
+      />
+
+      <div className="space-y-6">
+        {/* Lab Dips */}
+        <section>
+          <h3 className="text-sm font-semibold text-foreground mb-3">Fabric Color Approval</h3>
+          <Card className="border-border">
+            <CardContent className="p-6">
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                {['Navy', 'Forest Green', 'Charcoal'].map((color) => (
+                  <div key={color} className="space-y-2">
+                    <div className="aspect-square bg-muted rounded border" />
+                    <p className="text-xs text-center font-medium">{color}</p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <Button size="sm" className="w-full mt-3">Approve Colors</Button>
-        </CardContent>
-      </Card>
+              <Button 
+                size="sm" 
+                className="w-full"
+                onClick={() => updateWorkflowData({ labDipsApproved: true })}
+                disabled={workflowData.labDipsApproved}
+              >
+                {workflowData.labDipsApproved ? '✓ Colors Approved' : 'Approve Colors'}
+              </Button>
+            </CardContent>
+          </Card>
+        </section>
 
-      <Card className="border-border">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Material Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Fabric</span>
-            <span className="font-medium">100% Cotton</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">GSM</span>
-            <span className="font-medium">180 gsm</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Shrinkage</span>
-            <span className="font-medium">3-5%</span>
-          </div>
-        </CardContent>
-      </Card>
+        {/* First Batch */}
+        <section>
+          <h3 className="text-sm font-semibold text-foreground mb-3">First Batch Photos</h3>
+          <Card className="border-border">
+            <CardContent className="p-6">
+              <div className="grid grid-cols-4 gap-3 mb-4">
+                {['Front', 'Back', 'Detail', 'Label'].map((view) => (
+                  <div key={view} className="space-y-1.5">
+                    <div className="aspect-square bg-muted rounded border flex items-center justify-center">
+                      <Image className="w-6 h-6 text-muted-foreground" />
+                    </div>
+                    <p className="text-xs text-center text-muted-foreground">{view}</p>
+                  </div>
+                ))}
+              </div>
+              <Button 
+                size="sm" 
+                className="w-full bg-emerald-600 hover:bg-emerald-700"
+                onClick={() => updateWorkflowData({ firstBatchApproved: true })}
+                disabled={workflowData.firstBatchApproved}
+              >
+                {workflowData.firstBatchApproved ? '✓ Batch Approved' : 'Approve First Batch'}
+              </Button>
+            </CardContent>
+          </Card>
+        </section>
 
-      <Card className="border-emerald-200 bg-emerald-50/50 dark:bg-emerald-950/20 dark:border-emerald-900/30 lg:col-span-2">
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
-            <CheckCircle className="w-4 h-4 text-emerald-600" />
-            <CardTitle className="text-base">First Batch Photos</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p className="text-xs text-muted-foreground mb-3">
-            Factory will upload photos once production begins
-          </p>
-          <div className="flex gap-2">
-            <Button size="sm" disabled>Approve Batch</Button>
-            <Button variant="outline" size="sm" disabled>Request Changes</Button>
-          </div>
-        </CardContent>
-      </Card>
+        <StageNavigation
+          onNext={handleNext}
+          nextLabel="Continue to Quality Check"
+        />
+      </div>
     </div>
   );
 };
