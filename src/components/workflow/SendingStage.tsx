@@ -86,9 +86,15 @@ const SendingStage = ({ design }: SendingStageProps) => {
           </Card>
         </section>
 
-        <StageNavigation
-          nextLabel="Submit Order to Factory"
-        />
+          <StageNavigation
+            nextLabel="Submit Order to Factory"
+          />
+        </div>
+
+        <div className="space-y-4">
+          <FactoryCommunication />
+          <FactoryDocuments />
+        </div>
       </div>
     </div>
   );
