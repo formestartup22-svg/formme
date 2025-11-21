@@ -15,10 +15,7 @@ const ProductionStage = ({ design }: ProductionStageProps) => {
   const { workflowData, updateWorkflowData } = useWorkflow();
 
   const handleNext = () => {
-    if (!workflowData.firstBatchApproved) {
-      alert('Please review and approve the first batch before continuing');
-      return false;
-    }
+    // Allow progression without validation
     return true;
   };
 
