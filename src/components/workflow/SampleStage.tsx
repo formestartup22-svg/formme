@@ -78,7 +78,11 @@ const SampleStage = ({ design }: SampleStageProps) => {
             </Card>
           </section>
 
-          <StageNavigation onNext={() => true} nextLabel="Proceed to Production" />
+          <StageNavigation 
+            onNext={() => true} 
+            nextLabel="Continue to Production"
+            showBack={true}
+          />
         </div>
 
         <div className="space-y-4">

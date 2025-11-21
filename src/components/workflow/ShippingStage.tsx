@@ -30,7 +30,11 @@ const ShippingStage = ({ design }: ShippingStageProps) => {
               </Button>
             </CardContent>
           </Card>
-          <StageNavigation onNext={() => true} nextLabel="Complete" />
+          <StageNavigation 
+            onNext={() => true} 
+            nextLabel="Mark as Complete"
+            showBack={true}
+          />
         </div>
         <div className="space-y-4">
           <FactoryCommunication />
