@@ -1,363 +1,253 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { mockDesigns, mockTasks, stageNames } from '@/data/workflowData';
-import { Plus, ChevronDown, Clock } from 'lucide-react';
+import { Plus, Clock, AlertCircle, CheckCircle, Package, Truck, FileCheck, Factory, Send } from 'lucide-react';
 
 const Workflow = () => {
-  const [expandedDesigns, setExpandedDesigns] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState('all');
+  
+  const activeDesigns = mockDesigns.filter(d => d.status !== 'completed').length;
+  const inSampling = mockDesigns.filter(d => d.stage === 'sample').length;
+  const inProduction = mockDesigns.filter(d => d.stage === 'production' || d.stage === 'quality').length;
+  const awaitingApproval = mockDesigns.filter(d => d.status === 'action-required').length;
 
-  const toggleDesign = (id: string) => {
-    setExpandedDesigns(prev =>
-      prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]
-    );
-  };
-
-  // Group designs by stage
-  const designsByStage = {
-    'tech-pack': mockDesigns.filter(d => d.stage === 'tech-pack'),
-    'factory-match': mockDesigns.filter(d => d.stage === 'factory-match'),
-    'sample': mockDesigns.filter(d => d.stage === 'sample'),
-    'production': mockDesigns.filter(d => d.stage === 'production' || d.stage === 'quality'),
-  };
-
-  // Get tasks for a design
-  const getDesignTasks = (designId: string) => {
-    return mockTasks.filter(t => t.designId === designId);
-  };
-
-  const getStatusColor = (status: string) => {
+  const getStatusVariant = (status: string) => {
     switch (status) {
-      case 'on-track': return 'bg-primary/10 text-primary border-primary/20';
-      case 'delayed': return 'bg-yellow-500/10 text-yellow-700 border-yellow-500/20';
-      case 'action-required': return 'bg-accent/10 text-accent border-accent/20';
-      case 'completed': return 'bg-primary/10 text-primary border-primary/20';
-      default: return 'bg-muted text-muted-foreground';
+      case 'on-track': return 'default';
+      case 'delayed': return 'secondary';
+      case 'action-required': return 'destructive';
+      case 'completed': return 'outline';
+      default: return 'outline';
     }
   };
 
-  const getPriorityBadge = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'bg-accent text-white';
-      case 'medium': return 'bg-yellow-500 text-white';
-      case 'low': return 'bg-primary text-white';
-      default: return 'bg-muted text-foreground';
+  const getStageIcon = (stage: string) => {
+    switch (stage) {
+      case 'tech-pack': return <FileCheck className="w-4 h-4" />;
+      case 'factory-match': return <Factory className="w-4 h-4" />;
+      case 'sending': return <Send className="w-4 h-4" />;
+      case 'sample': return <Package className="w-4 h-4" />;
+      case 'production': return <Factory className="w-4 h-4" />;
+      case 'quality': return <CheckCircle className="w-4 h-4" />;
+      case 'shipping': return <Truck className="w-4 h-4" />;
+      default: return <Clock className="w-4 h-4" />;
     }
   };
+
+  const filteredDesigns = activeTab === 'all' 
+    ? mockDesigns 
+    : mockDesigns.filter(d => d.status === activeTab);
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-
+      
       <main className="container mx-auto px-4 sm:px-6 py-6 mt-20 max-w-7xl">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground mb-1">Production Workflow</h1>
-            <p className="text-muted-foreground">Track your designs from concept to delivery</p>
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">Production Workflow</h1>
+              <p className="text-muted-foreground">Track your designs from concept to delivery</p>
+            </div>
+            <Button size="lg" className="gap-2 w-full sm:w-auto">
+              <Plus className="w-4 h-4" />
+              New Design
+            </Button>
           </div>
-          <Button className="gap-2 bg-accent hover:bg-accent/90">
-            <Plus className="w-4 h-4" />
-            New Design
-          </Button>
+
+          {/* KPI Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <Card className="border-border hover:border-primary/50 transition-colors">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardDescription className="text-xs uppercase font-medium">Active</CardDescription>
+                  <Clock className="w-4 h-4 text-primary" />
+                </div>
+                <CardTitle className="text-3xl font-bold text-foreground">{activeDesigns}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-muted-foreground">In progress</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border hover:border-primary/50 transition-colors">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardDescription className="text-xs uppercase font-medium">Sampling</CardDescription>
+                  <Package className="w-4 h-4 text-accent" />
+                </div>
+                <CardTitle className="text-3xl font-bold text-foreground">{inSampling}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-muted-foreground">Review stage</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border hover:border-primary/50 transition-colors">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardDescription className="text-xs uppercase font-medium">Production</CardDescription>
+                  <Factory className="w-4 h-4 text-primary" />
+                </div>
+                <CardTitle className="text-3xl font-bold text-foreground">{inProduction}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-muted-foreground">Manufacturing</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border hover:border-destructive/50 transition-colors">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardDescription className="text-xs uppercase font-medium">Urgent</CardDescription>
+                  <AlertCircle className="w-4 h-4 text-destructive" />
+                </div>
+                <CardTitle className="text-3xl font-bold text-destructive">{awaitingApproval}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-muted-foreground">Action needed</p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
-        {/* Subtle Stage Summary */}
-        <div className="flex gap-4 mb-8 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-primary" />
-            <span className="text-muted-foreground">Tech Pack</span>
-            <span className="font-semibold text-foreground">{designsByStage['tech-pack'].length}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-primary" />
-            <span className="text-muted-foreground">Factory Match</span>
-            <span className="font-semibold text-foreground">{designsByStage['factory-match'].length}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-primary" />
-            <span className="text-muted-foreground">Sampling</span>
-            <span className="font-semibold text-foreground">{designsByStage['sample'].length}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-primary" />
-            <span className="text-muted-foreground">Production & QC</span>
-            <span className="font-semibold text-foreground">{designsByStage['production'].length}</span>
-          </div>
-        </div>
-
-        {/* Pipeline Sections */}
-        <div className="space-y-8">
-          {/* Tech Pack Section */}
-          {designsByStage['tech-pack'].length > 0 && (
-            <section>
-              <h2 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-                <div className="w-1 h-5 bg-primary rounded-full" />
-                Tech Pack ({designsByStage['tech-pack'].length})
-              </h2>
-              <div className="space-y-3">
-                {designsByStage['tech-pack'].map((design) => {
-                  const tasks = getDesignTasks(design.id);
-                  const isExpanded = expandedDesigns.includes(design.id);
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Content */}
+          <div className="lg:col-span-2">
+            <Card className="border-border">
+              <CardHeader>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div>
+                    <CardTitle className="text-xl sm:text-2xl">Design Pipeline</CardTitle>
+                    <CardDescription>Monitor and manage all designs</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
+                  <TabsList className="grid grid-cols-4 mb-4">
+                    <TabsTrigger value="all">All</TabsTrigger>
+                    <TabsTrigger value="on-track">On Track</TabsTrigger>
+                    <TabsTrigger value="action-required">Urgent</TabsTrigger>
+                    <TabsTrigger value="delayed">Delayed</TabsTrigger>
+                  </TabsList>
                   
-                  return (
-                    <Collapsible key={design.id} open={isExpanded} onOpenChange={() => toggleDesign(design.id)}>
-                      <Card className="border-border hover:border-primary/50 transition-colors">
-                        <CardHeader className="pb-3">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-2">
-                                <CardTitle className="text-base">{design.name}</CardTitle>
-                                <Badge variant="outline" className={getStatusColor(design.status) + ' text-xs'}>
-                                  {design.status.replace('-', ' ')}
-                                </Badge>
-                              </div>
-                              <p className="text-sm text-muted-foreground mb-2">{design.nextAction}</p>
-                              
-                              {/* Progress Bar */}
-                              <div className="flex items-center gap-3">
-                                <div className="flex-1">
-                                  <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                                    <div 
-                                      className="h-full bg-primary transition-all"
-                                      style={{ width: `${design.progress}%` }}
-                                    />
+                  <TabsContent value={activeTab} className="space-y-3">
+                    {filteredDesigns.length === 0 ? (
+                      <div className="text-center py-12 text-muted-foreground">
+                        <Package className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                        <p>No designs found</p>
+                      </div>
+                    ) : (
+                      filteredDesigns.map((design) => (
+                        <Link key={design.id} to={`/design/${design.id}`}>
+                          <Card className="border-border hover:border-primary/50 transition-all hover:shadow-sm cursor-pointer">
+                            <CardHeader className="pb-3">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    {getStageIcon(design.stage)}
+                                    <h3 className="font-semibold text-foreground">{design.name}</h3>
                                   </div>
+                                  <p className="text-sm text-muted-foreground mb-2">
+                                    {stageNames[design.stage]}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {design.nextAction}
+                                  </p>
                                 </div>
-                                <span className="text-xs text-muted-foreground">{design.progress}%</span>
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center gap-2">
-                              <Button asChild size="sm" variant="outline">
-                                <Link to={`/design/${design.id}`}>Open</Link>
-                              </Button>
-                              
-                              {tasks.length > 0 && (
-                                <CollapsibleTrigger asChild>
-                                  <Button size="sm" variant="ghost" className="gap-1">
-                                    <span className="text-xs">{tasks.length} task{tasks.length > 1 ? 's' : ''}</span>
-                                    <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-                                  </Button>
-                                </CollapsibleTrigger>
-                              )}
-                            </div>
-                          </div>
-                        </CardHeader>
-
-                        {/* Collapsible Tasks */}
-                        {tasks.length > 0 && (
-                          <CollapsibleContent>
-                            <CardContent className="pt-0">
-                              <div className="border-t pt-3 space-y-2">
-                                {tasks.map((task) => (
-                                  <div key={task.id} className="flex items-center justify-between p-2 bg-muted/50 rounded">
-                                    <div className="flex-1">
-                                      <p className="text-sm font-medium text-foreground">{task.action}</p>
-                                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                                        <Clock className="w-3 h-3" />
-                                        Due {task.dueDate}
-                                      </p>
-                                    </div>
-                                    <Badge className={getPriorityBadge(task.priority) + ' text-xs'}>
-                                      {task.priority}
-                                    </Badge>
-                                  </div>
-                                ))}
-                              </div>
-                            </CardContent>
-                          </CollapsibleContent>
-                        )}
-                      </Card>
-                    </Collapsible>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-
-          {/* Factory Match Section */}
-          {designsByStage['factory-match'].length > 0 && (
-            <section>
-              <h2 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-                <div className="w-1 h-5 bg-primary rounded-full" />
-                Factory Match ({designsByStage['factory-match'].length})
-              </h2>
-              <div className="space-y-3">
-                {designsByStage['factory-match'].map((design) => {
-                  const tasks = getDesignTasks(design.id);
-                  const isExpanded = expandedDesigns.includes(design.id);
-                  
-                  return (
-                    <Collapsible key={design.id} open={isExpanded} onOpenChange={() => toggleDesign(design.id)}>
-                      <Card className="border-border hover:border-primary/50 transition-colors">
-                        <CardHeader className="pb-3">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-2">
-                                <CardTitle className="text-base">{design.name}</CardTitle>
-                                <Badge variant="outline" className={getStatusColor(design.status) + ' text-xs'}>
-                                  {design.status.replace('-', ' ')}
-                                </Badge>
-                              </div>
-                              <p className="text-sm text-muted-foreground mb-2">{design.nextAction}</p>
-                              
-                              <div className="flex items-center gap-3">
-                                <div className="flex-1">
-                                  <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                                    <div 
-                                      className="h-full bg-primary transition-all"
-                                      style={{ width: `${design.progress}%` }}
-                                    />
-                                  </div>
-                                </div>
-                                <span className="text-xs text-muted-foreground">{design.progress}%</span>
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center gap-2">
-                              <Button asChild size="sm" variant="outline">
-                                <Link to={`/design/${design.id}`}>Open</Link>
-                              </Button>
-                              
-                              {tasks.length > 0 && (
-                                <CollapsibleTrigger asChild>
-                                  <Button size="sm" variant="ghost" className="gap-1">
-                                    <span className="text-xs">{tasks.length} task{tasks.length > 1 ? 's' : ''}</span>
-                                    <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-                                  </Button>
-                                </CollapsibleTrigger>
-                              )}
-                            </div>
-                          </div>
-                        </CardHeader>
-
-                        {tasks.length > 0 && (
-                          <CollapsibleContent>
-                            <CardContent className="pt-0">
-                              <div className="border-t pt-3 space-y-2">
-                                {tasks.map((task) => (
-                                  <div key={task.id} className="flex items-center justify-between p-2 bg-muted/50 rounded">
-                                    <div className="flex-1">
-                                      <p className="text-sm font-medium text-foreground">{task.action}</p>
-                                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                                        <Clock className="w-3 h-3" />
-                                        Due {task.dueDate}
-                                      </p>
-                                    </div>
-                                    <Badge className={getPriorityBadge(task.priority) + ' text-xs'}>
-                                      {task.priority}
-                                    </Badge>
-                                  </div>
-                                ))}
-                              </div>
-                            </CardContent>
-                          </CollapsibleContent>
-                        )}
-                      </Card>
-                    </Collapsible>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-
-          {/* Continue with other sections... */}
-          {['sample', 'production'].map((stageKey) => {
-            const designs = designsByStage[stageKey as keyof typeof designsByStage];
-            if (designs.length === 0) return null;
-
-            const sectionTitle = stageKey === 'sample' ? 'Sampling' : 'Production & QC';
-            
-            return (
-              <section key={stageKey}>
-                <h2 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-                  <div className="w-1 h-5 bg-primary rounded-full" />
-                  {sectionTitle} ({designs.length})
-                </h2>
-                <div className="space-y-3">
-                  {designs.map((design) => {
-                    const tasks = getDesignTasks(design.id);
-                    const isExpanded = expandedDesigns.includes(design.id);
-                    
-                    return (
-                      <Collapsible key={design.id} open={isExpanded} onOpenChange={() => toggleDesign(design.id)}>
-                        <Card className="border-border hover:border-primary/50 transition-colors">
-                          <CardHeader className="pb-3">
-                            <div className="flex items-start justify-between gap-4">
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <CardTitle className="text-base">{design.name}</CardTitle>
-                                  <Badge variant="outline" className={getStatusColor(design.status) + ' text-xs'}>
+                                <div className="flex flex-col items-end gap-2">
+                                  <Badge variant={getStatusVariant(design.status)}>
                                     {design.status.replace('-', ' ')}
                                   </Badge>
-                                </div>
-                                <p className="text-sm text-muted-foreground mb-2">{design.nextAction}</p>
-                                
-                                <div className="flex items-center gap-3">
-                                  <div className="flex-1">
-                                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                                      <div 
-                                        className="h-full bg-primary transition-all"
-                                        style={{ width: `${design.progress}%` }}
-                                      />
-                                    </div>
-                                  </div>
-                                  <span className="text-xs text-muted-foreground">{design.progress}%</span>
+                                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                    {design.eta}
+                                  </span>
                                 </div>
                               </div>
-                              
-                              <div className="flex items-center gap-2">
-                                <Button asChild size="sm" variant="outline">
-                                  <Link to={`/design/${design.id}`}>Open</Link>
-                                </Button>
-                                
-                                {tasks.length > 0 && (
-                                  <CollapsibleTrigger asChild>
-                                    <Button size="sm" variant="ghost" className="gap-1">
-                                      <span className="text-xs">{tasks.length} task{tasks.length > 1 ? 's' : ''}</span>
-                                      <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-                                    </Button>
-                                  </CollapsibleTrigger>
-                                )}
+                              {/* Progress Bar */}
+                              <div className="mt-3">
+                                <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+                                  <span>Progress</span>
+                                  <span>{design.progress}%</span>
+                                </div>
+                                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                                  <div 
+                                    className="h-full bg-primary transition-all" 
+                                    style={{ width: `${design.progress}%` }}
+                                  />
+                                </div>
                               </div>
-                            </div>
-                          </CardHeader>
+                            </CardHeader>
+                          </Card>
+                        </Link>
+                      ))
+                    )}
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          </div>
 
-                          {tasks.length > 0 && (
-                            <CollapsibleContent>
-                              <CardContent className="pt-0">
-                                <div className="border-t pt-3 space-y-2">
-                                  {tasks.map((task) => (
-                                    <div key={task.id} className="flex items-center justify-between p-2 bg-muted/50 rounded">
-                                      <div className="flex-1">
-                                        <p className="text-sm font-medium text-foreground">{task.action}</p>
-                                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                                          <Clock className="w-3 h-3" />
-                                          Due {task.dueDate}
-                                        </p>
-                                      </div>
-                                      <Badge className={getPriorityBadge(task.priority) + ' text-xs'}>
-                                        {task.priority}
-                                      </Badge>
-                                    </div>
-                                  ))}
-                                </div>
-                              </CardContent>
-                            </CollapsibleContent>
-                          )}
-                        </Card>
-                      </Collapsible>
-                    );
-                  })}
-                </div>
-              </section>
-            );
-          })}
+          {/* Action Items Sidebar */}
+          <div>
+            <Card className="border-border sticky top-24">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-destructive" />
+                  Action Items
+                </CardTitle>
+                <CardDescription>Tasks needing your attention</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {mockTasks.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <CheckCircle className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">All caught up!</p>
+                  </div>
+                ) : (
+                  mockTasks.map((task) => (
+                    <Link key={task.id} to={`/design/${task.designId}`}>
+                      <Card className={`border transition-all hover:shadow-md cursor-pointer ${
+                        task.priority === 'high' 
+                          ? 'border-destructive/30 bg-destructive/5' 
+                          : task.priority === 'medium'
+                          ? 'border-primary/30 bg-primary/5'
+                          : 'border-accent/30 bg-accent/5'
+                      }`}>
+                        <CardHeader className="p-4">
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <p className="font-medium text-foreground text-sm flex-1">
+                              {task.action}
+                            </p>
+                            <Badge 
+                              variant={task.priority === 'high' ? 'destructive' : 'outline'}
+                              className="text-xs"
+                            >
+                              {task.priority}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground mb-1">
+                            {task.designName}
+                          </p>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Clock className="w-3 h-3" />
+                            <span>Due {task.dueDate}</span>
+                          </div>
+                        </CardHeader>
+                      </Card>
+                    </Link>
+                  ))
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </main>
     </div>

@@ -39,7 +39,7 @@ export const WorkflowStepper = () => {
             {index < stages.length - 1 && (
               <div
                 className={`absolute left-[15px] top-8 w-0.5 h-8 ${
-                  isCompleted ? 'bg-accent' : 'bg-border'
+                  isCompleted ? 'bg-emerald-600' : 'bg-border'
                 }`}
               />
             )}
@@ -50,7 +50,7 @@ export const WorkflowStepper = () => {
               disabled={!isAccessible}
               className={`w-full text-left flex items-start gap-3 p-2 rounded-lg transition-all ${
                 isCurrent
-                  ? 'bg-accent/10 dark:bg-accent/20'
+                  ? 'bg-emerald-50 dark:bg-emerald-950/20'
                   : isAccessible
                   ? 'hover:bg-muted/50 cursor-pointer'
                   : 'opacity-40 cursor-not-allowed'
@@ -60,9 +60,9 @@ export const WorkflowStepper = () => {
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border-2 transition-all ${
                   isCompleted
-                    ? 'bg-accent border-accent'
+                    ? 'bg-emerald-600 border-emerald-600'
                     : isCurrent
-                    ? 'bg-accent/10 border-accent dark:bg-accent/20'
+                    ? 'bg-emerald-100 border-emerald-600 dark:bg-emerald-950/40'
                     : 'bg-background border-border'
                 }`}
               >
@@ -71,7 +71,7 @@ export const WorkflowStepper = () => {
                 ) : (
                   <span
                     className={`text-xs font-semibold ${
-                      isCurrent ? 'text-accent' : 'text-muted-foreground'
+                      isCurrent ? 'text-emerald-600' : 'text-muted-foreground'
                     }`}
                   >
                     {index + 1}
@@ -84,7 +84,7 @@ export const WorkflowStepper = () => {
                 <p
                   className={`text-sm font-medium ${
                     isCurrent
-                      ? 'text-accent'
+                      ? 'text-emerald-600'
                       : isCompleted
                       ? 'text-foreground'
                       : 'text-muted-foreground'

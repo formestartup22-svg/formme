@@ -57,7 +57,7 @@ export const StageNavigation = ({
       {hasNext && (
         <Button 
           onClick={handleNext}
-          className="bg-accent hover:bg-accent/90 gap-2"
+          className="bg-emerald-600 hover:bg-emerald-700 gap-2"
         >
           {nextLabel}
           <ArrowRight className="w-4 h-4" />
