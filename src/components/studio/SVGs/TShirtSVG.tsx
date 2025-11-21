@@ -1,0 +1,538 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { FabricProperties } from '@/hooks/useStudioState';
+import { UploadedPattern } from '@/hooks/usePatternUpload';
+import { CanvasButton } from '@/hooks/useCanvasButtons';
+import { useTshirtDrop } from '@/hooks/useTshirtDrop';
+import InteractivePatternEditor from '../InteractivePatternEditor';
+import SVGButtonElement from '../SVGButtonElement';
+import { useDrop } from 'react-dnd';
+
+interface TshirtSVGProps {
+  className?: string;
+  bodyColor?: string;
+  sleevesColor?: string;
+  collarColor?: string;
+  bodyPattern?: string;
+  sleevesPattern?: string;
+  collarPattern?: string;
+  bodyUploadedPattern?: string;
+  sleevesUploadedPattern?: string;
+  collarUploadedPattern?: string;
+  fabric?: FabricProperties;
+  onPatternDrop?: (part: 'body' | 'sleeves' | 'collar', patternId: string) => void;
+  getPatternById?: (patternId: string) => UploadedPattern | undefined;
+  onPatternUpdate?: (patternId: string, cropData: any) => void;
+  onButtonDrop?: (style: 'round' | 'square' | 'oval', size: 'small' | 'medium' | 'large', position: { x: number; y: number }) => void;
+  // Button-related props
+  buttons?: CanvasButton[];
+  selectedButtonId?: string | null;
+  onButtonClick?: (buttonId: string) => void;
+  onButtonDelete?: (buttonId: string) => void;
+  onButtonDrag?: (buttonId: string, newPosition: { x: number; y: number }) => void;
+  onButtonResize?: (buttonId: string, scale: number) => void;
+  activeTool?: string | null;
+  onButtonPlacement?: (style: 'round' | 'square' | 'oval', size: 'small' | 'medium' | 'large') => void;
+}
+
+const TshirtSVG = ({ 
+  className = "", 
+  bodyColor = "#ffffff",
+  sleevesColor = "#ffffff", 
+  collarColor = "#ffffff",
+  bodyPattern = '',
+  sleevesPattern = '',
+  collarPattern = '',
+  bodyUploadedPattern,
+  sleevesUploadedPattern,
+  collarUploadedPattern,
+  fabric,
+  onPatternDrop,
+  getPatternById,
+  onPatternUpdate,
+  onButtonDrop,
+  buttons = [],
+  selectedButtonId,
+  onButtonClick,
+  onButtonDelete,
+  onButtonDrag,
+  onButtonResize,
+  activeTool,
+  onButtonPlacement
+}: TshirtSVGProps) => {
+  const [activePatternEditor, setActivePatternEditor] = useState<{
+    patternId: string;
+    part: 'body' | 'sleeves' | 'collar';
+  } | null>(null);
+  
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Set up drop zones for each part with proper handlers
+  const { isOver: isBodyOver, canDrop: canBodyDrop, drop: bodyDrop } = useTshirtDrop('body', onPatternDrop || (() => {}));
+  const { isOver: isSleevesOver, canDrop: canSleevesDrop, drop: sleevesDrop } = useTshirtDrop('sleeves', onPatternDrop || (() => {}));
+  const { isOver: isCollarOver, canDrop: canCollarDrop, drop: collarDrop } = useTshirtDrop('collar', onPatternDrop || (() => {}));
+  
+  console.log('=== TshirtSVG Debug ===');
+  console.log('activeTool:', activeTool);
+  console.log('onButtonDrop exists:', !!onButtonDrop);
+  console.log('buttons:', buttons);
+  console.log('buttons length:', buttons.length);
+  
+  // Get uploaded pattern URL
+  const getPatternUrl = (patternId: string) => {
+    if (!patternId || !getPatternById) {
+      console.log(`❌ getPatternUrl: Missing patternId (${patternId}) or getPatternById function`);
+      return null;
+    }
+    const pattern = getPatternById(patternId);
+    console.log(`Pattern lookup for ${patternId}:`, pattern ? 'FOUND' : 'NOT FOUND');
+    if (pattern) {
+      console.log(`Pattern URL:`, pattern.url);
+    }
+    return pattern?.url || null;
+  };
+
+  // Handle pattern click for editing
+  const handlePatternClick = (patternId: string, part: 'body' | 'sleeves' | 'collar') => {
+    if (patternId && getPatternById) {
+      // Check if pattern actually exists before setting as active
+      const pattern = getPatternById(patternId);
+      if (pattern) {
+        console.log('Setting active pattern editor for:', patternId);
+        setActivePatternEditor({ patternId, part });
+      } else {
+        console.warn('Pattern not found for editing:', patternId);
+        setActivePatternEditor(null);
+      }
+    }
+  };
+
+  const handlePatternUpdate = (patternId: string, cropData: any) => {
+    if (onPatternUpdate) {
+      onPatternUpdate(patternId, cropData);
+    }
+    setActivePatternEditor(null);
+  };
+
+  // Get the current active pattern, with safety checks
+  const getActivePattern = () => {
+    if (!activePatternEditor || !getPatternById) {
+      return null;
+    }
+    
+    const pattern = getPatternById(activePatternEditor.patternId);
+    if (!pattern) {
+      console.warn('Active pattern no longer exists, clearing editor');
+      setActivePatternEditor(null);
+      return null;
+    }
+    
+    return pattern;
+  };
+  
+  // Create predefined pattern definitions
+  const createPredefinedPattern = (patternType: string, part: string) => {
+    switch (patternType) {
+      case 'stripes':
+        return (
+          <pattern 
+            id={`predefined-stripes-${part}`}
+            patternUnits="userSpaceOnUse" 
+            width="20" 
+            height="20"
+          >
+            <rect width="20" height="10" fill={part === 'body' ? bodyColor : part === 'sleeves' ? sleevesColor : collarColor} />
+            <rect y="10" width="20" height="10" fill="#000000" opacity="0.3" />
+          </pattern>
+        );
+      case 'polka-dots':
+        return (
+          <pattern 
+            id={`predefined-polka-dots-${part}`}
+            patternUnits="userSpaceOnUse" 
+            width="30" 
+            height="30"
+          >
+            <rect width="30" height="30" fill={part === 'body' ? bodyColor : part === 'sleeves' ? sleevesColor : collarColor} />
+            <circle cx="15" cy="15" r="5" fill="#000000" opacity="0.4" />
+          </pattern>
+        );
+      case 'checkerboard':
+        return (
+          <pattern 
+            id={`predefined-checkerboard-${part}`}
+            patternUnits="userSpaceOnUse" 
+            width="40" 
+            height="40"
+          >
+            <rect width="20" height="20" fill={part === 'body' ? bodyColor : part === 'sleeves' ? sleevesColor : collarColor} />
+            <rect x="20" y="20" width="20" height="20" fill={part === 'body' ? bodyColor : part === 'sleeves' ? sleevesColor : collarColor} />
+            <rect x="20" y="0" width="20" height="20" fill="#000000" opacity="0.3" />
+            <rect x="0" y="20" width="20" height="20" fill="#000000" opacity="0.3" />
+          </pattern>
+        );
+      default:
+        return null;
+    }
+  };
+  
+  // Function to get the fill value for each part
+  const getFillValue = (part: 'body' | 'sleeves' | 'collar') => {
+    const color = part === 'body' ? bodyColor : part === 'sleeves' ? sleevesColor : collarColor;
+    const uploadedPatternId = part === 'body' ? bodyUploadedPattern : part === 'sleeves' ? sleevesUploadedPattern : collarUploadedPattern;
+    const predefinedPattern = part === 'body' ? bodyPattern : part === 'sleeves' ? sleevesPattern : collarPattern;
+    
+    console.log(`🎨 getFillValue for ${part}:`, {
+      uploadedPatternId,
+      predefinedPattern,
+      color
+    });
+    
+    // Priority: Uploaded pattern > Predefined pattern > Solid color
+    if (uploadedPatternId) {
+      const patternUrl = getPatternUrl(uploadedPatternId);
+      if (patternUrl) {
+        console.log(`✅ Using uploaded pattern for ${part}:`, `url(#pattern-${part}-${uploadedPatternId})`);
+        return `url(#pattern-${part}-${uploadedPatternId})`;
+      } else {
+        console.log(`❌ Uploaded pattern URL not found for ${part}`);
+      }
+    }
+    
+    if (predefinedPattern) {
+      console.log(`✅ Using predefined pattern for ${part}: ${predefinedPattern}`);
+      return `url(#predefined-${predefinedPattern}-${part})`;
+    }
+    
+    console.log(`✅ Using solid color for ${part}: ${color}`);
+    return color;
+  };
+
+  // Helper function to get drop zone styles
+  const getDropZoneStyle = (isOver: boolean, canDrop: boolean) => {
+    if (isOver && canDrop) {
+      return { filter: 'brightness(1.2) drop-shadow(0 0 8px rgba(59, 130, 246, 0.5))' };
+    }
+    if (canDrop) {
+      return { filter: 'brightness(1.05)' };
+    }
+    return {};
+  };
+
+  // Get the active pattern safely
+  const activePattern = getActivePattern();
+
+  // Handle button placement when canvas is clicked in button mode
+  const handleSVGClick = (e: React.MouseEvent<SVGSVGElement>) => {
+    if (activeTool === 'buttons' && onButtonPlacement) {
+      const svgRect = e.currentTarget.getBoundingClientRect();
+      const clickX = e.clientX - svgRect.left;
+      const clickY = e.clientY - svgRect.top;
+      
+      // Convert to percentage coordinates
+      const percentX = (clickX / svgRect.width) * 100;
+      const percentY = (clickY / svgRect.height) * 100;
+      
+      // Constrain to SVG bounds
+      const constrainedX = Math.max(5, Math.min(95, percentX));
+      const constrainedY = Math.max(5, Math.min(95, percentY));
+      
+      console.log('🔍 TshirtSVG: SVG clicked in button mode at:', { x: constrainedX, y: constrainedY });
+      
+      // Default to medium round button
+      onButtonPlacement('round', 'medium');
+    }
+  };
+
+  // STATE FOR BUTTON DROP HOVER (for feedback)
+  const [buttonDropActive, setButtonDropActive] = useState(false);
+
+  // --- REACT DND HANDLERS FOR BUTTON DRAG & DROP ---
+  const [{ isOver: isButtonOver, canDrop: canButtonDrop }, dropButton] = useDrop(() => ({
+    accept: 'BUTTON_ELEMENT',
+    drop: (item: { style: 'round'|'square'|'oval'; size: 'small'|'medium'|'large' }, monitor) => {
+      console.log('🔥 Button dropped!', item);
+      console.log('🔥 activeTool:', activeTool);
+      console.log('🔥 onButtonDrop exists:', !!onButtonDrop);
+      
+      // Get mouse position relative to SVG for accurate drop placement
+      if (!containerRef.current) {
+        console.log('❌ No container ref');
+        return;
+      }
+      const boundingRect = containerRef.current.getBoundingClientRect();
+      const clientOffset = monitor.getClientOffset();
+      if (!clientOffset) {
+        console.log('❌ No client offset');
+        return;
+      }
+      const svgX = clientOffset.x - boundingRect.left;
+      const svgY = clientOffset.y - boundingRect.top;
+      const percentX = (svgX / boundingRect.width) * 100;
+      const percentY = (svgY / boundingRect.height) * 100;
+      const constrainedX = Math.max(2, Math.min(98, percentX));
+      const constrainedY = Math.max(2, Math.min(98, percentY));
+      
+      console.log('🔥 Drop position:', { x: constrainedX, y: constrainedY });
+      
+      if (onButtonDrop) {
+        console.log('🔥 Calling onButtonDrop');
+        onButtonDrop(item.style, item.size, { x: constrainedX, y: constrainedY });
+      } else {
+        console.log('❌ onButtonDrop not available');
+      }
+    },
+    collect: (monitor) => ({
+      isOver: !!monitor.isOver(),
+      canDrop: !!monitor.canDrop(),
+    }),
+    canDrop: () => {
+      console.log('🔍 canDrop check - activeTool:', activeTool, 'result:', activeTool === 'buttons');
+      return activeTool === 'buttons';
+    },
+    hover: () => {
+      setButtonDropActive(true);
+    }
+  }), [onButtonDrop, activeTool]);
+
+  // Only change style if a button is actively being dragged over the SVG:
+  useEffect(() => {
+    if (!isButtonOver) setButtonDropActive(false);
+  }, [isButtonOver]);
+
+  console.log('🔍 Drop state:', { isButtonOver, canButtonDrop, buttonDropActive });
+
+  return (
+    <div ref={containerRef} className="relative">
+      <svg 
+        ref={dropButton}
+        xmlns="http://www.w3.org/2000/svg" 
+        xmlnsXlink="http://www.w3.org/1999/xlink"
+        version="1.1" 
+        viewBox="0 0 1332.15 1687.55"
+        className={className}
+        onClick={handleSVGClick}
+        style={{ 
+          cursor: activeTool === 'buttons' ? (buttonDropActive ? 'copy' : 'crosshair') : 'default',
+          outline: buttonDropActive ? '2px solid #60a5fa' : undefined,
+          transition: 'outline 0.1s'
+        }}
+      >
+        <defs>
+          {/* Uploaded pattern definitions - larger scale for better visibility */}
+          {bodyUploadedPattern && getPatternUrl(bodyUploadedPattern) && (
+            <pattern 
+              id={`pattern-body-${bodyUploadedPattern}`}
+              patternUnits="userSpaceOnUse" 
+              width="400" 
+              height="400"
+            >
+              <image 
+                xlinkHref={getPatternUrl(bodyUploadedPattern)!}
+                x="0"
+                y="0"
+                width="400" 
+                height="400" 
+                preserveAspectRatio="xMidYMid slice"
+              />
+            </pattern>
+          )}
+          
+          {sleevesUploadedPattern && getPatternUrl(sleevesUploadedPattern) && (
+            <pattern 
+              id={`pattern-sleeves-${sleevesUploadedPattern}`}
+              patternUnits="userSpaceOnUse" 
+              width="400" 
+              height="400"
+            >
+              <image 
+                xlinkHref={getPatternUrl(sleevesUploadedPattern)!}
+                x="0"
+                y="0"
+                width="400" 
+                height="400" 
+                preserveAspectRatio="xMidYMid slice"
+              />
+            </pattern>
+          )}
+          
+          {collarUploadedPattern && getPatternUrl(collarUploadedPattern) && (
+            <pattern 
+              id={`pattern-collar-${collarUploadedPattern}`}
+              patternUnits="userSpaceOnUse" 
+              width="400" 
+              height="400"
+            >
+              <image 
+                xlinkHref={getPatternUrl(collarUploadedPattern)!}
+                x="0"
+                y="0"
+                width="400" 
+                height="400" 
+                preserveAspectRatio="xMidYMid slice"
+              />
+            </pattern>
+          )}
+
+          {/* Predefined pattern definitions */}
+          {bodyPattern && createPredefinedPattern(bodyPattern, 'body')}
+          {sleevesPattern && createPredefinedPattern(sleevesPattern, 'sleeves')}
+          {collarPattern && createPredefinedPattern(collarPattern, 'collar')}
+          
+          <style>
+            {`
+              .st0 {
+                stroke-width: 5px;
+                stroke: #000;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+              }
+
+              .st1 {
+                stroke-width: 5px;
+                fill: none;
+                stroke: #000;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+                stroke-dasharray: 12;
+              }
+
+              .st2 {
+                stroke-width: 3px;
+                fill: none;
+                stroke: #000;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+              }
+
+              .st3 {
+                stroke-width: 6px;
+                stroke: #000;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+              }
+
+              .st3-sleeves {
+                stroke-width: 6px;
+                stroke: #000;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+              }
+            `}
+          </style>
+        </defs>
+        
+        <g id="LEFT_SLEEVE">
+          <g>
+            <path 
+              ref={sleevesDrop}
+              className="st3-sleeves" 
+              fill={getFillValue('sleeves')} 
+              style={{
+                ...getDropZoneStyle(isSleevesOver, canSleevesDrop),
+                cursor: sleevesUploadedPattern ? 'pointer' : 'default'
+              }}
+              onClick={() => handlePatternClick(sleevesUploadedPattern || '', 'sleeves')}
+              d="M1184,501.22c30.63,84.26,56.68,203.75,56.68,203.75-90.13,73.75-223.74,68.53-231.01,68.18l.02-.27c-13.76-94.48-4.45-198.85-2.41-219.12,1.74.17,3.61-.85,3.85-3.2l1.65-22.8c22.99-93.75,74.13-229.37,84.8-257.3,38.57,42.59,58.3,153.45,86.42,230.76Z"
+            />
+            <path className="st1" d="M1225.06,683.69s-72.17,53.79-208.68,58.21"/>
+            <path className="st1" d="M1218.59,671.44s-62.98,49.7-205.62,55.14"/>
+          </g>
+        </g>
+        
+        <g id="RIGHT_SLEEVE">
+          <g>
+            <path 
+              ref={sleevesDrop}
+              className="st3-sleeves" 
+              fill={getFillValue('sleeves')} 
+              style={{
+                ...getDropZoneStyle(isSleevesOver, canSleevesDrop),
+                cursor: sleevesUploadedPattern ? 'pointer' : 'default'
+              }}
+              onClick={() => handlePatternClick(sleevesUploadedPattern || '', 'sleeves')}
+              d="M309.39,553.76c2.04,20.28,11.34,124.65-2.42,219.12-140.93,3.07-231.31-63.32-231.31-63.32,76.59-280.34,141.44-444.25,141.44-444.25,0,0,61.02,157.42,86.78,262.39l1.65,22.86c.25,2.37,2.12,3.38,3.86,3.2Z"
+            />
+            <path className="st1" d="M91.15,683.69s72.17,53.79,208.68,58.21"/>
+            <path className="st1" d="M97.61,671.44s62.98,49.7,205.62,55.14"/>
+          </g>
+        </g>
+        
+        <g id="TORSO">
+          <path 
+            ref={bodyDrop}
+            className="st3" 
+            fill={getFillValue('body')} 
+            style={{
+              ...getDropZoneStyle(isBodyOver, canBodyDrop),
+              cursor: bodyUploadedPattern ? 'pointer' : 'default'
+            }}
+            onClick={() => handlePatternClick(bodyUploadedPattern || '', 'body')}
+            d="M804.56,187.98c.31-.17,4.1-2.98,7.58-5.76,2.95-2.34,5.67-4.66,8.18-6.94,2.16-1.96,4.16-3.88,6.02-5.76,2.66-2.69,5.02-5.28,7.09-7.71,2.45-2.86,4.51-5.51,6.23-7.88,5.12-7.08,7.18-11.64,7.18-11.64l3.15-5.36c68.47,33.45,202.88,100.09,236.73,123.78,3.78,2.65,7.4,5.92,10.86,9.75-7.48,19.58-34.86,92.1-58.47,166.01,0,0-34.92,107.24-34.25,146.8h0c-2.83,42.35-5.49,118.76,4.83,189.61l-.02.27c-.21,0-.31-.01-.31-.01v147.83c0,82.72-.77,157.02.76,243.57,1.54,86.56-1.53,208.34,3.07,264.26,4.59,55.91,0,101.87,0,101.87-398.3,93.45-709.28,0-709.28,0,0,0-10.72-56.68,1.53-105.7.09-.36.18-.72.27-1.1.8-3.5,1.25-7.07,1.42-10.66l4.9-100.28c.91-99.81-3.06-238.43-5.06-321.49-3.06-127.15,0-218.56,0-218.56,9.99-68.56,7.83-142.33,5.11-185.39-.26-46.83-32.84-145.74-32.84-145.74-27.99-88.34-62.14-176.44-62.14-176.44l227.37-123.02s2.8,5.36,9.48,13.47c1.83,2.23,3.96,4.66,6.4,7.25,2.22,2.35,4.7,4.83,7.46,7.4,2.23,2.07,4.63,4.2,7.23,6.37,2.17,1.79,4.47,3.62,6.9,5.47,2.69,2.02,5.54,4.06,8.57,6.11,2.48,1.67,5.09,3.35,7.82,5.01,2.81,1.72,5.75,3.43,8.83,5.11,2.43,1.34,4.95,2.66,7.55,3.95h0c2.64,1.33,5.37,2.63,8.19,3.91,2.66,1.2,5.41,2.39,8.24,3.55,3.57,1.46,7.27,2.88,11.11,4.26,2.35.84,4.75,1.66,7.21,2.46,2.95.96,5.99,1.89,9.1,2.79,2.87.83,5.81,1.64,8.82,2.41,2.68.68,5.41,1.34,8.19,1.97,3.57.81,7.23,1.58,10.98,2.29h0c2.87.55,5.79,1.07,8.76,1.56,2.84.47,5.73.9,8.67,1.31,3.23.45,6.51.86,9.86,1.24,2.67.3,5.38.57,8.13.82,2.87.26,5.79.49,8.75.69,2.77.2,5.58.36,8.43.5,3.13.15,6.3.27,9.52.36.91-.02,1.82-.05,2.73-.09,3.29-.1,6.52-.24,9.71-.42,3.81-.21,7.54-.47,11.2-.78,3.31-.27,6.56-.59,9.75-.94,3.2-.34,6.35-.73,9.43-1.14,3.5-.48,6.93-.99,10.28-1.55,3.45-.57,6.83-1.19,10.13-1.85,3.19-.62,6.32-1.29,9.37-2,2.88-.66,5.69-1.35,8.44-2.08,2.83-.73,5.6-1.5,8.3-2.3,3.05-.9,6.02-1.83,8.92-2.8,3.26-1.08,6.43-2.21,9.5-3.37,2.88-1.09,5.67-2.2,8.37-3.34,3.26-1.37,6.39-2.78,9.41-4.22,2.78-1.32,5.46-2.67,8.05-4.04,2.42-1.27,4.76-2.57,7.02-3.87,3.02-1.75,5.9-3.52,8.64-5.31,2.36-1.52,4.62-3.06,6.77-4.6-.06.06-.11.09-.13.13Z"
+          />
+        </g>
+        
+        <g id="HEM">
+          <g>
+            <path className="st1" d="M1002.76,1463.27s-58.21,52.08-388.34,42.12c0,0-236.68-4.59-301.02-42.12"/>
+            <path className="st1" d="M1002.76,1478.68s-58.21,52.08-388.34,42.13c0,0-236.68-4.6-301.02-42.13"/>
+          </g>
+        </g>
+        
+        <g id="COLLAR_ROUND">
+          <g>
+            <path 
+              ref={collarDrop}
+              className="st0" 
+              fill={getFillValue('collar')} 
+              style={{
+                ...getDropZoneStyle(isCollarOver, canCollarDrop),
+                cursor: collarUploadedPattern ? 'pointer' : 'default'
+              }}
+              onClick={() => handlePatternClick(collarUploadedPattern || '', 'collar')}
+              d="M849.9,136.73l-3.15,5.38s-38.85,85.95-198.17,90.26c0,0,.01,0,0,0-159.33-4.3-204.2-90.26-204.2-90.26l42.16-24.87s62.98,61.76,169.53,56.32,155.33-58.21,155.33-58.21l38.49,21.38Z"
+            />
+            <path className="st1" d="M849.9,152.86l-3.15,5.38s-38.85,85.95-198.17,90.26c0,0,.01,0,0,0-159.33-4.3-204.2-90.26-204.2-90.26"/>
+          </g>
+        </g>
+
+        {/* Render buttons with enhanced controls */}
+        {buttons.map((button) => (
+          <SVGButtonElement
+            key={button.id}
+            button={button}
+            isSelected={selectedButtonId === button.id}
+            onButtonClick={onButtonClick || (() => {})}
+            onButtonDelete={onButtonDelete || (() => {})}
+            onButtonDrag={onButtonDrag}
+            onButtonResize={onButtonResize}
+            svgWidth={1332.15}
+            svgHeight={1687.55}
+          />
+        ))}
+
+        {/* OPTIONAL: Show visual drop target highlight */}
+        {buttonDropActive && activeTool === 'buttons' && (
+          <rect
+            x="0" y="0" width="1332.15" height="1687.55"
+            fill="#60a5fa22"
+            style={{ pointerEvents: 'none' }}
+          />
+        )}
+      </svg>
+
+      {/* Interactive Pattern Editor Overlay - only render if pattern exists */}
+      {activePatternEditor && activePattern && (
+        <InteractivePatternEditor
+          pattern={activePattern}
+          part={activePatternEditor.part}
+          isActive={true}
+          onUpdate={handlePatternUpdate}
+          onClose={() => setActivePatternEditor(null)}
+          containerBounds={containerRef.current?.getBoundingClientRect() || new DOMRect()}
+        />
+      )}
+    </div>
+  );
+};
+
+export default TshirtSVG;

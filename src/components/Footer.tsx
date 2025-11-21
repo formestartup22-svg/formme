@@ -1,0 +1,109 @@
+
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { ChevronRight, Mail, Phone, MapPin, Instagram, Twitter, Facebook } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+
+const Footer = () => {
+  const currentYear = new Date().getFullYear();
+  
+  return (
+    <footer className="bg-[#1a1a1a] text-white">
+      <div className="container mx-auto px-6">
+        {/* Top section with columns */}
+        <div className="py-16 grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Column 1: Company */}
+          <div>
+            <h3 className="font-instrument text-xl mb-6">FormMe</h3>
+            <p className="text-gray-300 font-light max-w-xs mb-6">
+              Redefining fashion design with cutting-edge technology and sustainable practices.
+            </p>
+            <div className="flex space-x-4">
+              <Link to="#" className="text-gray-400 hover:text-white transition-colors">
+                <Instagram className="h-5 w-5" />
+              </Link>
+              <Link to="#" className="text-gray-400 hover:text-white transition-colors">
+                <Twitter className="h-5 w-5" />
+              </Link>
+              <Link to="#" className="text-gray-400 hover:text-white transition-colors">
+                <Facebook className="h-5 w-5" />
+              </Link>
+            </div>
+          </div>
+          
+          {/* Column 2: Quick Links */}
+          <div>
+            <h4 className="font-medium uppercase text-sm tracking-wider mb-6">Quick Links</h4>
+            <ul className="space-y-3">
+              {['Home', 'About Us', 'Services', 'Portfolio', 'Contact'].map((item) => (
+                <li key={item}>
+                  <Link 
+                    to="#" 
+                    className="text-gray-300 hover:text-white transition-colors flex items-center group"
+                  >
+                    <ChevronRight className="h-4 w-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <span>{item}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          {/* Column 3: Services */}
+          <div>
+            <h4 className="font-medium uppercase text-sm tracking-wider mb-6">Services</h4>
+            <ul className="space-y-3">
+              {['Design Tools', 'Manufacturing', 'Sustainable Fashion', 'Custom Branding', 'Enterprise Solutions'].map((item) => (
+                <li key={item}>
+                  <Link 
+                    to="#" 
+                    className="text-gray-300 hover:text-white transition-colors flex items-center group"
+                  >
+                    <ChevronRight className="h-4 w-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <span>{item}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          {/* Column 4: Contact */}
+          <div>
+            <h4 className="font-medium uppercase text-sm tracking-wider mb-6">Contact Us</h4>
+            <ul className="space-y-4">
+              <li className="flex items-start">
+                <MapPin className="h-5 w-5 mr-3 text-[#96421f] mt-0.5" />
+                <span className="text-gray-300">
+                  123 Fashion Avenue, Suite 500<br />
+                  San Francisco, CA 94107
+                </span>
+              </li>
+              <li className="flex items-center">
+                <Phone className="h-5 w-5 mr-3 text-[#96421f]" />
+                <span className="text-gray-300">+1 (555) 123-4567</span>
+              </li>
+              <li className="flex items-center">
+                <Mail className="h-5 w-5 mr-3 text-[#96421f]" />
+                <span className="text-gray-300">contact@formme.com</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+        
+        <Separator className="bg-gray-800" />
+        
+        {/* Bottom section with copyright */}
+        <div className="py-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-400">
+          <p>© {currentYear} FormMe. All rights reserved.</p>
+          <div className="flex space-x-6 mt-4 md:mt-0">
+            <Link to="#" className="hover:text-white transition-colors">Privacy Policy</Link>
+            <Link to="#" className="hover:text-white transition-colors">Terms of Service</Link>
+            <Link to="#" className="hover:text-white transition-colors">Cookie Policy</Link>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;
