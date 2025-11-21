@@ -31,10 +31,7 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
   };
 
   const handleNext = () => {
-    if (!workflowData.selectedFactory) {
-      alert('Please select a factory before continuing');
-      return false;
-    }
+    // Allow progression without validation
     return true;
   };
 

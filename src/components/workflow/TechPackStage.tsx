@@ -17,15 +17,7 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
   const { workflowData, updateWorkflowData } = useWorkflow();
 
   const handleNext = () => {
-    // Validation: check if essential fields are filled
-    const hasDesign = !!workflowData.designFile;
-    const hasMeasurements = workflowData.measurements.chestWidth && 
-                           workflowData.measurements.length;
-    
-    if (!hasDesign || !hasMeasurements) {
-      alert('Please upload a design file and add measurements before continuing');
-      return false;
-    }
+    // Allow progression without validation
     return true;
   };
 

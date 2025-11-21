@@ -4,33 +4,34 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* New color scheme */
+    --background: 42 100% 94%;  /* #FFF7DE - Base cream */
+    --foreground: 160 20% 15%;  /* #344C3D - Dark green text */
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 160 20% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 160 20% 15%;
 
-    --primary: 210 90% 56%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 160 20% 25%;  /* #344C3D - Secondary base green */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 42 100% 94%;
+    --secondary-foreground: 160 20% 15%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 42 50% 88%;
+    --muted-foreground: 160 10% 40%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 16 60% 36%;  /* #974320 - Terracotta accent */
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 210 90% 56%;
+    --border: 160 15% 85%;
+    --input: 160 15% 90%;
+    --ring: 16 60% 36%;
 
     --radius: 0.5rem;
 
@@ -52,34 +53,34 @@
   }
 
   .dark {
-    /* Carbon + Electric Blue theme */
-    --background: 220 16% 7%;
-    --foreground: 210 20% 96%;
+    /* Dark mode with warm tones */
+    --background: 0 0% 5%;  /* #00000 - Dark base */
+    --foreground: 42 100% 94%;
 
-    --card: 220 16% 9%;
-    --card-foreground: 210 20% 96%;
+    --card: 0 0% 8%;
+    --card-foreground: 42 100% 94%;
 
-    --popover: 220 16% 9%;
-    --popover-foreground: 210 20% 96%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 42 100% 94%;
 
-    --primary: 210 90% 56%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 160 20% 35%;  /* Dark green */
+    --primary-foreground: 42 100% 94%;
 
-    --secondary: 220 12% 14%;
-    --secondary-foreground: 210 20% 96%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 42 100% 94%;
 
-    --muted: 220 10% 18%;
-    --muted-foreground: 220 8% 60%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
 
-    --accent: 210 80% 52%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 16 60% 40%;  /* Terracotta */
+    --accent-foreground: 42 100% 94%;
 
-    --destructive: 0 72% 45%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 42 100% 94%;
 
-    --border: 220 12% 18%;
-    --input: 220 12% 18%;
-    --ring: 210 90% 56%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 16 60% 40%;
 
     --sidebar-background: 220 12% 10%;
     --sidebar-foreground: 210 20% 96%;
