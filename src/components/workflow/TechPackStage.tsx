@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Upload, FileCheck, Download, Sparkles, Loader2 } from 'lucide-react';
+import { Upload, FileCheck, Download, Sparkles, Loader2, FileUp } from 'lucide-react';
 import { Design } from '@/data/workflowData';
 import { useWorkflow } from '@/context/WorkflowContext';
 import { StageHeader } from './StageHeader';
@@ -24,6 +24,8 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showTechPackDialog, setShowTechPackDialog] = useState(false);
   const [generatedTechPack, setGeneratedTechPack] = useState<string>('');
+  const [uploadedTechPack, setUploadedTechPack] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleNext = () => {
     // Allow progression without validation
@@ -75,11 +77,23 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
     toast.success('Tech pack downloaded!');
   };
 
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setUploadedTechPack(file);
+      toast.success(`Tech pack "${file.name}" uploaded successfully!`);
+    }
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
     <div>
       <StageHeader
         icon={FileCheck}
-        title="Create Your Tech Pack"
+        title="Create your tech pack"
         description="Start by uploading your design and adding measurements. This information will be sent to the factory for production."
       />
 
@@ -195,36 +209,74 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
             </Card>
           </section>
 
-          <div className="flex gap-3">
-            <Button 
-              variant="outline" 
-              className="gap-2"
-              onClick={handleGenerateTechPack}
-              disabled={isGenerating}
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-4 h-4" />
-                  Generate Tech Pack with AI
-                </>
-              )}
-            </Button>
-            {generatedTechPack && (
-              <Button variant="outline" className="gap-2" onClick={handleDownloadTechPack}>
-                <Download className="w-4 h-4" />
-                Download Tech Pack
-              </Button>
-            )}
-          </div>
+          {/* Generate & Upload Tech Pack */}
+          <section>
+            <h3 className="text-sm font-semibold text-foreground mb-3">Tech Pack Management</h3>
+            <Card className="border-border">
+              <CardContent className="p-6 space-y-4">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Generate a professional tech pack using AI based on your design specifications
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    className="w-full gap-2"
+                    onClick={handleGenerateTechPack}
+                    disabled={isGenerating}
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4" />
+                        Generate Tech Pack with AI
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                <div className="h-px bg-border" />
+
+                <div>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Upload your existing tech pack document (PDF, DOC, or DOCX)
+                  </p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <Button 
+                    onClick={handleUploadClick}
+                    variant="outline"
+                    className="w-full gap-2"
+                  >
+                    <FileUp className="w-4 h-4" />
+                    {uploadedTechPack ? uploadedTechPack.name : 'Upload Existing Tech Pack'}
+                  </Button>
+                </div>
+
+                {generatedTechPack && (
+                  <>
+                    <div className="h-px bg-border" />
+                    <Button variant="outline" className="w-full gap-2" onClick={handleDownloadTechPack}>
+                      <Download className="w-4 h-4" />
+                      Download Generated Tech Pack
+                    </Button>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </section>
 
           <StageNavigation 
             onNext={handleNext}
-            nextLabel="Continue to Factory Match"
+            nextLabel="Continue to Find Manufacturer"
             showBack={true}
           />
         </div>

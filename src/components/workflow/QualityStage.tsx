@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
+import { CheckCircle } from 'lucide-react';
 import { Design } from '@/data/workflowData';
-import { useWorkflow } from '@/context/WorkflowContext';
 import { StageHeader } from './StageHeader';
 import { StageNavigation } from './StageNavigation';
 import { FactoryCommunication } from './FactoryCommunication';
@@ -12,35 +13,43 @@ import { FactoryDocuments } from './FactoryDocuments';
 interface QualityStageProps { design: Design; }
 
 const QualityStage = ({ design }: QualityStageProps) => {
-  const { workflowData, updateWorkflowData } = useWorkflow();
+  const [ratings, setRatings] = useState({ measurements: 8, stitching: 9, fabric: 8, hardware: 7 });
+  const [notes, setNotes] = useState('');
+  const averageRating = (Object.values(ratings).reduce((a, b) => a + b, 0) / Object.values(ratings).length).toFixed(1);
 
   return (
     <div>
-      <StageHeader icon={CheckCircle} title="Quality Check" description="Review QC report and approve." />
+      <StageHeader icon={CheckCircle} title="Quality Check" description="Factory quality control assessment with detailed ratings and notes." />
       <div className="grid grid-cols-3 gap-6">
         <div className="col-span-2 space-y-6">
-          <Card className="border-border">
-            <CardContent className="p-6">
-              <div className="flex gap-3">
-                <Button variant={workflowData.qcApproved ? 'default' : 'outline'} className="flex-1 gap-2" onClick={() => updateWorkflowData({ qcApproved: true, qcRejected: false })}>
-                  <CheckCircle className="w-4 h-4" />Approve
-                </Button>
-                <Button variant={workflowData.qcRejected ? 'destructive' : 'outline'} className="flex-1 gap-2" onClick={() => updateWorkflowData({ qcApproved: false, qcRejected: true })}>
-                  <XCircle className="w-4 h-4" />Reject
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-          <StageNavigation 
-            onNext={() => true} 
-            nextLabel="Continue to Shipping"
-            showBack={true}
-          />
+          <section>
+            <Card className="border-border bg-primary/5">
+              <CardContent className="p-6"><div className="text-center"><p className="text-sm text-muted-foreground mb-2">Overall Quality Score</p><p className="text-4xl font-bold text-primary">{averageRating}/10</p></div></CardContent>
+            </Card>
+          </section>
+
+          <section>
+            <h3 className="text-sm font-semibold text-foreground mb-3">Quality Metrics</h3>
+            <Card className="border-border">
+              <CardContent className="p-6 space-y-6">
+                {[{ key: 'measurements', label: 'Measurements Accuracy', desc: 'Tolerance within spec' }, { key: 'stitching', label: 'Stitching & Construction', desc: 'Seam quality and durability' }, { key: 'fabric', label: 'Fabric & Colour Consistency', desc: 'Material quality and colour match' }, { key: 'hardware', label: 'Trim or Hardware Function', desc: 'Zippers, buttons, and accessories' }].map(item => (
+                  <div key={item.key}>
+                    <div className="flex justify-between items-center mb-2"><div><Label className="text-sm font-medium">{item.label}</Label><p className="text-xs text-muted-foreground">{item.desc}</p></div><span className="text-lg font-semibold text-primary">{ratings[item.key as keyof typeof ratings]}/10</span></div>
+                    <Slider value={[ratings[item.key as keyof typeof ratings]]} onValueChange={(value) => setRatings(prev => ({ ...prev, [item.key]: value[0] }))} max={10} min={1} step={1} className="w-full" />
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </section>
+
+          <section>
+            <h3 className="text-sm font-semibold text-foreground mb-3">Quality Control Notes</h3>
+            <Card className="border-border"><CardContent className="p-6"><Textarea placeholder="Explain any issues that may affect wearability or final appearance..." value={notes} onChange={(e) => setNotes(e.target.value)} className="min-h-[120px] text-sm resize-none" /></CardContent></Card>
+          </section>
+
+          <StageNavigation onNext={() => true} nextLabel="Continue to Shipping" showBack={true} />
         </div>
-        <div className="space-y-4">
-          <FactoryCommunication />
-          <FactoryDocuments />
-        </div>
+        <div className="space-y-4"><FactoryCommunication /><FactoryDocuments /></div>
       </div>
     </div>
   );

@@ -69,7 +69,7 @@ const Dashboard = () => {
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">Production Dashboard</h1>
+              <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">Your Production Dashboard</h1>
               <p className="text-muted-foreground">Track your designs from concept to delivery</p>
             </div>
             <Dialog open={showNewDesignDialog} onOpenChange={setShowNewDesignDialog}>
@@ -186,7 +186,7 @@ const Dashboard = () => {
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <CardTitle className="text-xl sm:text-2xl">Design Pipeline</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl">View recent designs</CardTitle>
                 <CardDescription>Monitor and manage all designs</CardDescription>
               </div>
             </div>

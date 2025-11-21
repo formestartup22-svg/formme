@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { mockDesigns, mockTasks, stageNames } from '@/data/workflowData';
-import { Plus, Clock, AlertCircle, CheckCircle, Package, Truck, FileCheck, Factory, Send } from 'lucide-react';
+import { Plus, Clock, AlertCircle, CheckCircle, Package, Truck, FileCheck, Factory, Send, CreditCard } from 'lucide-react';
 
 const Workflow = () => {
   const [activeTab, setActiveTab] = useState('all');
@@ -31,8 +31,9 @@ const Workflow = () => {
       case 'tech-pack': return <FileCheck className="w-4 h-4" />;
       case 'factory-match': return <Factory className="w-4 h-4" />;
       case 'sending': return <Send className="w-4 h-4" />;
-      case 'sample': return <Package className="w-4 h-4" />;
+      case 'payment': return <CreditCard className="w-4 h-4" />;
       case 'production': return <Factory className="w-4 h-4" />;
+      case 'sample': return <Package className="w-4 h-4" />;
       case 'quality': return <CheckCircle className="w-4 h-4" />;
       case 'shipping': return <Truck className="w-4 h-4" />;
       default: return <Clock className="w-4 h-4" />;
