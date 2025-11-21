@@ -1,7 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -18,85 +18,127 @@ serve(async (req) => {
     
     console.log('Generating tech pack for:', designData);
 
-    const prompt = `You are a professional fashion technical designer. Generate a comprehensive fashion tech pack based on the following information:
+    const systemPrompt = `You are a senior apparel technical designer creating a factory-ready TECH PACK.
 
-Design Name: ${designData.name || 'Not specified'}
-Garment Type: ${designData.garmentType || 'T-Shirt'}
-Fabric: ${designData.fabric || 'Not specified'}
-GSM: ${designData.gsm || 'Not specified'}
-Print Type: ${designData.print || 'Not specified'}
-Measurements:
-- Chest Width: ${designData.measurements?.chestWidth || 'Not specified'} inches
-- Length: ${designData.measurements?.length || 'Not specified'} inches
-- Sleeve Length: ${designData.measurements?.sleeveLength || 'Not specified'} inches
-Construction Notes: ${designData.constructionNotes || 'None provided'}
+You will be given structured design data for a garment (or set, e.g., top + pants). 
+Using that data, generate a complete tech pack document in clear, structured MARKDOWN, 
+so it can later be converted into a PDF.
 
-Please create a detailed tech pack that includes:
+The tech pack should follow this structure and tone:
 
-1. **DESIGN OVERVIEW**
-   - Style number and description
-   - Season/collection
-   - Target market
+1. HEADER
+   - Brand
+   - Style Name / Number
+   - Category (e.g., Pajama Set, Hoodie, Dress)
+   - Gender / Fit (e.g., WOMEN, MEN, UNISEX)
+   - Season (e.g., AW25, SS26)
+   - Created By
+   - Created Date
 
-2. **FABRIC SPECIFICATIONS**
-   - Fabric type and composition
-   - GSM/weight
-   - Width
-   - Care instructions
-   - Color/print details
+2. GARMENT OVERVIEW
+   - Short description of the style and intended use.
+   - Components included (e.g., "TOP + PANTS (AOP)").
+   - Base color(s) and main fabric.
+   - Overall quality and composition:
+     - QUALITY: marketing name (e.g., "Cotton with Elastane")
+     - COMPOSITION: exact percentages (e.g., "95% COTTON 5% ELASTANE")
+     - GSM or weight.
 
-3. **MEASUREMENTS & SIZE CHART**
-   - Detailed graded measurement chart (XS, S, M, L, XL)
-   - All critical measurements (chest, length, sleeves, neck, shoulders)
-   - Tolerance (+/- specifications)
+3. CONSTRUCTION / DESIGN DETAILS
+   - Describe the garment in terms a factory understands.
+   - Include FRONT and BACK descriptions where applicable.
+   - Call out key details in ALL CAPS labels with short explanations, e.g.:
+     - V-NECK NECKLINE – clean finish, double topstitch.
+     - SECURE TAPE – inside neckline for reinforcement.
+     - SATIN DRAWCORD – flat ribbon at waistband with metal tips.
+     - POCKETS – side seam pockets with clean finish.
+     - DOUBLE STITCHING – hem and sleeve hems.
+   - Use bullet points and keep each call-out clear and concise.
 
-4. **CONSTRUCTION DETAILS**
-   - Stitch types (e.g., 301 lockstitch, 504 overlock)
-   - Seam allowances
-   - Seam specifications by location
-   - Hem details
+4. FABRIC, MATERIALS & TRIMS TABLE
+   - Provide a table with rows such as:
+     - QUALITY
+     - COMPOSITION
+     - COLOR
+     - GSM
+     - THREADS COLOR
+     - DRAWCORD
+     - EYELETS
+     - DRAWCORD ENDINGS
+     - LABEL
+     - HANGTAG
+   - Fill each cell using the given data where possible.
+   - Where information is missing, write: "TBD – to be confirmed by designer."
 
-5. **BILL OF MATERIALS (BOM)**
-   - Main fabric quantity
-   - Thread type and color
-   - Labels (care, size, brand)
-   - Trims and accessories
-   - Packaging requirements
+5. ARTWORK & COLORS
+   - If there is an all-over print or graphic:
+     - Name/ID of the artwork.
+     - Print technique (if known; otherwise mark as TBD).
+     - Print size (e.g., "Print size: 400 x 435 mm") when provided or estimated.
+   - Provide a table of COLOR CHIPS with:
+     - Color Name
+     - Color Code (e.g., Pantone TCX, HEX, or internal code)
+     - Where it is used (e.g., SHELL, RIB, PRINT ACCENT).
+   - Clearly state if artwork should match a provided reference file or image.
 
-6. **QUALITY CONTROL CHECKPOINTS**
-   - Pre-production checks
-   - In-line inspection points
-   - Final inspection criteria
+6. MEASUREMENT SPEC (SIZE CHART)
+   - Include a short note: "All measurements in cm unless otherwise specified."
+   - Define main measurement points for each component (TOP, BOTTOM, etc.), e.g.:
+     - A – Chest width
+     - B – Body length
+     - C – Bottom opening
+     - D – Sleeve length
+     - E – Waist width
+     - F – Inseam
+     - etc.
+   - Provide a measurement table with sizes as columns (e.g., XS, S, M, L, XL, XXL)
+     and measurement codes as rows (A, B, C, …). 
+   - If exact numbers are not provided in the input, propose reasonable base values 
+     and grade them logically across sizes, but clearly label them as:
+     "(INITIAL SPEC – TO BE VALIDATED IN SAMPLING)".
 
-7. **PRODUCTION NOTES**
-   - Special instructions
-   - Critical quality points
-   - Sample approval requirements
+7. LABEL & BRANDING
+   - Describe the main neck label / stamp (size, position, color) and any additional labels.
+   - Include dimensions for brand stamps or waterprint labels if known 
+     (e.g., "Waterprint stamp: 38 x 31 mm at center back neck").
+   - Specify size label system (e.g., S, M, L, XL, XXL).
 
-Format the response in a clear, professional manner suitable for manufacturer communication. Use bullet points, tables where appropriate, and clear sections. Be specific with industry-standard terminology.`;
+8. PACKAGING / NOTES (optional section)
+   - Any general comments to the factory (folding, packing, special care, etc.).
+   - Add a short "NOTES" bullet list, including items that are still TBD or need review.
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+GENERAL RULES:
+- Always answer in English.
+- Use **clear headings** and MARKDOWN tables so the document is easy to convert into a PDF.
+- Prefer concise bullet points over long paragraphs.
+- When data is missing, DO NOT invent arbitrary details without warning. 
+  Instead:
+  - Either leave as "TBD – to be confirmed by designer"
+  - Or if you suggest a default, mark it clearly as an assumption.
+
+Now generate a complete tech pack using the provided DESIGN DATA.`;
+
+    const userPrompt = `DESIGN DATA:
+${JSON.stringify(designData, null, 2)}`;
+
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
+        'Authorization': `Bearer ${lovableApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-mini-2025-08-07',
+        model: 'google/gemini-2.5-flash',
         messages: [
-          { 
-            role: 'system', 
-            content: 'You are an expert fashion technical designer with 20+ years of experience creating comprehensive tech packs for garment manufacturing. Provide detailed, industry-standard specifications.' 
-          },
-          { role: 'user', content: prompt }
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
         ],
-        max_completion_tokens: 3000,
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('OpenAI API error:', response.status, errorText);
+      console.error('AI Gateway error:', response.status, errorText);
       return new Response(
         JSON.stringify({ error: 'Failed to generate tech pack', details: errorText }), 
         { 

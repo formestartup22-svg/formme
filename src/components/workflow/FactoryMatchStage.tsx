@@ -201,9 +201,10 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
             </section>
           )}
 
-          <StageNavigation
+          <StageNavigation 
             onNext={handleNext}
-            nextLabel={`Send to ${workflowData.selectedFactory?.name || 'Factory'}`}
+            nextLabel="Continue to Sending"
+            showBack={true}
           />
         </div>
 

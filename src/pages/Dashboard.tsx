@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { mockDesigns, mockTasks, stageNames } from '@/data/workflowData';
@@ -14,6 +14,7 @@ import { Plus, Clock, AlertCircle, CheckCircle, Package, Truck, FileCheck, Facto
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [hoveredTab, setHoveredTab] = useState<string | null>(null);
+  const [showNewDesignDialog, setShowNewDesignDialog] = useState(false);
   
   const activeDesigns = mockDesigns.filter(d => d.status !== 'completed').length;
   const inSampling = mockDesigns.filter(d => d.stage === 'sample').length;
@@ -71,33 +72,67 @@ const Dashboard = () => {
               <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">Production Dashboard</h1>
               <p className="text-muted-foreground">Track your designs from concept to delivery</p>
             </div>
-            <Dialog>
+            <Dialog open={showNewDesignDialog} onOpenChange={setShowNewDesignDialog}>
               <DialogTrigger asChild>
                 <Button size="lg" className="gap-2 w-full sm:w-auto">
                   <Plus className="w-4 h-4" />
                   New Design
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="max-w-md">
                 <DialogHeader>
-                  <DialogTitle>Add New Design</DialogTitle>
+                  <DialogTitle>Choose Your Design Studio</DialogTitle>
+                  <DialogDescription>
+                    Select which studio you'd like to use to create your garment design.
+                  </DialogDescription>
                 </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div>
-                    <Label htmlFor="design-name">Design Name</Label>
-                    <Input id="design-name" placeholder="e.g., Oversized Tee" />
-                  </div>
-                  <div>
-                    <Label htmlFor="design-type">Garment Type</Label>
-                    <Input id="design-type" placeholder="e.g., T-Shirt, Hoodie" />
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" className="flex-1">
-                      <Download className="w-4 h-4 mr-2" />
-                      Download Tech Pack Template
-                    </Button>
-                  </div>
-                  <Button className="w-full">Add to Pipeline</Button>
+                <div className="space-y-3 py-4">
+                  <Button
+                    variant="outline"
+                    className="w-full h-auto py-4 flex flex-col items-start gap-2"
+                    onClick={() => {
+                      setShowNewDesignDialog(false);
+                      window.location.href = '/design/simple';
+                    }}
+                  >
+                    <span className="font-semibold">Simple Studio</span>
+                    <span className="text-xs text-muted-foreground text-left">
+                      Quick and easy garment design with pre-made templates
+                    </span>
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    className="w-full h-auto py-4 flex flex-col items-start gap-2"
+                    onClick={() => {
+                      setShowNewDesignDialog(false);
+                      window.location.href = '/design/workspace';
+                    }}
+                  >
+                    <span className="font-semibold">Design Studio</span>
+                    <span className="text-xs text-muted-foreground text-left">
+                      Full-featured design workspace with advanced customization
+                    </span>
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    className="w-full h-auto py-4 flex flex-col items-start gap-2"
+                    onClick={() => {
+                      setShowNewDesignDialog(false);
+                      window.location.href = '/studio';
+                    }}
+                  >
+                    <span className="font-semibold">Professional Studio</span>
+                    <span className="text-xs text-muted-foreground text-left">
+                      Advanced pro-level tools for complex garment design
+                    </span>
+                  </Button>
+                </div>
+                <div className="flex gap-3 justify-end">
+                  <Button variant="outline" onClick={() => setShowNewDesignDialog(false)}>
+                    Cancel
+                  </Button>
                 </div>
               </DialogContent>
             </Dialog>

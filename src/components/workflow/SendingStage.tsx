@@ -86,8 +86,10 @@ const SendingStage = ({ design }: SendingStageProps) => {
           </Card>
         </section>
 
-          <StageNavigation
-            nextLabel="Submit Order to Factory"
+          <StageNavigation 
+            onNext={() => true}
+            nextLabel="Continue to Sample Development"
+            showBack={true}
           />
         </div>
 

@@ -42,6 +42,7 @@
     "@react-three/cannon": "^6.6.0",
     "@react-three/drei": "^9.122.0",
     "@react-three/fiber": "^8.15.14",
+    "@supabase/supabase-js": "^2.84.0",
     "@svgr/webpack": "^8.1.0",
     "@tanstack/react-query": "^5.56.2",
     "@tarikjabiri/dxf": "^2.8.9",
