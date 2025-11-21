@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, FileCheck, Download } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Upload, FileCheck, Download, Sparkles, Loader2 } from 'lucide-react';
 import { Design } from '@/data/workflowData';
 import { useWorkflow } from '@/context/WorkflowContext';
 import { StageHeader } from './StageHeader';
@@ -11,6 +12,8 @@ import { StageNavigation } from './StageNavigation';
 import { FactoryCommunication } from './FactoryCommunication';
 import { FactoryDocuments } from './FactoryDocuments';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface TechPackStageProps {
   design: Design;
@@ -18,10 +21,58 @@ interface TechPackStageProps {
 
 const TechPackStage = ({ design }: TechPackStageProps) => {
   const { workflowData, updateWorkflowData } = useWorkflow();
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [showTechPackDialog, setShowTechPackDialog] = useState(false);
+  const [generatedTechPack, setGeneratedTechPack] = useState<string>('');
 
   const handleNext = () => {
     // Allow progression without validation
     return true;
+  };
+
+  const handleGenerateTechPack = async () => {
+    setIsGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-techpack', {
+        body: {
+          designData: {
+            name: design.name,
+            garmentType: 'T-Shirt',
+            fabric: workflowData.fabric,
+            gsm: workflowData.gsm,
+            print: workflowData.print,
+            measurements: workflowData.measurements,
+            constructionNotes: workflowData.constructionNotes,
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.techPackContent) {
+        setGeneratedTechPack(data.techPackContent);
+        setShowTechPackDialog(true);
+        toast.success('Tech pack generated successfully!');
+      }
+    } catch (error) {
+      console.error('Error generating tech pack:', error);
+      toast.error('Failed to generate tech pack. Please try again.');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleDownloadTechPack = () => {
+    const blob = new Blob([generatedTechPack], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${design.name}-TechPack.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success('Tech pack downloaded!');
   };
 
   return (
@@ -145,10 +196,30 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
           </section>
 
           <div className="flex gap-3">
-            <Button variant="outline" className="gap-2">
-              <Download className="w-4 h-4" />
-              Download Tech Pack
+            <Button 
+              variant="outline" 
+              className="gap-2"
+              onClick={handleGenerateTechPack}
+              disabled={isGenerating}
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  Generate Tech Pack with AI
+                </>
+              )}
             </Button>
+            {generatedTechPack && (
+              <Button variant="outline" className="gap-2" onClick={handleDownloadTechPack}>
+                <Download className="w-4 h-4" />
+                Download Tech Pack
+              </Button>
+            )}
           </div>
 
           <StageNavigation 
@@ -163,6 +234,31 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
           <FactoryDocuments />
         </div>
       </div>
+
+      <Dialog open={showTechPackDialog} onOpenChange={setShowTechPackDialog}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Your Tech Pack is Ready!</DialogTitle>
+            <DialogDescription>
+              Review your AI-generated tech pack below. You can download it or send it directly to manufacturers.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="bg-muted p-6 rounded-lg whitespace-pre-wrap font-mono text-sm">
+              {generatedTechPack}
+            </div>
+          </div>
+          <div className="flex gap-3 justify-end">
+            <Button variant="outline" onClick={() => setShowTechPackDialog(false)}>
+              Close
+            </Button>
+            <Button onClick={handleDownloadTechPack} className="gap-2">
+              <Download className="w-4 h-4" />
+              Download
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
