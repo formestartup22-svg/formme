@@ -7,6 +7,8 @@ import { Design } from '@/data/workflowData';
 import { useWorkflow } from '@/context/WorkflowContext';
 import { StageHeader } from './StageHeader';
 import { StageNavigation } from './StageNavigation';
+import { FactoryCommunication } from './FactoryCommunication';
+import { FactoryDocuments } from './FactoryDocuments';
 
 interface SendingStageProps {
   design: Design;
@@ -33,7 +35,8 @@ const SendingStage = ({ design }: SendingStageProps) => {
         ]}
       />
 
-      <div className="space-y-6">
+      <div className="grid grid-cols-3 gap-6">
+        <div className="col-span-2 space-y-6">
         {/* Order Summary */}
         <section>
           <h3 className="text-sm font-semibold text-foreground mb-3">Order Details</h3>

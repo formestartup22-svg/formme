@@ -11,7 +11,7 @@ import NotFound from "./pages/NotFound";
 import Reviews from "./pages/Reviews";
 import StudioSelection from "./pages/StudioSelection";
 import ComingSoon from "./pages/ComingSoon";
-import Workflow from "./pages/Workflow";
+import Dashboard from "./pages/Dashboard";
 import DesignWorkspace from "./pages/DesignWorkspace";
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -35,7 +35,8 @@ function App() {
           <Route path="/simple" element={<SimpleDesigner />} />
           <Route path="/coming-soon" element={<ComingSoon />} />
           <Route path='/professional-studio' element={<ProfessionalStudio />} />
-          <Route path="/workflow" element={<Workflow />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/workflow" element={<Dashboard />} />
           <Route path="/design/:id" element={<DesignWorkspace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

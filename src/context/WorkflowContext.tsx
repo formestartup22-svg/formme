@@ -8,6 +8,9 @@ interface WorkflowData {
     length: string;
     sleeveLength: string;
   };
+  fabric: string;
+  gsm: string;
+  print: string;
   sizeChart?: any;
   constructionNotes: string;
   
@@ -32,18 +35,36 @@ interface WorkflowData {
   fitPhotos?: File[];
   fitNotes: string;
   sampleApproved: boolean;
+  sampleRejected: boolean;
+  manufacturerSamples: string[]; // URLs to manufacturer uploaded samples
   
   // Production
   labDipsApproved: boolean;
+  labDipsRejected: boolean;
   materialsApproved: boolean;
+  materialsRejected: boolean;
+  materialsList: string;
   firstBatchApproved: boolean;
+  firstBatchRejected: boolean;
+  productionNotes: string;
   
   // Quality
   qcApproved: boolean;
+  qcRejected: boolean;
   
   // Shipping
   trackingNumber: string;
   deliveryConfirmed: boolean;
+  invoices: string[]; // URLs to invoices
+  
+  // Communication
+  factoryMessages: Array<{
+    id: string;
+    sender: 'designer' | 'factory';
+    message: string;
+    timestamp: Date;
+    attachments?: string[];
+  }>;
 }
 
 interface WorkflowContextType {
@@ -60,6 +81,9 @@ const WorkflowContext = createContext<WorkflowContextType | undefined>(undefined
 
 const initialData: WorkflowData = {
   measurements: { chestWidth: '', length: '', sleeveLength: '' },
+  fabric: '',
+  gsm: '',
+  print: '',
   constructionNotes: '',
   quantity: '',
   leadTime: '',
@@ -69,12 +93,22 @@ const initialData: WorkflowData = {
   materialSource: 'factory',
   fitNotes: '',
   sampleApproved: false,
+  sampleRejected: false,
+  manufacturerSamples: [],
   labDipsApproved: false,
+  labDipsRejected: false,
   materialsApproved: false,
+  materialsRejected: false,
+  materialsList: '',
   firstBatchApproved: false,
+  firstBatchRejected: false,
+  productionNotes: '',
   qcApproved: false,
+  qcRejected: false,
   trackingNumber: '',
   deliveryConfirmed: false,
+  invoices: [],
+  factoryMessages: [],
 };
 
 export const WorkflowProvider = ({ children }: { children: ReactNode }) => {

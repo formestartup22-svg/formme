@@ -35,13 +35,13 @@ const NavBar: React.FC = () => {
         </div>
       </Link>
       <nav className="hidden md:flex gap-8 mr-10 ml-auto">
-        {['about', 'collection', 'create', 'workflow', 'reviews', 'contact'].map((item) => (
+        {['about', 'collection', 'create', 'dashboard', 'reviews', 'contact'].map((item) => (
           <Link 
             key={item}
             to={
               item === 'create' ? "/designer" : 
               item === 'reviews' ? "/reviews" : 
-              item === 'workflow' ? "/workflow" : 
+              item === 'dashboard' ? "/dashboard" : 
               "#"
             } 
             className="text-lg text-foreground relative py-1 group transition-colors hover:text-foreground/80"
