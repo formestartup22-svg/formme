@@ -105,19 +105,11 @@ const DesignWorkspace = () => {
           {/* Compact Header */}
           <div className="mb-6">
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-4">
-                <Button variant="ghost" asChild size="sm">
-                  <Link to="/workflow" className="gap-2">
-                    <ArrowLeft className="w-4 h-4" />
-                    Back
-                  </Link>
-                </Button>
-                <div>
-                  <h1 className="text-2xl font-bold text-foreground">{design.name}</h1>
-                  <Badge variant="outline" className={getStatusColor(design.status)}>
-                    {design.status.replace('-', ' ')}
-                  </Badge>
-                </div>
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">{design.name}</h1>
+                <Badge variant="outline" className={getStatusColor(design.status)}>
+                  {design.status.replace('-', ' ')}
+                </Badge>
               </div>
             </div>
 
