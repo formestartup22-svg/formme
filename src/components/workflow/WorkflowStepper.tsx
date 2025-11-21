@@ -7,8 +7,9 @@ const stages = [
   'tech-pack',
   'factory-match',
   'sending',
-  'sample',
+  'payment',
   'production',
+  'sample',
   'quality',
   'shipping'
 ];
@@ -19,10 +20,7 @@ export const WorkflowStepper = () => {
   const getStageStatus = (stage: string, index: number) => {
     if (completedStages.includes(stage)) return 'completed';
     if (stage === currentStage) return 'current';
-    
-    const currentIndex = stages.indexOf(currentStage);
-    if (index < currentIndex) return 'accessible';
-    return 'locked';
+    return 'accessible'; // All stages are accessible for non-linear navigation
   };
 
   return (
@@ -35,10 +33,10 @@ export const WorkflowStepper = () => {
 
         return (
           <div key={stage} className="relative">
-            {/* Connector Line */}
+            {/* Connector Line - Centered */}
             {index < stages.length - 1 && (
               <div
-                className={`absolute left-[15px] top-8 w-0.5 h-8 ${
+                className={`absolute left-4 top-8 w-0.5 h-8 ${
                   isCompleted ? 'bg-primary' : 'bg-border'
                 }`}
               />
@@ -46,14 +44,11 @@ export const WorkflowStepper = () => {
 
             {/* Step Item */}
             <button
-              onClick={() => isAccessible && setCurrentStage(stage)}
-              disabled={!isAccessible}
+              onClick={() => setCurrentStage(stage)}
               className={`w-full text-left flex items-start gap-3 p-2 rounded-lg transition-all ${
                 isCurrent
                   ? 'bg-primary/5'
-                  : isAccessible
-                  ? 'hover:bg-muted/50 cursor-pointer'
-                  : 'opacity-40 cursor-not-allowed'
+                  : 'hover:bg-muted/50 cursor-pointer'
               }`}
             >
               {/* Circle/Check */}

@@ -12,8 +12,9 @@ import { WorkflowStepper } from '@/components/workflow/WorkflowStepper';
 import TechPackStage from '@/components/workflow/TechPackStage';
 import FactoryMatchStage from '@/components/workflow/FactoryMatchStage';
 import SendingStage from '@/components/workflow/SendingStage';
-import SampleStage from '@/components/workflow/SampleStage';
+import PaymentStage from '@/components/workflow/PaymentStage';
 import ProductionStage from '@/components/workflow/ProductionStage';
+import SampleStage from '@/components/workflow/SampleStage';
 import QualityStage from '@/components/workflow/QualityStage';
 import ShippingStage from '@/components/workflow/ShippingStage';
 
@@ -28,10 +29,12 @@ const WorkspaceContent = ({ design }: { design: any }) => {
         return <FactoryMatchStage design={design} />;
       case 'sending':
         return <SendingStage design={design} />;
-      case 'sample':
-        return <SampleStage design={design} />;
+      case 'payment':
+        return <PaymentStage design={design} />;
       case 'production':
         return <ProductionStage design={design} />;
+      case 'sample':
+        return <SampleStage design={design} />;
       case 'quality':
         return <QualityStage design={design} />;
       case 'shipping':

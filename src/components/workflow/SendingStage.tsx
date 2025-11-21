@@ -26,10 +26,10 @@ const SendingStage = ({ design }: SendingStageProps) => {
     <div>
       <StageHeader
         icon={Send}
-        title="Finalize Your Order"
-        description={`You've selected ${workflowData.selectedFactory?.name}. Confirm your order details and submit to the factory.`}
+        title="Confirm your order"
+        description="Review your finalized order details and confirm before proceeding to payment."
         contextInfo={[
-          { label: 'Factory', value: workflowData.selectedFactory?.name || '' },
+          { label: 'Factory', value: workflowData.selectedFactory?.name || 'Not selected' },
           { label: 'Location', value: workflowData.selectedFactory?.location || '' },
           { label: 'Lead Time', value: workflowData.selectedFactory?.leadTime || '' }
         ]}
@@ -88,7 +88,7 @@ const SendingStage = ({ design }: SendingStageProps) => {
 
           <StageNavigation 
             onNext={() => true}
-            nextLabel="Continue to Sample Development"
+            nextLabel="Continue to Payment"
             showBack={true}
           />
         </div>
