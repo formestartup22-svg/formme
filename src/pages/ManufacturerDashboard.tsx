@@ -11,87 +11,12 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Factory, CheckCircle, XCircle } from 'lucide-react';
+import { Factory, CheckCircle, XCircle, Clock } from 'lucide-react';
 import NavBar from '@/components/Navbar';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useManufacturerOrders } from '@/hooks/useManufacturerOrders';
 
-// Mock data for current orders
-const mockOrders = [
-  {
-    id: '1',
-    designName: 'Cotton Pajama Set',
-    designerName: 'Emma Johnson',
-    stage: 'Sample Development',
-    status: 'On Track',
-    nextAction: 'Upload sample progress photos',
-  },
-  {
-    id: '2',
-    designName: 'Premium Crew Neck',
-    designerName: 'Michael Chen',
-    stage: 'Production Approval',
-    status: 'Action Required',
-    nextAction: 'Upload lab dip photos',
-  },
-  {
-    id: '3',
-    designName: 'V-Neck T-Shirt',
-    designerName: 'Sophia Rodriguez',
-    stage: 'Quality Check',
-    status: 'On Track',
-    nextAction: 'Upload QC photos',
-  },
-  {
-    id: '4',
-    designName: 'Hooded Sweatshirt',
-    designerName: 'Lucas Wong',
-    stage: 'Tech Pack',
-    status: 'Delayed',
-    nextAction: 'Review tech pack details',
-  },
-];
-
-// Mock data for potential orders (order matching)
-const mockPotentialOrders = [
-  {
-    id: 'p1',
-    designName: 'Organic Cotton Tee',
-    designerName: 'Sarah Williams',
-    category: 'T-Shirts',
-    quantity: 500,
-    targetPrice: '$12-15',
-    deadline: '45 days',
-    requirements: 'Organic cotton, GOTS certified, custom embroidery'
-  },
-  {
-    id: 'p2',
-    designName: 'Athletic Joggers',
-    designerName: 'David Park',
-    category: 'Pants',
-    quantity: 300,
-    targetPrice: '$20-25',
-    deadline: '60 days',
-    requirements: 'Moisture-wicking fabric, elastic waistband, side pockets'
-  },
-  {
-    id: 'p3',
-    designName: 'Summer Dress Collection',
-    designerName: 'Maria Garcia',
-    category: 'Dresses',
-    quantity: 200,
-    targetPrice: '$30-40',
-    deadline: '75 days',
-    requirements: 'Lightweight fabric, multiple sizes, quality stitching'
-  },
-];
-
-const kpiData = [
-  { title: 'Active Orders', value: 4, color: 'text-primary' },
-  { title: 'Awaiting Your Action', value: 2, color: 'text-amber-600' },
-  { title: 'In Production', value: 3, color: 'text-blue-600' },
-  { title: 'Ready to Ship', value: 1, color: 'text-green-600' },
-];
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -108,6 +33,23 @@ const getStatusColor = (status: string) => {
 
 const ManufacturerDashboard = () => {
   const [profileCreated, setProfileCreated] = useState(true);
+  const { orders, loading } = useManufacturerOrders();
+
+  const activeOrders = orders.length;
+  const awaitingAction = orders.filter(o => 
+    o.status === 'manufacturer_review' || o.status === 'production_approval'
+  ).length;
+  const inProduction = orders.filter(o => 
+    o.status === 'sample_development' || o.status === 'in_production'
+  ).length;
+  const readyToShip = orders.filter(o => o.status === 'ready_to_ship').length;
+
+  const kpiData = [
+    { title: 'Active Orders', value: activeOrders, color: 'text-primary' },
+    { title: 'Awaiting Your Action', value: awaitingAction, color: 'text-amber-600' },
+    { title: 'In Production', value: inProduction, color: 'text-blue-600' },
+    { title: 'Ready to Ship', value: readyToShip, color: 'text-green-600' },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -171,59 +113,78 @@ const ManufacturerDashboard = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {mockOrders.map((order) => (
-                      <TableRow key={order.id} className="hover:bg-muted/50">
-                        <TableCell className="font-medium">{order.designName}</TableCell>
-                        <TableCell>{order.designerName}</TableCell>
-                        <TableCell>
-                          <span className="group relative">
-                            <span className="text-sm text-muted-foreground group-hover:opacity-0 transition-opacity">
-                              {order.stage}
-                            </span>
-                            <Badge 
-                              variant="outline" 
-                              className="absolute left-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap"
-                            >
-                              {order.stage}
-                            </Badge>
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <span className="group relative inline-block">
-                            <span className="text-sm group-hover:opacity-0 transition-opacity">
-                              {order.status}
-                            </span>
-                            <Badge 
-                              className={cn(
-                                "absolute left-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap",
-                                getStatusColor(order.status)
-                              )}
-                            >
-                              {order.status}
-                            </Badge>
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {order.nextAction}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Link to={`/manufacturer/order/${order.id}`}>
-                            <span className="group relative inline-block">
-                              <span className="text-sm text-primary group-hover:opacity-0 transition-opacity">
-                                View Order
-                              </span>
-                              <Button 
-                                variant="default" 
-                                size="sm"
-                                className="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap"
-                              >
-                                View Order
-                              </Button>
-                            </span>
-                          </Link>
+                    {loading ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-12">
+                          <Clock className="w-8 h-8 mx-auto mb-2 opacity-50 animate-spin" />
+                          <p className="text-muted-foreground">Loading orders...</p>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    ) : orders.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-12">
+                          <Factory className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                          <p className="text-muted-foreground">No orders yet</p>
+                          <p className="text-sm text-muted-foreground mt-1">Check the "Find Orders" tab for opportunities</p>
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      orders.map((order) => (
+                        <TableRow key={order.id} className="hover:bg-muted/50">
+                          <TableCell className="font-medium">{order.designs.name}</TableCell>
+                          <TableCell>{order.profiles?.full_name || 'Unknown'}</TableCell>
+                          <TableCell>
+                            <span className="group relative">
+                              <span className="text-sm text-muted-foreground group-hover:opacity-0 transition-opacity">
+                                {order.status?.replace(/_/g, ' ') || 'Pending'}
+                              </span>
+                              <Badge 
+                                variant="outline" 
+                                className="absolute left-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap"
+                              >
+                                {order.status?.replace(/_/g, ' ') || 'Pending'}
+                              </Badge>
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <span className="group relative inline-block">
+                              <span className="text-sm group-hover:opacity-0 transition-opacity">
+                                {order.status?.includes('review') ? 'Action Required' : 'On Track'}
+                              </span>
+                              <Badge 
+                                className={cn(
+                                  "absolute left-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap",
+                                  order.status?.includes('review') 
+                                    ? 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'
+                                    : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                                )}
+                              >
+                                {order.status?.includes('review') ? 'Action Required' : 'On Track'}
+                              </Badge>
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            Review order details
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Link to={`/manufacturer/order/${order.id}`}>
+                              <span className="group relative inline-block">
+                                <span className="text-sm text-primary group-hover:opacity-0 transition-opacity">
+                                  View Order
+                                </span>
+                                <Button 
+                                  variant="default" 
+                                  size="sm"
+                                  className="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap"
+                                >
+                                  View Order
+                                </Button>
+                              </span>
+                            </Link>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -240,60 +201,10 @@ const ManufacturerDashboard = () => {
                 </p>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {mockPotentialOrders.map((order) => (
-                    <Card key={order.id} className="border-l-4 border-l-primary">
-                      <CardContent className="pt-6">
-                        <div className="grid md:grid-cols-2 gap-6">
-                          <div className="space-y-3">
-                            <div>
-                              <h3 className="font-semibold text-lg text-foreground">
-                                {order.designName}
-                              </h3>
-                              <p className="text-sm text-muted-foreground">
-                                Designer: {order.designerName}
-                              </p>
-                            </div>
-                            
-                            <div className="grid grid-cols-2 gap-3 text-sm">
-                              <div>
-                                <span className="text-muted-foreground">Category:</span>
-                                <p className="font-medium">{order.category}</p>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground">Quantity:</span>
-                                <p className="font-medium">{order.quantity} units</p>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground">Target Price:</span>
-                                <p className="font-medium">{order.targetPrice}</p>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground">Deadline:</span>
-                                <p className="font-medium">{order.deadline}</p>
-                              </div>
-                            </div>
-                            
-                            <div>
-                              <span className="text-sm text-muted-foreground">Requirements:</span>
-                              <p className="text-sm mt-1">{order.requirements}</p>
-                            </div>
-                          </div>
-
-                          <div className="flex flex-col justify-center gap-3">
-                            <Button className="w-full gap-2">
-                              <CheckCircle className="w-4 h-4" />
-                              Accept Order
-                            </Button>
-                            <Button variant="outline" className="w-full gap-2">
-                              <XCircle className="w-4 h-4" />
-                              Decline
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                <div className="text-center py-12 text-muted-foreground">
+                  <Factory className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p>No available orders at the moment</p>
+                  <p className="text-sm mt-2">Check back later for new opportunities</p>
                 </div>
               </CardContent>
             </Card>
