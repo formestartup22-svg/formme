@@ -38,28 +38,64 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
   const [showFactories, setShowFactories] = useState(false);
   const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
   const [loading, setLoading] = useState(false);
+  const [viewAll, setViewAll] = useState(false);
 
-  // Fetch manufacturers from database
-  useEffect(() => {
-    const fetchManufacturers = async () => {
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from('manufacturers')
-          .select('*')
-          .eq('is_active', true);
+  const fetchFilteredManufacturers = async () => {
+    try {
+      setLoading(true);
+      setShowFactories(true);
+      
+      let query = supabase
+        .from('manufacturers')
+        .select('*')
+        .eq('is_active', true);
 
-        if (error) throw error;
-        setManufacturers(data || []);
-      } catch (error: any) {
-        toast.error(error.message || 'Failed to load manufacturers');
-      } finally {
-        setLoading(false);
+      // Apply filters based on user criteria
+      if (workflowData.location && workflowData.location !== 'any') {
+        query = query.ilike('location', `%${workflowData.location}%`);
       }
-    };
 
-    fetchManufacturers();
-  }, []);
+      if (workflowData.priceRange) {
+        query = query.eq('price_range', workflowData.priceRange);
+      }
+
+      if (workflowData.leadTime) {
+        // Extract max days from leadTime (e.g., "4-6" -> 6, "6-8" -> 8)
+        const maxDays = parseInt(workflowData.leadTime.split('-')[1]) * 7; // Convert weeks to days
+        query = query.lte('lead_time_days', maxDays);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+      setManufacturers(data || []);
+      setViewAll(false);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to load manufacturers');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAllManufacturers = async () => {
+    try {
+      setLoading(true);
+      setShowFactories(true);
+      
+      const { data, error } = await supabase
+        .from('manufacturers')
+        .select('*')
+        .eq('is_active', true);
+
+      if (error) throw error;
+      setManufacturers(data || []);
+      setViewAll(true);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to load manufacturers');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleFactorySelect = (factory: Manufacturer) => {
     updateWorkflowData({
@@ -163,26 +199,40 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
           </section>
 
           {/* Find Match Button */}
-          <div className="flex justify-center">
+          <div className="flex justify-center gap-3">
             <Button
               size="lg"
-              onClick={() => setShowFactories(true)}
+              onClick={fetchFilteredManufacturers}
               className="gap-2"
             >
               <FactoryIcon className="w-4 h-4" />
               Find Your Match!
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={fetchAllManufacturers}
+              className="gap-2"
+            >
+              View All Manufacturers
             </Button>
           </div>
 
           {/* Factory Results */}
           {showFactories && (
             <section>
-              <h3 className="text-sm font-semibold text-foreground mb-3">Matched Factories</h3>
+              <h3 className="text-sm font-semibold text-foreground mb-3">
+                {viewAll ? 'All Manufacturers' : 'Matched Factories'}
+              </h3>
               {loading ? (
                 <p className="text-muted-foreground">Loading manufacturers...</p>
               ) : manufacturers.length === 0 ? (
                 <Card className="p-6 text-center">
-                  <p className="text-muted-foreground">No manufacturers found</p>
+                  <p className="text-muted-foreground">
+                    {viewAll 
+                      ? 'No manufacturers exist in the database' 
+                      : 'No such manufacturers exist matching your criteria. Try adjusting your filters or view all manufacturers.'}
+                  </p>
                 </Card>
               ) : (
                 <div className="space-y-3">
