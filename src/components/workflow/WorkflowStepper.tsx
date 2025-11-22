@@ -8,8 +8,8 @@ const stages = [
   'factory-match',
   'sending',
   'payment',
-  'sample',
   'production',
+  'sample',
   'quality',
   'shipping'
 ];

@@ -133,17 +133,13 @@ const ManufacturerDashboard = () => {
           )}
         </div>
 
-        {/* KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {/* KPI Cards - Simplified */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
           {kpiData.map((kpi) => (
-            <Card key={kpi.title} className="border-l-4 border-l-primary">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  {kpi.title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className={`text-3xl font-bold ${kpi.color}`}>{kpi.value}</div>
+            <Card key={kpi.title} className="border border-border">
+              <CardContent className="p-4">
+                <div className="text-xs text-muted-foreground mb-1">{kpi.title}</div>
+                <div className={`text-2xl font-semibold ${kpi.color}`}>{kpi.value}</div>
               </CardContent>
             </Card>
           ))}
@@ -151,9 +147,9 @@ const ManufacturerDashboard = () => {
 
         {/* Tabs for Orders and Opportunities */}
         <Tabs defaultValue="current" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-2 mb-6 bg-primary/10">
-            <TabsTrigger value="current" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Current Orders</TabsTrigger>
-            <TabsTrigger value="opportunities" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Find Orders</TabsTrigger>
+          <TabsList className="grid w-full max-w-md grid-cols-2 mb-4">
+            <TabsTrigger value="current">Current Orders</TabsTrigger>
+            <TabsTrigger value="opportunities">Find Orders</TabsTrigger>
           </TabsList>
 
           {/* Current Orders Tab */}

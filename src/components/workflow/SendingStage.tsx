@@ -41,10 +41,26 @@ const SendingStage = ({ design }: SendingStageProps) => {
         <section>
           <h3 className="text-sm font-semibold text-foreground mb-3">Order Details</h3>
           <Card className="border-border">
-            <CardContent className="p-6">
-              <div className="grid grid-cols-2 gap-4 mb-6">
+            <CardContent className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-xs mb-1.5 block">Total Quantity</Label>
+                  <Label className="text-xs text-muted-foreground mb-1 block">Factory Name</Label>
+                  <p className="text-sm font-medium">{workflowData.selectedFactory?.name || 'Not selected'}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1 block">Location</Label>
+                  <p className="text-sm font-medium">{workflowData.selectedFactory?.location || 'N/A'}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1 block">Fabric Type</Label>
+                  <p className="text-sm font-medium">{workflowData.fabric || 'N/A'}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1 block">GSM</Label>
+                  <p className="text-sm font-medium">{workflowData.gsm || 'N/A'}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1 block">Total Quantity</Label>
                   <Input
                     type="number"
                     value={workflowData.quantity}
@@ -53,7 +69,7 @@ const SendingStage = ({ design }: SendingStageProps) => {
                   />
                 </div>
                 <div>
-                  <Label className="text-xs mb-1.5 block">Delivery Date</Label>
+                  <Label className="text-xs text-muted-foreground mb-1 block">Estimated Delivery</Label>
                   <Input
                     type="date"
                     value={workflowData.deliveryDate}
@@ -61,25 +77,9 @@ const SendingStage = ({ design }: SendingStageProps) => {
                     className="h-9 text-sm"
                   />
                 </div>
-              </div>
-
-              {/* Cost Breakdown */}
-              <div className="space-y-2 pt-4 border-t">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Unit Cost</span>
-                  <span className="font-medium">${unitCost.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Quantity × {quantity}</span>
-                  <span className="font-medium">${(unitCost * quantity).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Shipping</span>
-                  <span className="font-medium">${shipping.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-base font-semibold pt-2 border-t">
-                  <span>Total Cost</span>
-                  <span className="text-emerald-600">${total.toFixed(2)}</span>
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1 block">Lead Time</Label>
+                  <p className="text-sm font-medium">{workflowData.selectedFactory?.leadTime || 'N/A'}</p>
                 </div>
               </div>
             </CardContent>

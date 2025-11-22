@@ -71,16 +71,6 @@ const SampleStage = ({ design }: SampleStageProps) => {
             </Card>
           </section>
 
-          <section>
-            <h3 className="text-sm font-semibold text-foreground mb-3">Communicate with Designer</h3>
-            <Card className="border-border">
-              <CardContent className="p-6">
-                <Textarea placeholder="Send a message directly to the designer about the sample..." className="min-h-[100px] text-sm resize-none" />
-                <Button className="mt-3 w-full">Send Message</Button>
-              </CardContent>
-            </Card>
-          </section>
-
           <StageNavigation onNext={() => { if (!allApproved) return false; updateWorkflowData({ sampleApproved: true }); return true; }} nextLabel={allApproved ? "Approve & Continue to Quality Check" : "Complete checklist to continue"} showBack={true} />
         </div>
         <div className="space-y-4">

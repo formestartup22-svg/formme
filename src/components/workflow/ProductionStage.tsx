@@ -41,25 +41,25 @@ const ProductionStage = ({ design }: ProductionStageProps) => {
       <div className="grid grid-cols-3 gap-6">
         <div className="col-span-2 space-y-6">
           <section>
-            <h3 className="text-sm font-semibold text-foreground mb-3">Fabric Specifications</h3>
+            <h3 className="text-sm font-semibold text-foreground mb-3">Fabric Specifications (View Only)</h3>
             <Card className="border-border">
               <CardContent className="p-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-xs mb-1.5 block">Fabric Type</Label>
-                    <Input placeholder="e.g., 100% Cotton" className="h-9 text-sm" />
+                    <Label className="text-xs text-muted-foreground mb-1 block">Fabric Type</Label>
+                    <p className="text-sm font-medium">100% Cotton</p>
                   </div>
                   <div>
-                    <Label className="text-xs mb-1.5 block">GSM (Weight)</Label>
-                    <Input placeholder="e.g., 180 GSM" className="h-9 text-sm" />
+                    <Label className="text-xs text-muted-foreground mb-1 block">GSM (Weight)</Label>
+                    <p className="text-sm font-medium">180 GSM</p>
                   </div>
                   <div>
-                    <Label className="text-xs mb-1.5 block">Shrinkage (%)</Label>
-                    <Input placeholder="e.g., 3-5%" className="h-9 text-sm" />
+                    <Label className="text-xs text-muted-foreground mb-1 block">Shrinkage (%)</Label>
+                    <p className="text-sm font-medium">3-5%</p>
                   </div>
                   <div>
-                    <Label className="text-xs mb-1.5 block">Color Fastness</Label>
-                    <Input placeholder="e.g., Grade 4-5" className="h-9 text-sm" />
+                    <Label className="text-xs text-muted-foreground mb-1 block">Color Fastness</Label>
+                    <p className="text-sm font-medium">Grade 4-5</p>
                   </div>
                 </div>
               </CardContent>
@@ -67,34 +67,34 @@ const ProductionStage = ({ design }: ProductionStageProps) => {
           </section>
 
           <section>
-            <h3 className="text-sm font-semibold text-foreground mb-3">Lab Dip Photos</h3>
+            <h3 className="text-sm font-semibold text-foreground mb-3">Lab Dip Photos (View Only)</h3>
             <Card className="border-border">
               <CardContent className="p-6">
-                <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleFileUpload} className="hidden" />
-                <Button onClick={() => fileInputRef.current?.click()} variant="outline" className="w-full gap-2 mb-4">
-                  <Upload className="w-4 h-4" />Upload Lab Dip Photos
-                </Button>
-                {labDipPhotos.length > 0 && (
-                  <div className="grid grid-cols-3 gap-3">
-                    {labDipPhotos.map((file, idx) => (
-                      <div key={idx} className="aspect-square bg-muted rounded-lg flex items-center justify-center">
-                        <ImageIcon className="w-8 h-8 text-muted-foreground" />
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <div className="grid grid-cols-3 gap-3">
+                  {[1, 2, 3].map((idx) => (
+                    <div key={idx} className="aspect-square bg-muted rounded-lg flex items-center justify-center">
+                      <ImageIcon className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </section>
 
           <section>
-            <h3 className="text-sm font-semibold text-foreground mb-3">Production Timeline</h3>
+            <h3 className="text-sm font-semibold text-foreground mb-3">Production Timeline (View Only)</h3>
             <Card className="border-border">
               <CardContent className="p-6">
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <div><Label className="text-xs mb-1.5 block">Start Date</Label><Input type="date" className="h-9 text-sm" /></div>
-                    <div><Label className="text-xs mb-1.5 block">Expected Completion</Label><Input type="date" className="h-9 text-sm" /></div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground mb-1 block">Start Date</Label>
+                      <p className="text-sm font-medium">Nov 25, 2025</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground mb-1 block">Expected Completion</Label>
+                      <p className="text-sm font-medium">Dec 20, 2025</p>
+                    </div>
                   </div>
                   <div className="mt-6">
                     <div className="relative pt-1">

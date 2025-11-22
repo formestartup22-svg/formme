@@ -127,7 +127,7 @@ export const WorkflowProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const getProgress = () => {
-    const totalStages = 7;
+    const totalStages = 8;
     return Math.round((completedStages.length / totalStages) * 100);
   };
 
