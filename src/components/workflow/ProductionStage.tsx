@@ -82,44 +82,6 @@ const ProductionStage = ({ design }: ProductionStageProps) => {
           </section>
 
           <section>
-            <h3 className="text-sm font-semibold text-foreground mb-3">Production Timeline</h3>
-            <Card className="border-border">
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-xs text-muted-foreground mb-1 block">Start Date</Label>
-                      <p className="text-sm font-medium">Nov 25, 2025</p>
-                    </div>
-                    <div>
-                      <Label className="text-xs text-muted-foreground mb-1 block">Expected Completion</Label>
-                      <p className="text-sm font-medium">Dec 20, 2025</p>
-                    </div>
-                  </div>
-                  <div className="mt-6">
-                    <div className="relative pt-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-medium text-muted-foreground">Nov 25</span>
-                        <span className="text-xs font-medium text-muted-foreground">Dec 20</span>
-                      </div>
-                      <div className="overflow-hidden h-3 text-xs flex rounded-full bg-muted">
-                        <div className="bg-primary w-1/3 flex items-center justify-center text-white text-[10px] font-semibold">Cutting</div>
-                        <div className="bg-primary/60 w-1/3 flex items-center justify-center text-white text-[10px] font-semibold">Sewing</div>
-                        <div className="bg-primary/30 w-1/3 flex items-center justify-center text-white text-[10px] font-semibold">Finishing</div>
-                      </div>
-                      <div className="flex items-center justify-between mt-2">
-                        <span className="text-xs text-muted-foreground">5 days</span>
-                        <span className="text-xs text-muted-foreground">12 days</span>
-                        <span className="text-xs text-muted-foreground">8 days</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-
-          <section>
             <Card className="border-border">
               <CardContent className="p-6">
                 <div className="flex gap-3">

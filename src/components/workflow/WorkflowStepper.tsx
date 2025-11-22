@@ -8,6 +8,7 @@ const stages = [
   'factory-match',
   'sending',
   'waiting',
+  'review-timeline',
   'payment',
   'production',
   'sample',

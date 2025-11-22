@@ -44,7 +44,7 @@ const WaitingForManufacturerStage = ({ design }: WaitingForManufacturerStageProp
         
         // Auto-proceed after 2 seconds
         setTimeout(() => {
-          navigate(`/workflow?designId=${design.id}&stage=payment`);
+          navigate(`/workflow?designId=${design.id}&stage=review-timeline`);
         }, 2000);
       }
     };
@@ -79,7 +79,7 @@ const WaitingForManufacturerStage = ({ design }: WaitingForManufacturerStageProp
             
             // Auto-proceed to payment after 2 seconds
             setTimeout(() => {
-              navigate(`/workflow?designId=${design.id}&stage=payment`);
+              navigate(`/workflow?designId=${design.id}&stage=review-timeline`);
             }, 2000);
           }
         }
