@@ -1,20 +1,21 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { mockDesigns, mockTasks, stageNames } from '@/data/workflowData';
 import { Plus, Clock, AlertCircle, CheckCircle, Package, Truck, FileCheck, Factory, Send, CreditCard } from 'lucide-react';
+import { useDesigns } from '@/hooks/useDesigns';
 
 const Workflow = () => {
   const [activeTab, setActiveTab] = useState('all');
+  const { designs, loading } = useDesigns();
   
-  const activeDesigns = mockDesigns.filter(d => d.status !== 'completed').length;
-  const inSampling = mockDesigns.filter(d => d.stage === 'sample').length;
-  const inProduction = mockDesigns.filter(d => d.stage === 'production' || d.stage === 'quality').length;
-  const awaitingApproval = mockDesigns.filter(d => d.status === 'action-required').length;
+  const activeDesigns = designs.filter(d => d.status !== 'completed').length;
+  const inSampling = designs.filter(d => d.status === 'sample_development').length;
+  const inProduction = designs.filter(d => d.status === 'production_approval' || d.status === 'quality_check').length;
+  const awaitingApproval = 0; // TODO: Calculate based on orders requiring action
 
   const getStatusVariant = (status: string) => {
     switch (status) {
@@ -40,9 +41,7 @@ const Workflow = () => {
     }
   };
 
-  const filteredDesigns = activeTab === 'all' 
-    ? mockDesigns 
-    : mockDesigns.filter(d => d.status === activeTab);
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background">
@@ -56,7 +55,7 @@ const Workflow = () => {
               <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">Production Workflow</h1>
               <p className="text-muted-foreground">Track your designs from concept to delivery</p>
             </div>
-            <Button size="lg" className="gap-2 w-full sm:w-auto">
+            <Button size="lg" className="gap-2 w-full sm:w-auto" onClick={() => navigate('/new-design')}>
               <Plus className="w-4 h-4" />
               New Design
             </Button>
@@ -140,54 +139,30 @@ const Workflow = () => {
                   </TabsList>
                   
                   <TabsContent value={activeTab} className="space-y-3">
-                    {filteredDesigns.length === 0 ? (
+                    {loading ? (
+                      <div className="text-center py-12 text-muted-foreground">
+                        <p>Loading designs...</p>
+                      </div>
+                    ) : designs.length === 0 ? (
                       <div className="text-center py-12 text-muted-foreground">
                         <Package className="w-12 h-12 mx-auto mb-3 opacity-50" />
                         <p>No designs found</p>
                       </div>
                     ) : (
-                      filteredDesigns.map((design) => (
-                        <Link key={design.id} to={`/design/${design.id}`}>
-                          <Card className="border-border hover:border-primary/50 transition-all hover:shadow-sm cursor-pointer">
-                            <CardHeader className="pb-3">
-                              <div className="flex items-start justify-between gap-3">
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    {getStageIcon(design.stage)}
-                                    <h3 className="font-semibold text-foreground">{design.name}</h3>
-                                  </div>
-                                  <p className="text-sm text-muted-foreground mb-2">
-                                    {stageNames[design.stage]}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground">
-                                    {design.nextAction}
-                                  </p>
-                                </div>
-                                <div className="flex flex-col items-end gap-2">
-                                  <Badge variant={getStatusVariant(design.status)}>
-                                    {design.status.replace('-', ' ')}
-                                  </Badge>
-                                  <span className="text-xs text-muted-foreground whitespace-nowrap">
-                                    {design.eta}
-                                  </span>
-                                </div>
+                      designs.map((design) => (
+                        <Card key={design.id} className="border-border hover:border-primary/50 transition-all hover:shadow-sm cursor-pointer">
+                          <CardHeader className="pb-3">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-semibold text-foreground mb-2">{design.name}</h3>
+                                <p className="text-sm text-muted-foreground mb-2">
+                                  {design.category || 'Uncategorized'}
+                                </p>
+                                <Badge variant="outline">{design.status || 'draft'}</Badge>
                               </div>
-                              {/* Progress Bar */}
-                              <div className="mt-3">
-                                <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-                                  <span>Progress</span>
-                                  <span>{design.progress}%</span>
-                                </div>
-                                <div className="h-2 bg-muted rounded-full overflow-hidden">
-                                  <div 
-                                    className="h-full bg-primary transition-all" 
-                                    style={{ width: `${design.progress}%` }}
-                                  />
-                                </div>
-                              </div>
-                            </CardHeader>
-                          </Card>
-                        </Link>
+                            </div>
+                          </CardHeader>
+                        </Card>
                       ))
                     )}
                   </TabsContent>
@@ -207,45 +182,10 @@ const Workflow = () => {
                 <CardDescription>Tasks needing your attention</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {mockTasks.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <CheckCircle className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">All caught up!</p>
-                  </div>
-                ) : (
-                  mockTasks.map((task) => (
-                    <Link key={task.id} to={`/design/${task.designId}`}>
-                      <Card className={`border transition-all hover:shadow-md cursor-pointer ${
-                        task.priority === 'high' 
-                          ? 'border-destructive/30 bg-destructive/5' 
-                          : task.priority === 'medium'
-                          ? 'border-primary/30 bg-primary/5'
-                          : 'border-accent/30 bg-accent/5'
-                      }`}>
-                        <CardHeader className="p-4">
-                          <div className="flex items-start justify-between gap-2 mb-2">
-                            <p className="font-medium text-foreground text-sm flex-1">
-                              {task.action}
-                            </p>
-                            <Badge 
-                              variant={task.priority === 'high' ? 'destructive' : 'outline'}
-                              className="text-xs"
-                            >
-                              {task.priority}
-                            </Badge>
-                          </div>
-                          <p className="text-xs text-muted-foreground mb-1">
-                            {task.designName}
-                          </p>
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <Clock className="w-3 h-3" />
-                            <span>Due {task.dueDate}</span>
-                          </div>
-                        </CardHeader>
-                      </Card>
-                    </Link>
-                  ))
-                )}
+                <div className="text-center py-8 text-muted-foreground">
+                  <CheckCircle className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">All caught up!</p>
+                </div>
               </CardContent>
             </Card>
           </div>

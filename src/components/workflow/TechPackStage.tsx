@@ -1,11 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Upload, FileCheck, Download, Sparkles, Loader2, FileUp } from 'lucide-react';
-import { Design } from '@/data/workflowData';
 import { useWorkflow } from '@/context/WorkflowContext';
 import { StageHeader } from './StageHeader';
 import { StageNavigation } from './StageNavigation';
@@ -14,6 +13,12 @@ import { FactoryDocuments } from './FactoryDocuments';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+
+interface Design {
+  id: string;
+  name: string;
+  design_file_url: string | null;
+}
 
 interface TechPackStageProps {
   design: Design;
@@ -30,6 +35,47 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const designFileInputRef = useRef<HTMLInputElement>(null);
 
+  // Load design specs from database
+  useEffect(() => {
+    const loadDesignSpecs = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('design_specs')
+          .select('*')
+          .eq('design_id', design.id)
+          .maybeSingle();
+
+        if (error) throw error;
+        
+        if (data) {
+          const measurements = typeof data.measurements === 'object' && data.measurements !== null 
+            ? data.measurements as Record<string, any>
+            : {};
+            
+          updateWorkflowData({
+            measurements: {
+              chestWidth: measurements.chestWidth || '',
+              length: measurements.length || '',
+              sleeveLength: measurements.sleeveLength || '',
+            },
+            fabric: data.fabric_type || '',
+            gsm: data.gsm?.toString() || '',
+            print: data.print_type || '',
+            constructionNotes: data.construction_notes || '',
+          });
+        }
+
+        if (design.design_file_url) {
+          setDesignFileUrl(design.design_file_url);
+        }
+      } catch (error) {
+        console.error('Error loading design specs:', error);
+      }
+    };
+
+    loadDesignSpecs();
+  }, [design.id, design.design_file_url]);
+
   const handleNext = () => {
     // Allow progression without validation
     return true;
@@ -38,6 +84,21 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
   const handleGenerateTechPack = async () => {
     setIsGenerating(true);
     try {
+      // Save design specs to database first
+      const { error: specsError } = await supabase
+        .from('design_specs')
+        .update({
+          measurements: workflowData.measurements,
+          fabric_type: workflowData.fabric,
+          gsm: workflowData.gsm ? parseInt(workflowData.gsm) : null,
+          print_type: workflowData.print,
+          construction_notes: workflowData.constructionNotes,
+          artwork_url: designFileUrl || null,
+        })
+        .eq('design_id', design.id);
+
+      if (specsError) throw specsError;
+
       const { data, error } = await supabase.functions.invoke('generate-techpack', {
         body: {
           designData: {

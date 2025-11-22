@@ -63,11 +63,21 @@ const NewDesign = () => {
           description,
           category,
           design_file_url: publicUrl,
+          status: 'draft',
         })
         .select()
         .single();
 
       if (designError) throw designError;
+
+      // Create design_specs for this design
+      const { error: specsError } = await supabase
+        .from("design_specs")
+        .insert({
+          design_id: design.id,
+        });
+
+      if (specsError) throw specsError;
 
       // Create an order for this design to enter the workflow
       const { data: order, error: orderError } = await supabase
@@ -84,7 +94,7 @@ const NewDesign = () => {
 
       toast.success("Design uploaded successfully!");
       // Navigate to the workflow at tech-pack stage
-      navigate(`/workflow/${order.id}`);
+      navigate(`/workflow`);
     } catch (error: any) {
       toast.error(error.message || "Failed to upload design");
     } finally {
