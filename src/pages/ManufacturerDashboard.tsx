@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,9 +13,10 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Factory, CheckCircle, XCircle, Clock } from 'lucide-react';
 import NavBar from '@/components/Navbar';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useManufacturerOrders } from '@/hooks/useManufacturerOrders';
+import { useUserRole } from '@/hooks/useUserRole';
 
 
 const getStatusColor = (status: string) => {
@@ -32,8 +33,17 @@ const getStatusColor = (status: string) => {
 };
 
 const ManufacturerDashboard = () => {
+  const navigate = useNavigate();
   const [profileCreated, setProfileCreated] = useState(true);
   const { orders, loading } = useManufacturerOrders();
+  const { role, loading: roleLoading } = useUserRole();
+
+  // Redirect to designer dashboard if user is a designer
+  useEffect(() => {
+    if (!roleLoading && role === 'designer') {
+      navigate('/dashboard');
+    }
+  }, [role, roleLoading, navigate]);
 
   const activeOrders = orders.length;
   const awaitingAction = orders.filter(o => 
@@ -42,7 +52,18 @@ const ManufacturerDashboard = () => {
   const inProduction = orders.filter(o => 
     o.status === 'sample_development' || o.status === 'in_production'
   ).length;
-  const readyToShip = orders.filter(o => o.status === 'ready_to_ship').length;
+  const readyToShip = orders.filter(o => o.status === 'quality_check').length;
+
+  if (roleLoading || loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <NavBar />
+        <div className="container mx-auto p-8 pt-32 text-center">
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   const kpiData = [
     { title: 'Active Orders', value: activeOrders, color: 'text-primary' },

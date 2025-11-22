@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,14 +7,37 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Clock, AlertCircle, CheckCircle, Package, Truck, FileCheck, Factory, Send, CreditCard } from 'lucide-react';
 import { useDesigns } from '@/hooks/useDesigns';
+import { useUserRole } from '@/hooks/useUserRole';
 
 const Workflow = () => {
   const [activeTab, setActiveTab] = useState('all');
+  const navigate = useNavigate();
   const { designs, loading } = useDesigns();
+  const { role, loading: roleLoading } = useUserRole();
+  
+  // Redirect to manufacturer dashboard if user is a manufacturer
+  useEffect(() => {
+    if (!roleLoading && role === 'manufacturer') {
+      navigate('/manufacturer');
+    }
+  }, [role, roleLoading, navigate]);
+
+  if (roleLoading || loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="container mx-auto px-4 sm:px-6 py-6 mt-20 max-w-7xl">
+          <p className="text-muted-foreground">Loading...</p>
+        </main>
+      </div>
+    );
+  }
   
   const activeDesigns = designs.filter(d => d.status !== 'completed').length;
   const inSampling = designs.filter(d => d.status === 'sample_development').length;
-  const inProduction = designs.filter(d => d.status === 'production_approval' || d.status === 'quality_check').length;
+  const inProduction = designs.filter(d => 
+    d.status === 'production_approval' || d.status === 'quality_check'
+  ).length;
   const awaitingApproval = 0; // TODO: Calculate based on orders requiring action
 
   const getStatusVariant = (status: string) => {
@@ -40,8 +63,6 @@ const Workflow = () => {
       default: return <Clock className="w-4 h-4" />;
     }
   };
-
-  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background">

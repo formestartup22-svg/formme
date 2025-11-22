@@ -1,16 +1,37 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useDesigns } from '@/hooks/useDesigns';
+import { useUserRole } from '@/hooks/useUserRole';
 import { Plus, Clock, Package, Factory, FileCheck } from 'lucide-react';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
   const [hoveredTab, setHoveredTab] = useState<string | null>(null);
   const { designs, loading } = useDesigns();
+  const { role, loading: roleLoading } = useUserRole();
+
+  // Redirect to manufacturer dashboard if user is a manufacturer
+  useEffect(() => {
+    if (!roleLoading && role === 'manufacturer') {
+      navigate('/manufacturer');
+    }
+  }, [role, roleLoading, navigate]);
+
+  if (roleLoading || loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="container mx-auto px-4 sm:px-6 py-6 mt-20 max-w-7xl">
+          <p className="text-muted-foreground">Loading...</p>
+        </main>
+      </div>
+    );
+  }
   
   const activeDesigns = designs.filter(d => d.status !== 'completed').length;
   const inSampling = designs.filter(d => d.status === 'sample_development').length;
