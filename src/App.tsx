@@ -1,8 +1,4 @@
-
-import {
-  Routes,
-  Route,
-} from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Templates from "./pages/Templates";
 import Marketplace from "./pages/Marketplace";
@@ -14,14 +10,14 @@ import StudioSelection from "./pages/StudioSelection";
 import ComingSoon from "./pages/ComingSoon";
 import Dashboard from "./pages/Dashboard";
 import DesignWorkspace from "./pages/DesignWorkspace";
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 import { Toaster } from "sonner";
-import SimpleDesigner from './pages/SimpleDesigner';
-import DesignStudio from './pages/DesignStudio';
+import SimpleDesigner from "./pages/SimpleDesigner";
+import DesignStudio from "./pages/DesignStudio";
 import ProfessionalStudio from "./pages/ProfessionalStudio";
-import ManufacturerDashboard from './pages/ManufacturerDashboard';
-import ManufacturerOrderWorkspace from './pages/ManufacturerOrderWorkspace';
+import ManufacturerDashboard from "./pages/ManufacturerDashboard";
+import ManufacturerOrderWorkspace from "./pages/ManufacturerOrderWorkspace";
 
 function App() {
   return (
@@ -35,10 +31,9 @@ function App() {
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/reviews" element={<Reviews />} />
-          <Route path="/about" element={<About />} />
           <Route path="/simple" element={<SimpleDesigner />} />
           <Route path="/coming-soon" element={<ComingSoon />} />
-          <Route path='/professional-studio' element={<ProfessionalStudio />} />
+          <Route path="/professional-studio" element={<ProfessionalStudio />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/workflow" element={<Dashboard />} />
           <Route path="/design/:id" element={<DesignWorkspace />} />
