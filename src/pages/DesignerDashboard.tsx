@@ -173,29 +173,38 @@ const DesignerDashboard = () => {
 
           <section>
             <h2 className="text-2xl font-semibold mb-4">All Designs</h2>
-            <div className="grid md:grid-cols-3 gap-4">
-              {designs.map((design) => (
-                <Card
-                  key={design.id}
-                  className="p-4 hover:shadow-lg transition-shadow cursor-pointer"
-                  onClick={() => navigate(`/design/${design.id}`)}
-                >
-                  <div className="aspect-square bg-muted rounded-lg mb-4 flex items-center justify-center">
-                    {design.thumbnail_url ? (
-                      <img
-                        src={design.thumbnail_url}
-                        alt={design.name}
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                    ) : (
-                      <Shirt className="w-12 h-12 text-muted-foreground" />
-                    )}
-                  </div>
-                  <h3 className="font-semibold">{design.name}</h3>
-                  <p className="text-sm text-muted-foreground">{design.category}</p>
-                </Card>
-              ))}
-            </div>
+            {designs.length === 0 ? (
+              <Card className="p-8 text-center">
+                <p className="text-muted-foreground mb-4">No designs yet</p>
+                <Button onClick={() => navigate("/new-design")}>
+                  Create your first design
+                </Button>
+              </Card>
+            ) : (
+              <div className="grid md:grid-cols-3 gap-4">
+                {designs.map((design) => (
+                  <Card
+                    key={design.id}
+                    className="p-4 hover:shadow-lg transition-shadow cursor-pointer"
+                    onClick={() => navigate(`/design/${design.id}`)}
+                  >
+                    <div className="aspect-square bg-muted rounded-lg mb-4 flex items-center justify-center">
+                      {design.thumbnail_url ? (
+                        <img
+                          src={design.thumbnail_url}
+                          alt={design.name}
+                          className="w-full h-full object-cover rounded-lg"
+                        />
+                      ) : (
+                        <Shirt className="w-12 h-12 text-muted-foreground" />
+                      )}
+                    </div>
+                    <h3 className="font-semibold">{design.name}</h3>
+                    <p className="text-sm text-muted-foreground">{design.category}</p>
+                  </Card>
+                ))}
+              </div>
+            )}
           </section>
         </div>
       </div>
