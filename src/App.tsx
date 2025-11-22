@@ -45,7 +45,7 @@ function App() {
           <Route path="/coming-soon" element={<ComingSoon />} />
           <Route path="/professional-studio" element={<ProfessionalStudio />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/workflow" element={<Dashboard />} />
+          <Route path="/workflow" element={<Workflow />} />
           <Route path="/design/:id" element={<DesignWorkspace />} />
           <Route path="/manufacturer" element={<ManufacturerDashboard />} />
           <Route path="/manufacturer/order/:id" element={<ManufacturerOrderWorkspace />} />
