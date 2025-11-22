@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -21,64 +20,66 @@ const NavBar: React.FC<NavBarProps> = ({ initialDark = false }) => {
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [scrolled]);
 
   // Use a much deeper green gradient, multiply look
   // #09100B → #233229 → #09100B, slightly diagonal
   return (
-    <header 
+    <header
       className={cn(
         "flex fixed inset-x-0 top-0 justify-between items-center px-9 py-0 h-20 z-[100] transition-all duration-300",
-        scrolled ? "backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border" : "bg-transparent"
+        scrolled
+          ? "backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border"
+          : "bg-transparent",
       )}
     >
       <Link to="/" className="flex items-center">
-        <div className={cn(
-          "text-3xl font-bold bg-none -ml-2 tracking-tight drop-shadow-sm transition-colors duration-300",
-          initialDark && !scrolled ? "text-[#111827]" : "text-foreground"
-        )}>
+        <div
+          className={cn(
+            "text-3xl font-bold bg-none -ml-2 tracking-tight drop-shadow-sm transition-colors duration-300",
+            initialDark && !scrolled ? "text-[#111827]" : "text-foreground",
+          )}
+        >
           formme
         </div>
       </Link>
       <nav className="hidden md:flex gap-8 mr-10 ml-auto">
-        {['about', 'collection', 'create', 'dashboard', 'reviews', 'contact'].map((item) => (
-          <Link 
+        {["collection", "create", "dashboard", "reviews", "contact"].map((item) => (
+          <Link
             key={item}
             to={
-              item === 'create' ? "/designer" : 
-              item === 'reviews' ? "/reviews" : 
-              item === 'dashboard' ? "/dashboard" :
-              item === 'about' ? "/about" :
-              "#"
-            } 
+              item === "create"
+                ? "/designer"
+                : item === "reviews"
+                  ? "/reviews"
+                  : item === "dashboard"
+                    ? "/dashboard"
+                    : "#"
+            }
             className={cn(
               "text-lg relative py-1 group transition-colors",
-              initialDark && !scrolled 
-                ? "text-[#111827] hover:text-[#111827]/80" 
-                : "text-foreground hover:text-foreground/80"
+              initialDark && !scrolled
+                ? "text-[#111827] hover:text-[#111827]/80"
+                : "text-foreground hover:text-foreground/80",
             )}
           >
             {item}
-            <span className={cn(
-              "absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full",
-              initialDark && !scrolled ? "bg-[#111827]" : "bg-foreground"
-            )}></span>
+            <span
+              className={cn(
+                "absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full",
+                initialDark && !scrolled ? "bg-[#111827]" : "bg-foreground",
+              )}
+            ></span>
           </Link>
         ))}
       </nav>
       <div className="flex gap-6 items-center">
-        <button 
-          aria-label="User profile" 
-          className="p-2 rounded-full hover:bg-muted transition-colors"
-        >
+        <button aria-label="User profile" className="p-2 rounded-full hover:bg-muted transition-colors">
           <UserIcon />
         </button>
-        <button 
-          aria-label="Shopping cart" 
-          className="p-2 rounded-full hover:bg-muted transition-colors"
-        >
+        <button aria-label="Shopping cart" className="p-2 rounded-full hover:bg-muted transition-colors">
           <CartIcon />
         </button>
         <ThemeToggle />
