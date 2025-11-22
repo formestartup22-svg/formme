@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Upload, Palette, Sparkles, Zap } from "lucide-react";
 import { toast } from "sonner";
@@ -16,20 +15,12 @@ const NewDesign = () => {
   const [showDialog, setShowDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [designName, setDesignName] = useState("");
-  const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
-  const [designFile, setDesignFile] = useState<File | null>(null);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setDesignFile(e.target.files[0]);
-    }
-  };
 
   const handleUploadDesign = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!designName || !designFile) {
-      toast.error("Please provide a design name and file");
+    if (!designName) {
+      toast.error("Please provide a design name");
       return;
     }
 
@@ -39,30 +30,13 @@ const NewDesign = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // Upload file to storage
-      const fileExt = designFile.name.split('.').pop();
-      const filePath = `${user.id}/${Date.now()}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('design-files')
-        .upload(filePath, designFile);
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('design-files')
-        .getPublicUrl(filePath);
-
       // Insert design record
       const { data: design, error: designError } = await supabase
         .from("designs")
         .insert({
           user_id: user.id,
           name: designName,
-          description,
           category,
-          design_file_url: publicUrl,
           status: 'draft',
         })
         .select()
@@ -92,11 +66,11 @@ const NewDesign = () => {
 
       if (orderError) throw orderError;
 
-      toast.success("Design uploaded successfully!");
-      // Navigate to the workflow at tech-pack stage
-      navigate(`/workflow`);
+      toast.success("Design created successfully!");
+      // Navigate directly to tech pack stage
+      navigate(`/workflow?designId=${design.id}`);
     } catch (error: any) {
-      toast.error(error.message || "Failed to upload design");
+      toast.error(error.message || "Failed to create design");
     } finally {
       setIsLoading(false);
     }
@@ -197,31 +171,6 @@ const NewDesign = () => {
                     onChange={(e) => setCategory(e.target.value)}
                     placeholder="T-Shirt, Hoodie, etc."
                   />
-                </div>
-
-                <div>
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Describe your design..."
-                    rows={3}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="designFile">Design File *</Label>
-                  <Input
-                    id="designFile"
-                    type="file"
-                    onChange={handleFileChange}
-                    accept="image/*,.pdf,.ai,.psd"
-                    required
-                  />
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Supported: Images, PDF, AI, PSD
-                  </p>
                 </div>
 
                 <Button type="submit" className="w-full" disabled={isLoading}>
