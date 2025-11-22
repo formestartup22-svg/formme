@@ -36,7 +36,7 @@ export const WorkflowStepper = () => {
             {/* Connector Line - Centered with circle */}
             {index < stages.length - 1 && (
               <div
-                className={`absolute left-[15px] top-8 w-0.5 h-8 ${
+                className={`absolute left-[16px] top-8 w-0.5 h-8 ${
                   isCompleted ? 'bg-primary' : 'bg-border'
                 }`}
               />
