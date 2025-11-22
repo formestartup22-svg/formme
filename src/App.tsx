@@ -21,6 +21,7 @@ import ManufacturerOrderWorkspace from "./pages/ManufacturerOrderWorkspace";
 import Auth from "./pages/Auth";
 import DesignerDashboard from "./pages/DesignerDashboard";
 import Workflow from "./pages/Workflow";
+import Profile from "./pages/Profile";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Templates />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/designer-dashboard" element={<DesignerDashboard />} />
           <Route path="/workflow/:orderId" element={<Workflow />} />
           <Route path="/studio-selection" element={<StudioSelection />} />
