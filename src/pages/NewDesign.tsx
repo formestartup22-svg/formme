@@ -77,6 +77,7 @@ const NewDesign = () => {
   };
 
   const handleUseStudio = () => {
+    // Show dialog to choose between Pro Studio and Free Studio
     navigate("/studio-selection");
   };
 
