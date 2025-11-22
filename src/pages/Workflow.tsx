@@ -15,6 +15,7 @@ import TechPackStage from '@/components/workflow/TechPackStage';
 import FactoryMatchStage from '@/components/workflow/FactoryMatchStage';
 import SendingStage from '@/components/workflow/SendingStage';
 import WaitingForManufacturerStage from '@/components/workflow/WaitingForManufacturerStage';
+import ReviewProductionTimelineStage from '@/components/workflow/ReviewProductionTimelineStage';
 import PaymentStage from '@/components/workflow/PaymentStage';
 import ProductionStage from '@/components/workflow/ProductionStage';
 import SampleStage from '@/components/workflow/SampleStage';
@@ -34,6 +35,8 @@ const WorkspaceContent = ({ design }: { design: any }) => {
         return <SendingStage design={design} />;
       case 'waiting':
         return <WaitingForManufacturerStage design={design} />;
+      case 'review-timeline':
+        return <ReviewProductionTimelineStage design={design} />;
       case 'payment':
         return <PaymentStage design={design} />;
       case 'production':
@@ -127,6 +130,7 @@ const Workflow = () => {
       case 'factory-match': return <Factory className="w-4 h-4" />;
       case 'sending': return <Send className="w-4 h-4" />;
       case 'waiting': return <Clock className="w-4 h-4" />;
+      case 'review-timeline': return <CheckCircle className="w-4 h-4" />;
       case 'payment': return <CreditCard className="w-4 h-4" />;
       case 'production': return <Factory className="w-4 h-4" />;
       case 'sample': return <Package className="w-4 h-4" />;
