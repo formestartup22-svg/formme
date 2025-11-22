@@ -196,8 +196,8 @@ const ManufacturerOrderWorkspace = () => {
             </Card>
             )}
 
-            {/* Sample Development Content */}
-            {activeTab === 'sample' && (
+            {/* Production Approval Content */}
+            {activeTab === 'production' && (
             <Card>
               <CardHeader>
                 <CardTitle>Sample Development</CardTitle>
@@ -257,8 +257,8 @@ const ManufacturerOrderWorkspace = () => {
             </Card>
             )}
 
-            {/* Production Approval Content */}
-            {activeTab === 'production' && (
+            {/* Sample Development Content */}
+            {activeTab === 'sample' && (
             <Card>
               <CardHeader>
                 <CardTitle>Production Approval</CardTitle>

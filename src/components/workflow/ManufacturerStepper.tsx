@@ -9,8 +9,8 @@ interface ManufacturerStepperProps {
 const manufacturerStages = [
   { id: 'techpack', label: 'Tech Pack Review' },
   { id: 'clarifications', label: 'Clarifications' },
-  { id: 'sample', label: 'Sample Development' },
   { id: 'production', label: 'Production Approval' },
+  { id: 'sample', label: 'Sample Development' },
   { id: 'quality', label: 'Quality Check' },
   { id: 'shipping', label: 'Shipping & Logistics' },
 ];
@@ -33,10 +33,10 @@ export const ManufacturerStepper = ({ activeStep, onStepChange }: ManufacturerSt
 
         return (
           <div key={stage.id} className="relative">
-            {/* Connector Line - Centered */}
+            {/* Connector Line - Centered with circle */}
             {index < manufacturerStages.length - 1 && (
               <div
-                className={`absolute left-4 top-8 w-0.5 h-8 ${
+                className={`absolute left-[15px] top-8 w-0.5 h-8 ${
                   isCompleted ? 'bg-primary' : 'bg-border'
                 }`}
               />

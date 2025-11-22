@@ -123,21 +123,35 @@ const Reviews = () => {
 
       {/* Hero Section */}
       <section className="pt-32 pb-16 px-4">
-        <div className="container mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
-              <h1 className="text-5xl lg:text-6xl font-serif text-[#111827] leading-tight">
-                What creators say about Formme
-              </h1>
-              <p className="text-lg text-[#4B5563] max-w-md">
-                Join thousands of designers who trust Formme to bring their fashion visions to life with professional manufacturing support.
-              </p>
+        <div className="container mx-auto max-w-5xl">
+          <div className="text-center space-y-8 mb-16">
+            <h1 className="text-6xl lg:text-7xl font-serif text-[#111827] leading-tight">
+              Fashion is hard to break into.
+            </h1>
+            <h2 className="text-5xl lg:text-6xl font-serif text-[#111827] leading-tight">
+              We're here to change that.
+            </h2>
+            <p className="text-xl text-[#4B5563] max-w-3xl mx-auto leading-relaxed">
+              Formme is the all-in-one platform for designing, manufacturing, and selling fashion, without the barriers.
+            </p>
+            <div className="pt-8">
               <Link to="/designer">
                 <Button className="bg-black hover:bg-[#111111] text-white px-8 py-6 rounded-full text-base">
                   Start your brand
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
+            </div>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+              <h3 className="text-4xl font-serif text-[#111827] leading-tight">
+                What creators say about Formme
+              </h3>
+              <p className="text-lg text-[#4B5563]">
+                Join thousands of designers who trust Formme to bring their fashion visions to life with professional manufacturing support.
+              </p>
             </div>
 
             {/* Hero Panels */}
@@ -159,32 +173,94 @@ const Reviews = () => {
         </div>
       </section>
 
-      {/* Featured Stories Section */}
+      {/* What We Offer Section */}
       <section className="py-16 px-4 bg-[#F9FAFB]">
-        <div className="container mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12">
-            <div>
-              <h2 className="text-3xl font-serif text-[#111827] mb-4">Featured creators</h2>
-              <p className="text-[#4B5563]">
-                See how independent designers and emerging brands are launching successful collections with Formme's end-to-end manufacturing platform.
+        <div className="container mx-auto max-w-5xl">
+          <h3 className="text-4xl font-serif text-[#111827] text-center mb-12">
+            What we offer
+          </h3>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="bg-white p-8 rounded-2xl border border-[#E5E7EB] shadow-sm">
+              <h4 className="text-2xl font-semibold text-[#111827] mb-3">No MOQs</h4>
+              <p className="text-[#4B5563] leading-relaxed">
+                Start small, scale as you grow. No minimum order quantities.
               </p>
             </div>
 
-            <div className="space-y-6">
-              {featuredStories.map((story, idx) => (
-                <div
-                  key={idx}
-                  className="bg-white p-6 rounded-2xl border border-[#E5E7EB] shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <div className="mb-3">
-                    <h3 className="font-semibold text-[#111827]">{story.name}</h3>
-                    <p className="text-sm text-[#4B5563]">{story.brand}</p>
-                  </div>
-                  <p className="text-[#111827]">"{story.quote}"</p>
-                </div>
-              ))}
+            <div className="bg-white p-8 rounded-2xl border border-[#E5E7EB] shadow-sm">
+              <h4 className="text-2xl font-semibold text-[#111827] mb-3">A design studio that meets you where you are</h4>
+              <p className="text-[#4B5563] leading-relaxed">
+                Intuitive design tools that adapt to your skill level.
+              </p>
+            </div>
+
+            <div className="bg-white p-8 rounded-2xl border border-[#E5E7EB] shadow-sm">
+              <h4 className="text-2xl font-semibold text-[#111827] mb-3">Transparent, ethical manufacturing</h4>
+              <p className="text-[#4B5563] leading-relaxed">
+                Know exactly where and how your pieces are made.
+              </p>
+            </div>
+
+            <div className="bg-white p-8 rounded-2xl border border-[#E5E7EB] shadow-sm">
+              <h4 className="text-2xl font-semibold text-[#111827] mb-3">On-demand production → zero inventory</h4>
+              <p className="text-[#4B5563] leading-relaxed">
+                Only produce what you sell. Eliminate unsold inventory.
+              </p>
+            </div>
+
+            <div className="bg-white p-8 rounded-2xl border border-[#E5E7EB] shadow-sm">
+              <h4 className="text-2xl font-semibold text-[#111827] mb-3">Predictable timelines</h4>
+              <p className="text-[#4B5563] leading-relaxed">
+                Clear production schedules and real-time updates.
+              </p>
+            </div>
+
+            <div className="bg-white p-8 rounded-2xl border border-[#E5E7EB] shadow-sm">
+              <h4 className="text-2xl font-semibold text-[#111827] mb-3">Instant storefront</h4>
+              <p className="text-[#4B5563] leading-relaxed">
+                Connect with Formme customers through our marketplace.
+              </p>
+            </div>
+
+            <div className="bg-white p-8 rounded-2xl border border-[#E5E7EB] shadow-sm">
+              <h4 className="text-2xl font-semibold text-[#111827] mb-3">Full creative control</h4>
+              <p className="text-[#4B5563] leading-relaxed">
+                Your vision, your way. No compromises.
+              </p>
+            </div>
+
+            <div className="bg-white p-8 rounded-2xl border border-[#E5E7EB] shadow-sm">
+              <h4 className="text-2xl font-semibold text-[#111827] mb-3">A team that understands</h4>
+              <p className="text-[#4B5563] leading-relaxed">
+                We're your partners in bringing your fashion dreams to life.
+              </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Featured Stories Carousel */}
+      <section className="py-16 px-4 bg-white overflow-hidden">
+        <div className="container mx-auto mb-8">
+          <h2 className="text-3xl font-serif text-[#111827] text-center mb-4">Featured creators</h2>
+          <p className="text-[#4B5563] text-center max-w-2xl mx-auto">
+            See how independent designers are launching successful collections with Formme
+          </p>
+        </div>
+        <div className="animate-scroll-left flex gap-6 w-max">
+          {[...featuredStories, ...featuredStories].map((story, idx) => (
+            <div
+              key={idx}
+              className="bg-[#FBEFD3] p-6 rounded-2xl border border-[#E5E7EB] shadow-sm w-[400px] flex-shrink-0"
+            >
+              <div className="mb-3">
+                <h3 className="font-semibold text-[#111827]">{story.name}</h3>
+                <p className="text-sm text-[#4B5563]">{story.brand}</p>
+              </div>
+              <p className="text-[#111827]">"{story.quote}"</p>
+            </div>
+          ))}
         </div>
       </section>
 

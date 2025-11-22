@@ -212,9 +212,18 @@ const ManufacturerDashboard = () => {
                         </TableCell>
                         <TableCell className="text-right">
                           <Link to={`/manufacturer/order/${order.id}`}>
-                            <Button variant="default" size="sm">
-                              View Order
-                            </Button>
+                            <span className="group relative inline-block">
+                              <span className="text-sm text-primary group-hover:opacity-0 transition-opacity">
+                                View Order
+                              </span>
+                              <Button 
+                                variant="default" 
+                                size="sm"
+                                className="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap"
+                              >
+                                View Order
+                              </Button>
+                            </span>
                           </Link>
                         </TableCell>
                       </TableRow>
