@@ -4,60 +4,33 @@ import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { mockDesigns, mockTasks, stageNames } from '@/data/workflowData';
-import { Plus, Clock, AlertCircle, CheckCircle, Package, Truck, FileCheck, Factory, Send, Download, Building2 } from 'lucide-react';
+import { useDesigns } from '@/hooks/useDesigns';
+import { Plus, Clock, Package, Factory, FileCheck } from 'lucide-react';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [hoveredTab, setHoveredTab] = useState<string | null>(null);
+  const { designs, loading } = useDesigns();
   
-  const activeDesigns = mockDesigns.filter(d => d.status !== 'completed').length;
-  const inSampling = mockDesigns.filter(d => d.stage === 'sample').length;
-  const inProduction = mockDesigns.filter(d => d.stage === 'production' || d.stage === 'quality').length;
+  const activeDesigns = designs.filter(d => d.status !== 'completed').length;
+  const inSampling = designs.filter(d => d.status === 'sample_development').length;
+  const inProduction = designs.filter(d => 
+    d.status === 'production_approval' || d.status === 'in_production'
+  ).length;
 
-  const getStatusVariant = (status: string) => {
-    switch (status) {
-      case 'on-track': return 'default';
-      case 'delayed': return 'secondary';
-      case 'action-required': return 'destructive';
-      case 'completed': return 'outline';
-      default: return 'outline';
-    }
+  const getStatusBadge = (status: string | null) => {
+    if (!status) return 'default';
+    if (status.includes('draft')) return 'outline';
+    if (status.includes('completed') || status.includes('delivered')) return 'default';
+    return 'secondary';
   };
 
-  const getStageIcon = (stage: string) => {
-    switch (stage) {
-      case 'tech-pack': return <FileCheck className="w-4 h-4" />;
-      case 'factory-match': return <Factory className="w-4 h-4" />;
-      case 'sending': return <Send className="w-4 h-4" />;
-      case 'sample': return <Package className="w-4 h-4" />;
-      case 'production': return <Factory className="w-4 h-4" />;
-      case 'quality': return <CheckCircle className="w-4 h-4" />;
-      case 'shipping': return <Truck className="w-4 h-4" />;
-      default: return <Clock className="w-4 h-4" />;
-    }
+  const getStatusDisplay = (status: string | null) => {
+    if (!status) return 'Draft';
+    return status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
-  const getStageDescription = (stage: string) => {
-    switch (stage) {
-      case 'tech-pack': return 'Tech Pack Creation';
-      case 'factory-match': return 'Factory Matching';
-      case 'sending': return 'Tech Pack Sent';
-      case 'sample': return 'Sample Review';
-      case 'production': return 'Production';
-      case 'quality': return 'Quality Control';
-      case 'shipping': return 'In Transit';
-      default: return stage;
-    }
-  };
-
-  const filteredDesigns = activeTab === 'all' 
-    ? mockDesigns 
-    : mockDesigns.filter(d => d.status === activeTab);
+  const filteredDesigns = designs;
 
   return (
     <div className="min-h-screen bg-background">
@@ -169,49 +142,44 @@ const Dashboard = () => {
             </div>
             
             <div className="space-y-3">
-              {filteredDesigns.length === 0 ? (
+              {loading ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <Clock className="w-12 h-12 mx-auto mb-3 opacity-50 animate-spin" />
+                  <p>Loading designs...</p>
+                </div>
+              ) : filteredDesigns.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <Package className="w-12 h-12 mx-auto mb-3 opacity-50" />
                   <p>No designs found</p>
+                  <p className="text-sm mt-2">Create your first design to get started</p>
                 </div>
               ) : (
                 filteredDesigns.map((design) => (
-                  <Link key={design.id} to={`/design/${design.id}`}>
+                  <Link key={design.id} to={`/workflow?designId=${design.id}`}>
                     <Card className="border-border hover:border-primary/50 transition-all hover:shadow-sm cursor-pointer">
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-2">
-                              {getStageIcon(design.stage)}
+                              <FileCheck className="w-4 h-4" />
                               <h3 className="font-semibold text-foreground">{design.name}</h3>
                             </div>
                             <p className="text-sm text-muted-foreground mb-2">
-                              {stageNames[design.stage]}
+                              {getStatusDisplay(design.status)}
                             </p>
-                            <p className="text-xs text-muted-foreground">
-                              {design.nextAction}
-                            </p>
+                            {design.description && (
+                              <p className="text-xs text-muted-foreground line-clamp-2">
+                                {design.description}
+                              </p>
+                            )}
                           </div>
                           <div className="flex flex-col items-end gap-2">
-                            <Badge variant={getStatusVariant(design.status)}>
-                              {design.status.replace('-', ' ')}
+                            <Badge variant={getStatusBadge(design.status)}>
+                              {getStatusDisplay(design.status)}
                             </Badge>
                             <span className="text-xs text-muted-foreground whitespace-nowrap">
-                              {design.eta}
+                              {new Date(design.created_at).toLocaleDateString()}
                             </span>
-                          </div>
-                        </div>
-                        {/* Progress Bar with Stage Description */}
-                        <div className="mt-3">
-                          <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-                            <span>{getStageDescription(design.stage)}</span>
-                            <span>{design.progress}%</span>
-                          </div>
-                          <div className="h-2 bg-muted rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-primary transition-all" 
-                              style={{ width: `${design.progress}%` }}
-                            />
                           </div>
                         </div>
                       </CardHeader>

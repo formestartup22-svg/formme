@@ -21,6 +21,12 @@ const Auth = () => {
     password: "",
     fullName: "",
     companyName: "",
+    location: "",
+    phone: "",
+    moq: "",
+    leadTime: "",
+    capabilities: [] as string[],
+    categories: [] as string[],
   });
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -112,11 +118,33 @@ const Auth = () => {
         role: userRole,
       });
 
-      // Update profile
+      // Update profile with common data
       await supabase.from("profiles").update({
         full_name: formData.fullName,
         company_name: formData.companyName,
+        location: formData.location || null,
+        phone: formData.phone || null,
+        capabilities: formData.capabilities.length > 0 ? formData.capabilities : null,
+        categories: formData.categories.length > 0 ? formData.categories : null,
+        moq: formData.moq ? parseInt(formData.moq) : null,
+        lead_time: formData.leadTime ? parseInt(formData.leadTime) : null,
       }).eq("user_id", data.user.id);
+
+      // If manufacturer, create manufacturer record
+      if (userRole === "manufacturer") {
+        await supabase.from("manufacturers").insert({
+          user_id: data.user.id,
+          name: formData.companyName || formData.fullName,
+          description: `${formData.companyName || formData.fullName} - Professional manufacturing services`,
+          location: formData.location || null,
+          country: formData.location || null,
+          specialties: formData.capabilities.length > 0 ? formData.capabilities : null,
+          certifications: formData.categories.length > 0 ? formData.categories : null,
+          min_order_quantity: formData.moq ? parseInt(formData.moq) : null,
+          lead_time_days: formData.leadTime ? parseInt(formData.leadTime) : null,
+          is_active: true,
+        });
+      }
 
       toast.success("Account created! Please check your email to verify.");
       setMode("signin");
@@ -255,6 +283,78 @@ const Auth = () => {
                   onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                 />
               </div>
+              
+              {userRole === "manufacturer" && (
+                <>
+                  <div>
+                    <Label htmlFor="signup-location">Location</Label>
+                    <Input
+                      id="signup-location"
+                      type="text"
+                      placeholder="City, Country"
+                      value={formData.location}
+                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="signup-phone">Phone</Label>
+                    <Input
+                      id="signup-phone"
+                      type="tel"
+                      placeholder="+1 234 567 8900"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="signup-moq">Min Order Qty</Label>
+                      <Input
+                        id="signup-moq"
+                        type="number"
+                        placeholder="100"
+                        value={formData.moq}
+                        onChange={(e) => setFormData({ ...formData, moq: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="signup-leadTime">Lead Time (days)</Label>
+                      <Input
+                        id="signup-leadTime"
+                        type="number"
+                        placeholder="30"
+                        value={formData.leadTime}
+                        onChange={(e) => setFormData({ ...formData, leadTime: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="signup-capabilities">Capabilities (comma-separated)</Label>
+                    <Input
+                      id="signup-capabilities"
+                      type="text"
+                      placeholder="Cut & Sew, Printing, Embroidery"
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        capabilities: e.target.value.split(',').map(s => s.trim()).filter(Boolean) 
+                      })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="signup-categories">Categories (comma-separated)</Label>
+                    <Input
+                      id="signup-categories"
+                      type="text"
+                      placeholder="T-Shirts, Hoodies, Pants"
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        categories: e.target.value.split(',').map(s => s.trim()).filter(Boolean) 
+                      })}
+                    />
+                  </div>
+                </>
+              )}
+              
               <div>
                 <Label htmlFor="signup-email">Email</Label>
                 <Input
