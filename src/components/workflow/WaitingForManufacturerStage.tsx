@@ -101,10 +101,10 @@ const WaitingForManufacturerStage = ({ design }: WaitingForManufacturerStageProp
     <div>
       <StageHeader
         icon={Clock}
-        title={isAccepted ? "Manufacturer Found!" : "Finding Manufacturer"}
+        title={isAccepted ? "Manufacturer Found!" : "Waiting for manufacturer to approve your order"}
         description={isAccepted 
           ? `${acceptedManufacturer} has accepted your order` 
-          : "We're matching you with the best manufacturer for your design"
+          : "Your order has been sent to the manufacturer. You'll be notified as soon as they approve."
         }
       />
 
@@ -128,32 +128,8 @@ const WaitingForManufacturerStage = ({ design }: WaitingForManufacturerStageProp
                     Waiting for manufacturer...
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    We've sent your order details to matched manufacturers. You'll be notified as soon as one accepts.
+                    Your order has been sent to the manufacturer. You'll be notified as soon as they approve.
                   </p>
-                </div>
-
-                {/* Timer */}
-                <div className="inline-flex items-center gap-2 px-6 py-3 bg-muted rounded-full">
-                  <Clock className="w-5 h-5 text-muted-foreground" />
-                  <span className="text-lg font-mono text-foreground">
-                    {formatTime(waitingTime)}
-                  </span>
-                </div>
-
-                {/* Status Indicators */}
-                <div className="pt-8 space-y-3">
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                    <span className="text-muted-foreground">
-                      Matching with manufacturers based on your requirements
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-2 h-2 bg-muted rounded-full" />
-                    <span className="text-muted-foreground">
-                      Waiting for manufacturer to review and accept
-                    </span>
-                  </div>
                 </div>
               </div>
             ) : (
