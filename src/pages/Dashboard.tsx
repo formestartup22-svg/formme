@@ -6,14 +6,25 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useDesigns } from '@/hooks/useDesigns';
 import { useUserRole } from '@/hooks/useUserRole';
-import { Plus, Clock, Package, Factory, FileCheck } from 'lucide-react';
+import { Plus, Clock, Package, Factory, FileCheck, Lock } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
   const [hoveredTab, setHoveredTab] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const { designs, loading } = useDesigns();
   const { role, loading: roleLoading } = useUserRole();
+
+  // Check authentication
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAuthenticated(!!user);
+    };
+    checkAuth();
+  }, []);
 
   // Redirect to manufacturer dashboard if user is a manufacturer
   useEffect(() => {
@@ -22,12 +33,43 @@ const Dashboard = () => {
     }
   }, [role, roleLoading, navigate]);
 
-  if (roleLoading || loading) {
+  if (isAuthenticated === null || roleLoading || loading) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
         <main className="container mx-auto px-4 sm:px-6 py-6 mt-20 max-w-7xl">
           <p className="text-muted-foreground">Loading...</p>
+        </main>
+      </div>
+    );
+  }
+
+  // Show sign-up prompt if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="container mx-auto px-4 sm:px-6 py-6 mt-20 max-w-7xl">
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <Card className="max-w-md w-full border-border">
+              <CardContent className="p-12 text-center">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Lock className="w-10 h-10 text-primary" />
+                </div>
+                <h2 className="text-2xl font-semibold text-foreground mb-3">
+                  Sign up to access your dashboard
+                </h2>
+                <p className="text-muted-foreground mb-8">
+                  You need to create an account or sign in to view your production dashboard and manage your designs.
+                </p>
+                <Link to="/auth">
+                  <Button size="lg" className="w-full">
+                    Sign up or Sign in
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
         </main>
       </div>
     );
