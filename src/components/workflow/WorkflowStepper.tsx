@@ -23,7 +23,16 @@ export const WorkflowStepper = () => {
   const getStageStatus = (stage: string, index: number) => {
     if (completedStages.includes(stage)) return 'completed';
     if (stage === currentStage) return 'current';
-    return 'accessible'; // All stages are accessible for non-linear navigation
+    
+    // Check if previous stage is completed
+    if (index > 0) {
+      const previousStage = stages[index - 1];
+      if (!completedStages.includes(previousStage)) {
+        return 'locked';
+      }
+    }
+    
+    return 'accessible';
   };
 
   return (
@@ -32,6 +41,7 @@ export const WorkflowStepper = () => {
         const status = getStageStatus(stage, index);
         const isCompleted = status === 'completed';
         const isCurrent = status === 'current';
+        const isLocked = status === 'locked';
         const isAccessible = status === 'accessible' || isCompleted || isCurrent;
 
         return (
@@ -47,10 +57,13 @@ export const WorkflowStepper = () => {
 
             {/* Step Item */}
             <button
-              onClick={() => setCurrentStage(stage)}
+              onClick={() => !isLocked && setCurrentStage(stage)}
+              disabled={isLocked}
               className={`w-full text-left flex items-start gap-3 p-2 rounded-lg transition-all ${
                 isCurrent
                   ? 'bg-primary/5'
+                  : isLocked
+                  ? 'cursor-not-allowed opacity-50'
                   : 'hover:bg-muted/50 cursor-pointer'
               }`}
             >
@@ -61,6 +74,8 @@ export const WorkflowStepper = () => {
                     ? 'bg-primary border-primary'
                     : isCurrent
                     ? 'bg-primary/10 border-primary'
+                    : isLocked
+                    ? 'bg-muted border-muted'
                     : 'bg-background border-border'
                 }`}
               >
@@ -69,7 +84,11 @@ export const WorkflowStepper = () => {
                 ) : (
                   <span
                     className={`text-xs font-semibold ${
-                      isCurrent ? 'text-primary' : 'text-muted-foreground'
+                      isCurrent 
+                        ? 'text-primary' 
+                        : isLocked
+                        ? 'text-muted-foreground/50'
+                        : 'text-muted-foreground'
                     }`}
                   >
                     {index + 1}
@@ -85,6 +104,8 @@ export const WorkflowStepper = () => {
                       ? 'text-primary'
                       : isCompleted
                       ? 'text-foreground'
+                      : isLocked
+                      ? 'text-muted-foreground/50'
                       : 'text-muted-foreground'
                   }`}
                 >
@@ -92,6 +113,9 @@ export const WorkflowStepper = () => {
                 </p>
                 {isCompleted && (
                   <p className="text-xs text-muted-foreground mt-0.5">Completed</p>
+                )}
+                {isLocked && (
+                  <p className="text-xs text-muted-foreground/50 mt-0.5">Locked</p>
                 )}
               </div>
             </button>

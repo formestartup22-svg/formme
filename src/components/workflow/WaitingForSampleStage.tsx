@@ -5,6 +5,7 @@ import { StageHeader } from './StageHeader';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { useWorkflow } from '@/context/WorkflowContext';
 
 interface WaitingForSampleStageProps {
   design: {
@@ -17,6 +18,7 @@ const WaitingForSampleStage = ({ design }: WaitingForSampleStageProps) => {
   const [waitingTime, setWaitingTime] = useState(0);
   const [isReady, setIsReady] = useState(false);
   const navigate = useNavigate();
+  const { markStageComplete } = useWorkflow();
 
   useEffect(() => {
     // Timer for waiting duration
@@ -41,6 +43,7 @@ const WaitingForSampleStage = ({ design }: WaitingForSampleStageProps) => {
         
         // Auto-proceed after 2 seconds
         setTimeout(() => {
+          markStageComplete('waiting-sample');
           navigate(`/workflow?designId=${design.id}&stage=sample`);
         }, 2000);
       }
@@ -68,6 +71,7 @@ const WaitingForSampleStage = ({ design }: WaitingForSampleStageProps) => {
             
             // Auto-proceed to sample stage after 2 seconds
             setTimeout(() => {
+              markStageComplete('waiting-sample');
               navigate(`/workflow?designId=${design.id}&stage=sample`);
             }, 2000);
           }

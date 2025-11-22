@@ -75,6 +75,7 @@ interface WorkflowContextType {
   completedStages: string[];
   markStageComplete: (stage: string) => void;
   getProgress: () => number;
+  isStageAccessible: (stage: string) => boolean;
 }
 
 const WorkflowContext = createContext<WorkflowContextType | undefined>(undefined);
@@ -111,10 +112,41 @@ const initialData: WorkflowData = {
   factoryMessages: [],
 };
 
-export const WorkflowProvider = ({ children }: { children: ReactNode }) => {
+export const WorkflowProvider = ({ children, initialStage }: { children: ReactNode; initialStage?: string }) => {
   const [workflowData, setWorkflowData] = useState<WorkflowData>(initialData);
-  const [currentStage, setCurrentStage] = useState('tech-pack');
+  const [currentStage, setCurrentStageState] = useState(initialStage || 'tech-pack');
   const [completedStages, setCompletedStages] = useState<string[]>([]);
+
+  const stages = [
+    'tech-pack',
+    'factory-match',
+    'sending',
+    'waiting',
+    'review-timeline',
+    'payment',
+    'production',
+    'waiting-sample',
+    'sample',
+    'quality',
+    'shipping'
+  ];
+
+  const isStageAccessible = (stage: string) => {
+    const stageIndex = stages.indexOf(stage);
+    if (stageIndex === -1) return false;
+    if (stageIndex === 0) return true; // First stage always accessible
+    
+    // Check if previous stage is completed
+    const previousStage = stages[stageIndex - 1];
+    return completedStages.includes(previousStage);
+  };
+
+  const setCurrentStage = (stage: string) => {
+    // Only allow navigation to accessible stages
+    if (isStageAccessible(stage) || completedStages.includes(stage)) {
+      setCurrentStageState(stage);
+    }
+  };
 
   const updateWorkflowData = (data: Partial<WorkflowData>) => {
     setWorkflowData(prev => ({ ...prev, ...data }));
@@ -127,7 +159,7 @@ export const WorkflowProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const getProgress = () => {
-    const totalStages = 8;
+    const totalStages = stages.length;
     return Math.round((completedStages.length / totalStages) * 100);
   };
 
@@ -141,6 +173,7 @@ export const WorkflowProvider = ({ children }: { children: ReactNode }) => {
         completedStages,
         markStageComplete,
         getProgress,
+        isStageAccessible,
       }}
     >
       {children}
