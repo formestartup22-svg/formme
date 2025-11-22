@@ -166,8 +166,11 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
     if (!generatedTechPackBlob) return;
 
     try {
-      // Upload to storage
-      const fileName = `${design.id}-techpack-${Date.now()}.pdf`;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      // Upload to storage with user_id in path
+      const fileName = `${user.id}/${design.id}-techpack-${Date.now()}.pdf`;
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('design-files')
         .upload(fileName, generatedTechPackBlob);
@@ -243,9 +246,12 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
     if (!file) return;
 
     try {
-      // Upload to storage
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      // Upload to storage with user_id in path
       const fileExt = file.name.split('.').pop();
-      const fileName = `${design.id}-techpack-${Date.now()}.${fileExt}`;
+      const fileName = `${user.id}/${design.id}-techpack-${Date.now()}.${fileExt}`;
       const { data, error: uploadError } = await supabase.storage
         .from('design-files')
         .upload(fileName, file);
