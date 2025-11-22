@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Upload, FileCheck, Download, Sparkles, Loader2, FileUp } from 'lucide-react';
+import { Upload, FileCheck, Download, Sparkles, Loader2, FileUp, Plus, X } from 'lucide-react';
 import { useWorkflow } from '@/context/WorkflowContext';
 import { StageHeader } from './StageHeader';
 import { StageNavigation } from './StageNavigation';
@@ -34,6 +34,9 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
   const [designFile, setDesignFile] = useState<File | null>(null);
   const [designFileUrl, setDesignFileUrl] = useState<string>('');
   const [existingTechPack, setExistingTechPack] = useState<string | null>(null);
+  const [measurements, setMeasurements] = useState<Array<{ name: string; value: string }>>([
+    { name: '', value: '' }
+  ]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const designFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -51,16 +54,22 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
         if (specsError && specsError.code !== 'PGRST116') throw specsError;
         
         if (specsData) {
-          const measurements = typeof specsData.measurements === 'object' && specsData.measurements !== null 
-            ? specsData.measurements as Record<string, any>
-            : {};
+          const dbMeasurements = typeof specsData.measurements === 'object' && specsData.measurements !== null 
+            ? specsData.measurements as any
+            : [];
+            
+          // Convert measurements to array format if needed
+          if (Array.isArray(dbMeasurements) && dbMeasurements.length > 0) {
+            setMeasurements(dbMeasurements);
+          } else if (Object.keys(dbMeasurements).length > 0) {
+            // Convert old format to new format
+            const converted = Object.entries(dbMeasurements)
+              .filter(([_, value]) => value)
+              .map(([name, value]) => ({ name, value: String(value) }));
+            setMeasurements(converted.length > 0 ? converted : [{ name: '', value: '' }]);
+          }
             
           updateWorkflowData({
-            measurements: {
-              chestWidth: measurements.chestWidth || '',
-              length: measurements.length || '',
-              sleeveLength: measurements.sleeveLength || '',
-            },
             fabric: specsData.fabric_type || '',
             gsm: specsData.gsm?.toString() || '',
             print: specsData.print_type || '',
@@ -110,7 +119,7 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
         .from('design_specs')
         .upsert({
           design_id: design.id,
-          measurements: workflowData.measurements,
+          measurements: measurements.filter(m => m.name && m.value),
           fabric_type: workflowData.fabric,
           gsm: workflowData.gsm ? parseInt(workflowData.gsm) : null,
           print_type: workflowData.print,
@@ -130,7 +139,7 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
             fabric: workflowData.fabric,
             gsm: workflowData.gsm,
             print: workflowData.print,
-            measurements: workflowData.measurements,
+            measurements: measurements.filter(m => m.name && m.value),
             constructionNotes: workflowData.constructionNotes,
             designImageUrl: designFileUrl || null,
           }
@@ -356,37 +365,55 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
           <section>
             <h3 className="text-sm font-semibold text-foreground mb-3">Garment Measurements</h3>
             <Card className="border-border">
-              <CardContent className="p-6">
-                <div className="grid grid-cols-3 gap-4">
-                  {[
-                    { key: 'chestWidth', label: 'Chest Width' },
-                    { key: 'length', label: 'Length' },
-                    { key: 'sleeveLength', label: 'Sleeve Length' }
-                  ].map((field) => (
-                    <div key={field.key}>
-                      <Label className="text-xs mb-1.5 block">{field.label}</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          type="number"
-                          placeholder="0"
-                          value={workflowData.measurements[field.key as keyof typeof workflowData.measurements]}
-                          onChange={(e) =>
-                            updateWorkflowData({
-                              measurements: {
-                                ...workflowData.measurements,
-                                [field.key]: e.target.value
-                              }
-                            })
-                          }
-                          className="h-9 text-sm"
-                        />
-                        <div className="w-16 flex items-center justify-center bg-muted rounded text-xs text-muted-foreground">
-                          inches
-                        </div>
-                      </div>
+              <CardContent className="p-6 space-y-3">
+                {measurements.map((measurement, index) => (
+                  <div key={index} className="flex gap-2">
+                    <Input
+                      placeholder="Measurement name (e.g., Chest Width)"
+                      value={measurement.name}
+                      onChange={(e) => {
+                        const newMeasurements = [...measurements];
+                        newMeasurements[index].name = e.target.value;
+                        setMeasurements(newMeasurements);
+                      }}
+                      className="h-9 text-sm flex-1"
+                    />
+                    <Input
+                      placeholder="Value"
+                      value={measurement.value}
+                      onChange={(e) => {
+                        const newMeasurements = [...measurements];
+                        newMeasurements[index].value = e.target.value;
+                        setMeasurements(newMeasurements);
+                      }}
+                      className="h-9 text-sm w-32"
+                    />
+                    <div className="w-16 flex items-center justify-center bg-muted rounded text-xs text-muted-foreground">
+                      inches
                     </div>
-                  ))}
-                </div>
+                    {measurements.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setMeasurements(measurements.filter((_, i) => i !== index));
+                        }}
+                        className="h-9 w-9 p-0"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setMeasurements([...measurements, { name: '', value: '' }])}
+                  className="w-full gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Measurement
+                </Button>
               </CardContent>
             </Card>
           </section>
