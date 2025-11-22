@@ -25,7 +25,10 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
   const [showTechPackDialog, setShowTechPackDialog] = useState(false);
   const [generatedTechPack, setGeneratedTechPack] = useState<string>('');
   const [uploadedTechPack, setUploadedTechPack] = useState<File | null>(null);
+  const [designFile, setDesignFile] = useState<File | null>(null);
+  const [designFileUrl, setDesignFileUrl] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const designFileInputRef = useRef<HTMLInputElement>(null);
 
   const handleNext = () => {
     // Allow progression without validation
@@ -45,16 +48,34 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
             print: workflowData.print,
             measurements: workflowData.measurements,
             constructionNotes: workflowData.constructionNotes,
+            designImageUrl: designFileUrl || null,
           }
         }
       });
 
       if (error) throw error;
 
-      if (data?.techPackContent) {
-        setGeneratedTechPack(data.techPackContent);
+      if (data?.pdfData) {
+        // Convert base64 to blob and download
+        const byteCharacters = atob(data.pdfData);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${design.name}-TechPack.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        setGeneratedTechPack(data.techPackContent || 'Tech pack generated');
         setShowTechPackDialog(true);
-        toast.success('Tech pack generated successfully!');
+        toast.success('Tech pack PDF downloaded successfully!');
       }
     } catch (error) {
       console.error('Error generating tech pack:', error);
@@ -64,17 +85,32 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
     }
   };
 
-  const handleDownloadTechPack = () => {
-    const blob = new Blob([generatedTechPack], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${design.name}-TechPack.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast.success('Tech pack downloaded!');
+  const handleDesignFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      // Upload to Supabase Storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${design.id}-design-${Date.now()}.${fileExt}`;
+      const { data, error } = await supabase.storage
+        .from('design-files')
+        .upload(fileName, file);
+
+      if (error) throw error;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('design-files')
+        .getPublicUrl(fileName);
+
+      setDesignFile(file);
+      setDesignFileUrl(publicUrl);
+      toast.success(`Design file "${file.name}" uploaded successfully!`);
+    } catch (error) {
+      console.error('Error uploading design file:', error);
+      toast.error('Failed to upload design file');
+    }
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,10 +140,20 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
             <h3 className="text-sm font-semibold text-foreground mb-3">Design File</h3>
             <Card className="border-border">
               <CardContent className="p-6">
-                <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer">
+                <input
+                  ref={designFileInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/jpg,application/pdf"
+                  onChange={handleDesignFileUpload}
+                  className="hidden"
+                />
+                <div 
+                  className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer"
+                  onClick={() => designFileInputRef.current?.click()}
+                >
                   <Upload className="w-8 h-8 mx-auto mb-3 text-muted-foreground" />
                   <p className="text-sm font-medium text-foreground mb-1">
-                    Upload your design sketch or mockup
+                    {designFile ? designFile.name : 'Upload your design sketch or mockup'}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     PNG, JPG, or PDF • Max 10MB
@@ -262,13 +308,9 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
                 </div>
 
                 {generatedTechPack && (
-                  <>
-                    <div className="h-px bg-border" />
-                    <Button variant="outline" className="w-full gap-2" onClick={handleDownloadTechPack}>
-                      <Download className="w-4 h-4" />
-                      Download Generated Tech Pack
-                    </Button>
-                  </>
+                  <div className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">
+                    ✓ Tech pack PDF generated and downloaded
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -296,17 +338,15 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            <div className="bg-muted p-6 rounded-lg whitespace-pre-wrap font-mono text-sm">
-              {generatedTechPack}
+            <div className="bg-muted p-6 rounded-lg">
+              <p className="text-sm text-muted-foreground">
+                Your tech pack PDF has been downloaded successfully. Check your downloads folder.
+              </p>
             </div>
           </div>
           <div className="flex gap-3 justify-end">
             <Button variant="outline" onClick={() => setShowTechPackDialog(false)}>
               Close
-            </Button>
-            <Button onClick={handleDownloadTechPack} className="gap-2">
-              <Download className="w-4 h-4" />
-              Download
             </Button>
           </div>
         </DialogContent>

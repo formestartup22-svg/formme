@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import jsPDF from "https://esm.sh/jspdf@2.5.1";
 
 const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
 
@@ -153,10 +154,72 @@ ${JSON.stringify(designData, null, 2)}`;
 
     console.log('Tech pack generated successfully');
 
+    // Generate PDF
+    const doc = new jsPDF();
+    let yPosition = 20;
+
+    // Add design image if provided
+    if (designData.designImageUrl) {
+      try {
+        const imageResponse = await fetch(designData.designImageUrl);
+        const imageBuffer = await imageResponse.arrayBuffer();
+        const base64Image = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)));
+        const imageType = designData.designImageUrl.toLowerCase().endsWith('.png') ? 'PNG' : 'JPEG';
+        
+        doc.addImage(`data:image/${imageType.toLowerCase()};base64,${base64Image}`, imageType, 15, yPosition, 180, 100);
+        yPosition += 110;
+      } catch (error) {
+        console.error('Error adding image to PDF:', error);
+      }
+    }
+
+    // Parse markdown and add to PDF
+    const lines = techPackContent.split('\n');
+    doc.setFontSize(10);
+    
+    for (const line of lines) {
+      if (yPosition > 280) {
+        doc.addPage();
+        yPosition = 20;
+      }
+
+      if (line.startsWith('# ')) {
+        doc.setFontSize(16);
+        doc.setFont(undefined, 'bold');
+        doc.text(line.replace('# ', ''), 15, yPosition);
+        yPosition += 10;
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+      } else if (line.startsWith('## ')) {
+        doc.setFontSize(14);
+        doc.setFont(undefined, 'bold');
+        doc.text(line.replace('## ', ''), 15, yPosition);
+        yPosition += 8;
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+      } else if (line.startsWith('### ')) {
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text(line.replace('### ', ''), 15, yPosition);
+        yPosition += 7;
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+      } else if (line.trim()) {
+        const textLines = doc.splitTextToSize(line, 180);
+        doc.text(textLines, 15, yPosition);
+        yPosition += textLines.length * 6;
+      } else {
+        yPosition += 5;
+      }
+    }
+
+    const pdfData = doc.output('datauristring').split(',')[1];
+
     return new Response(
       JSON.stringify({ 
         success: true,
         techPackContent,
+        pdfData,
         message: 'Tech pack generated successfully'
       }), 
       {
