@@ -37,6 +37,9 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
   const [measurements, setMeasurements] = useState<Array<{ name: string; value: string }>>([
     { name: '', value: '' }
   ]);
+  const [fabricSpecs, setFabricSpecs] = useState<Array<{ type: string; details: string }>>([
+    { type: '', details: '' }
+  ]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const designFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -68,11 +71,17 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
               .map(([name, value]) => ({ name, value: String(value) }));
             setMeasurements(converted.length > 0 ? converted : [{ name: '', value: '' }]);
           }
+
+          // Load fabric specs
+          if (specsData.fabric_type || specsData.gsm || specsData.print_type) {
+            const specs = [];
+            if (specsData.fabric_type) specs.push({ type: 'Fabric Type', details: specsData.fabric_type });
+            if (specsData.gsm) specs.push({ type: 'GSM', details: specsData.gsm.toString() });
+            if (specsData.print_type) specs.push({ type: 'Print Type', details: specsData.print_type });
+            setFabricSpecs(specs.length > 0 ? specs : [{ type: '', details: '' }]);
+          }
             
           updateWorkflowData({
-            fabric: specsData.fabric_type || '',
-            gsm: specsData.gsm?.toString() || '',
-            print: specsData.print_type || '',
             constructionNotes: specsData.construction_notes || '',
           });
 
@@ -115,14 +124,19 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
     setIsGenerating(true);
     try {
       // Save design specs to database first
+      const fabricData = fabricSpecs.filter(f => f.type && f.details);
+      const fabricType = fabricData.find(f => f.type.toLowerCase().includes('fabric'))?.details || '';
+      const gsmData = fabricData.find(f => f.type.toLowerCase().includes('gsm'))?.details || '';
+      const printType = fabricData.find(f => f.type.toLowerCase().includes('print'))?.details || '';
+
       const { error: upsertError } = await supabase
         .from('design_specs')
         .upsert({
           design_id: design.id,
           measurements: measurements.filter(m => m.name && m.value),
-          fabric_type: workflowData.fabric,
-          gsm: workflowData.gsm ? parseInt(workflowData.gsm) : null,
-          print_type: workflowData.print,
+          fabric_type: fabricType,
+          gsm: gsmData ? parseInt(gsmData) : null,
+          print_type: printType,
           construction_notes: workflowData.constructionNotes,
           artwork_url: designFileUrl || null,
         }, {
@@ -136,9 +150,7 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
           designData: {
             name: design.name,
             garmentType: 'T-Shirt',
-            fabric: workflowData.fabric,
-            gsm: workflowData.gsm,
-            print: workflowData.print,
+            fabricSpecs: fabricSpecs.filter(f => f.type && f.details),
             measurements: measurements.filter(m => m.name && m.value),
             constructionNotes: workflowData.constructionNotes,
             designImageUrl: designFileUrl || null,
@@ -422,36 +434,52 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
           <section>
             <h3 className="text-sm font-semibold text-foreground mb-3">Fabric Specifications</h3>
             <Card className="border-border">
-              <CardContent className="p-6">
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <Label className="text-xs mb-1.5 block">Fabric Type</Label>
+              <CardContent className="p-6 space-y-3">
+                {fabricSpecs.map((spec, index) => (
+                  <div key={index} className="flex gap-2">
                     <Input
-                      placeholder="e.g., Cotton, Polyester"
-                      value={workflowData.fabric}
-                      onChange={(e) => updateWorkflowData({ fabric: e.target.value })}
-                      className="h-9 text-sm"
+                      placeholder="Specification type (e.g., Fabric Type, GSM)"
+                      value={spec.type}
+                      onChange={(e) => {
+                        const newSpecs = [...fabricSpecs];
+                        newSpecs[index].type = e.target.value;
+                        setFabricSpecs(newSpecs);
+                      }}
+                      className="h-9 text-sm flex-1"
                     />
-                  </div>
-                  <div>
-                    <Label className="text-xs mb-1.5 block">GSM</Label>
                     <Input
-                      placeholder="e.g., 180"
-                      value={workflowData.gsm}
-                      onChange={(e) => updateWorkflowData({ gsm: e.target.value })}
-                      className="h-9 text-sm"
+                      placeholder="Details"
+                      value={spec.details}
+                      onChange={(e) => {
+                        const newSpecs = [...fabricSpecs];
+                        newSpecs[index].details = e.target.value;
+                        setFabricSpecs(newSpecs);
+                      }}
+                      className="h-9 text-sm flex-1"
                     />
+                    {fabricSpecs.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setFabricSpecs(fabricSpecs.filter((_, i) => i !== index));
+                        }}
+                        className="h-9 w-9 p-0"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
                   </div>
-                  <div>
-                    <Label className="text-xs mb-1.5 block">Print Type</Label>
-                    <Input
-                      placeholder="e.g., Screen, DTG"
-                      value={workflowData.print}
-                      onChange={(e) => updateWorkflowData({ print: e.target.value })}
-                      className="h-9 text-sm"
-                    />
-                  </div>
-                </div>
+                ))}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setFabricSpecs([...fabricSpecs, { type: '', details: '' }])}
+                  className="w-full gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Fabric Specification
+                </Button>
               </CardContent>
             </Card>
           </section>
@@ -474,73 +502,71 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
           {/* Generate & Upload Tech Pack */}
           <section>
             <h3 className="text-sm font-semibold text-foreground mb-3">Tech Pack Management</h3>
-            <Card className="border-border">
-              <CardContent className="p-6 space-y-4">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Generate a professional tech pack using AI based on your design specifications
-                  </p>
-                  <Button 
-                    variant="outline" 
-                    className="w-full gap-2"
-                    onClick={handleGenerateTechPack}
-                    disabled={isGenerating}
-                  >
-                    {isGenerating ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Generating...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-4 h-4" />
-                        Generate Tech Pack with AI
-                      </>
-                    )}
-                  </Button>
-                </div>
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Generate a professional tech pack using AI based on your design specifications
+                </p>
+                <Button 
+                  variant="outline" 
+                  className="w-full gap-2"
+                  onClick={handleGenerateTechPack}
+                  disabled={isGenerating}
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4" />
+                      Generate Tech Pack with AI
+                    </>
+                  )}
+                </Button>
+              </div>
 
-                <div className="h-px bg-border" />
+              <div className="h-px bg-border" />
 
-                <div>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Upload your existing tech pack document (PDF, DOC, or DOCX)
-                  </p>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".pdf,.doc,.docx"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                  <Button 
-                    onClick={handleUploadClick}
-                    variant="outline"
-                    className="w-full gap-2"
-                  >
-                    <FileUp className="w-4 h-4" />
-                    {uploadedTechPack ? uploadedTechPack.name : 'Upload Existing Tech Pack'}
-                  </Button>
-                </div>
+              <div>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Upload your existing tech pack document (PDF, DOC, or DOCX)
+                </p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+                <Button 
+                  onClick={handleUploadClick}
+                  variant="outline"
+                  className="w-full gap-2"
+                >
+                  <FileUp className="w-4 h-4" />
+                  {uploadedTechPack ? uploadedTechPack.name : 'Upload Existing Tech Pack'}
+                </Button>
+              </div>
 
-                {existingTechPack && (
-                  <div className="rounded-lg bg-primary/10 p-3 space-y-2">
-                    <div className="flex items-center gap-2 text-sm font-medium text-primary">
-                      <FileCheck className="w-4 h-4" />
-                      Tech pack already uploaded
-                    </div>
-                    <a 
-                      href={existingTechPack} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-xs text-muted-foreground hover:text-foreground underline"
-                    >
-                      View tech pack
-                    </a>
+              {existingTechPack && (
+                <div className="rounded-lg bg-primary/10 p-3 space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-medium text-primary">
+                    <FileCheck className="w-4 h-4" />
+                    Tech pack already uploaded
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                  <a 
+                    href={existingTechPack} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-xs text-muted-foreground hover:text-foreground underline"
+                  >
+                    View tech pack
+                  </a>
+                </div>
+              )}
+            </div>
           </section>
 
           <StageNavigation 
