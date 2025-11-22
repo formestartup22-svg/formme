@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Clock, CheckCircle2, Package } from 'lucide-react';
 import { StageHeader } from './StageHeader';
+import { StageNavigation } from './StageNavigation';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -162,6 +163,11 @@ const WaitingForSampleStage = ({ design }: WaitingForSampleStageProps) => {
             </p>
           </div>
         )}
+
+        <StageNavigation 
+          nextLabel="Continue to Sample Review"
+          showBack={true}
+        />
       </div>
     </div>
   );
