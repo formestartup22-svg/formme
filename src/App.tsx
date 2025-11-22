@@ -19,6 +19,8 @@ import { Toaster } from "sonner";
 import SimpleDesigner from './pages/SimpleDesigner';
 import DesignStudio from './pages/DesignStudio';
 import ProfessionalStudio from "./pages/ProfessionalStudio";
+import ManufacturerDashboard from './pages/ManufacturerDashboard';
+import ManufacturerOrderWorkspace from './pages/ManufacturerOrderWorkspace';
 
 function App() {
   return (
@@ -38,6 +40,8 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/workflow" element={<Dashboard />} />
           <Route path="/design/:id" element={<DesignWorkspace />} />
+          <Route path="/manufacturer" element={<ManufacturerDashboard />} />
+          <Route path="/manufacturer/order/:id" element={<ManufacturerOrderWorkspace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster />

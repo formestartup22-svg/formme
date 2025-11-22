@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { mockDesigns, mockTasks, stageNames } from '@/data/workflowData';
-import { Plus, Clock, AlertCircle, CheckCircle, Package, Truck, FileCheck, Factory, Send, Download } from 'lucide-react';
+import { Plus, Clock, AlertCircle, CheckCircle, Package, Truck, FileCheck, Factory, Send, Download, Building2 } from 'lucide-react';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('all');
@@ -72,7 +72,14 @@ const Dashboard = () => {
               <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">Your Production Dashboard</h1>
               <p className="text-muted-foreground">Track your designs from concept to delivery</p>
             </div>
-            <Dialog open={showNewDesignDialog} onOpenChange={setShowNewDesignDialog}>
+            <div className="flex gap-3">
+              <Link to="/manufacturer">
+                <Button variant="outline" size="lg" className="gap-2 w-full sm:w-auto">
+                  <Building2 className="w-4 h-4" />
+                  Manufacturer View
+                </Button>
+              </Link>
+              <Dialog open={showNewDesignDialog} onOpenChange={setShowNewDesignDialog}>
               <DialogTrigger asChild>
                 <Button size="lg" className="gap-2 w-full sm:w-auto">
                   <Plus className="w-4 h-4" />
@@ -136,6 +143,7 @@ const Dashboard = () => {
                 </div>
               </DialogContent>
             </Dialog>
+            </div>
           </div>
 
           {/* KPI Cards */}
