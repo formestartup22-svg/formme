@@ -153,8 +153,10 @@ const Workflow = () => {
 
   // If a design is selected, show the workflow for that design
   if (designId && selectedDesign) {
+    const initialStage = searchParams.get('stage') || 'tech-pack';
+    
     return (
-      <WorkflowProvider>
+      <WorkflowProvider initialStage={initialStage}>
         <div className="min-h-screen bg-background">
           <Navbar />
           

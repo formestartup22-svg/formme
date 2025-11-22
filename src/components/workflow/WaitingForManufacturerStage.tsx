@@ -5,6 +5,7 @@ import { StageHeader } from './StageHeader';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { useWorkflow } from '@/context/WorkflowContext';
 
 interface WaitingForManufacturerStageProps {
   design: {
@@ -18,6 +19,7 @@ const WaitingForManufacturerStage = ({ design }: WaitingForManufacturerStageProp
   const [isAccepted, setIsAccepted] = useState(false);
   const [acceptedManufacturer, setAcceptedManufacturer] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { markStageComplete } = useWorkflow();
 
   useEffect(() => {
     // Timer for waiting duration
@@ -44,6 +46,7 @@ const WaitingForManufacturerStage = ({ design }: WaitingForManufacturerStageProp
         
         // Auto-proceed after 2 seconds
         setTimeout(() => {
+          markStageComplete('waiting');
           navigate(`/workflow?designId=${design.id}&stage=review-timeline`);
         }, 2000);
       }
@@ -79,6 +82,7 @@ const WaitingForManufacturerStage = ({ design }: WaitingForManufacturerStageProp
             
             // Auto-proceed to payment after 2 seconds
             setTimeout(() => {
+              markStageComplete('waiting');
               navigate(`/workflow?designId=${design.id}&stage=review-timeline`);
             }, 2000);
           }
