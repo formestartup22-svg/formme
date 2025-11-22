@@ -72,12 +72,6 @@ const Dashboard = () => {
               <p className="text-muted-foreground">Track your designs from concept to delivery</p>
             </div>
             <div className="flex gap-3">
-              <Link to="/manufacturer">
-                <Button variant="outline" size="lg" className="gap-2 w-full sm:w-auto">
-                  <Building2 className="w-4 h-4" />
-                  Manufacturer View
-                </Button>
-              </Link>
               <Link to="/new-design">
                 <Button size="lg" className="gap-2 w-full sm:w-auto">
                   <Plus className="w-4 h-4" />
