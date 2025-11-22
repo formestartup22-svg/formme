@@ -37,8 +37,8 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
   const [measurements, setMeasurements] = useState<Array<{ name: string; value: string }>>([
     { name: '', value: '' }
   ]);
-  const [fabricSpecs, setFabricSpecs] = useState<Array<{ type: string; details: string }>>([
-    { type: '', details: '' }
+  const [fabricSpecs, setFabricSpecs] = useState<Array<{ type: string; details: string; gsm?: string }>>([
+    { type: '', details: '', gsm: '' }
   ]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const designFileInputRef = useRef<HTMLInputElement>(null);
@@ -438,7 +438,7 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
                 {fabricSpecs.map((spec, index) => (
                   <div key={index} className="flex gap-2">
                     <Input
-                      placeholder="Specification type (e.g., Fabric Type, GSM)"
+                      placeholder="Fabric type"
                       value={spec.type}
                       onChange={(e) => {
                         const newSpecs = [...fabricSpecs];
@@ -448,7 +448,7 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
                       className="h-9 text-sm flex-1"
                     />
                     <Input
-                      placeholder="Details"
+                      placeholder="Fiber %"
                       value={spec.details}
                       onChange={(e) => {
                         const newSpecs = [...fabricSpecs];
@@ -456,6 +456,16 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
                         setFabricSpecs(newSpecs);
                       }}
                       className="h-9 text-sm flex-1"
+                    />
+                    <Input
+                      placeholder="GSM"
+                      value={spec.gsm || ''}
+                      onChange={(e) => {
+                        const newSpecs = [...fabricSpecs];
+                        newSpecs[index] = { ...newSpecs[index], gsm: e.target.value };
+                        setFabricSpecs(newSpecs);
+                      }}
+                      className="h-9 text-sm w-32"
                     />
                     {fabricSpecs.length > 1 && (
                       <Button
@@ -501,7 +511,6 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
 
           {/* Generate & Upload Tech Pack */}
           <section>
-            <h3 className="text-sm font-semibold text-foreground mb-3">Tech Pack Management</h3>
             <div className="space-y-4">
               <div>
                 <p className="text-sm text-muted-foreground mb-3">
