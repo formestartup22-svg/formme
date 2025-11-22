@@ -14,16 +14,324 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      designs: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          design_file_url: string | null
+          id: string
+          name: string
+          tech_pack_url: string | null
+          thumbnail_url: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          design_file_url?: string | null
+          id?: string
+          name: string
+          tech_pack_url?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          design_file_url?: string | null
+          id?: string
+          name?: string
+          tech_pack_url?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      manufacturers: {
+        Row: {
+          certifications: string[] | null
+          country: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          lead_time_days: number | null
+          location: string | null
+          min_order_quantity: number | null
+          name: string
+          price_range: string | null
+          specialties: string[] | null
+          sustainability_score: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          certifications?: string[] | null
+          country?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          lead_time_days?: number | null
+          location?: string | null
+          min_order_quantity?: number | null
+          name: string
+          price_range?: string | null
+          specialties?: string[] | null
+          sustainability_score?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          certifications?: string[] | null
+          country?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          lead_time_days?: number | null
+          location?: string | null
+          min_order_quantity?: number | null
+          name?: string
+          price_range?: string | null
+          specialties?: string[] | null
+          sustainability_score?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          attachments: string[] | null
+          content: string
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          order_id: string
+          sender_id: string
+        }
+        Insert: {
+          attachments?: string[] | null
+          content: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          order_id: string
+          sender_id: string
+        }
+        Update: {
+          attachments?: string[] | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          order_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_preferences: {
+        Row: {
+          channels: Database["public"]["Enums"]["notification_channel"][] | null
+          created_at: string | null
+          id: string
+          manufacturer_responses: boolean | null
+          order_updates: boolean | null
+          sample_approvals: boolean | null
+          shipping_updates: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          channels?:
+            | Database["public"]["Enums"]["notification_channel"][]
+            | null
+          created_at?: string | null
+          id?: string
+          manufacturer_responses?: boolean | null
+          order_updates?: boolean | null
+          sample_approvals?: boolean | null
+          shipping_updates?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          channels?:
+            | Database["public"]["Enums"]["notification_channel"][]
+            | null
+          created_at?: string | null
+          id?: string
+          manufacturer_responses?: boolean | null
+          order_updates?: boolean | null
+          sample_approvals?: boolean | null
+          shipping_updates?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      orders: {
+        Row: {
+          budget_max: number | null
+          budget_min: number | null
+          created_at: string | null
+          design_id: string
+          designer_id: string
+          id: string
+          lead_time_days: number | null
+          manufacturer_id: string | null
+          preferred_location: string | null
+          quantity: number | null
+          status: Database["public"]["Enums"]["order_status"] | null
+          sustainability_priority: string | null
+          tech_pack_data: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          budget_max?: number | null
+          budget_min?: number | null
+          created_at?: string | null
+          design_id: string
+          designer_id: string
+          id?: string
+          lead_time_days?: number | null
+          manufacturer_id?: string | null
+          preferred_location?: string | null
+          quantity?: number | null
+          status?: Database["public"]["Enums"]["order_status"] | null
+          sustainability_priority?: string | null
+          tech_pack_data?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          budget_max?: number | null
+          budget_min?: number | null
+          created_at?: string | null
+          design_id?: string
+          designer_id?: string
+          id?: string
+          lead_time_days?: number | null
+          manufacturer_id?: string | null
+          preferred_location?: string | null
+          quantity?: number | null
+          status?: Database["public"]["Enums"]["order_status"] | null
+          sustainability_priority?: string | null
+          tech_pack_data?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_design_id_fkey"
+            columns: ["design_id"]
+            isOneToOne: false
+            referencedRelation: "designs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_manufacturer_id_fkey"
+            columns: ["manufacturer_id"]
+            isOneToOne: false
+            referencedRelation: "manufacturers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          company_name: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          company_name?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          company_name?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "designer" | "manufacturer"
+      notification_channel: "email" | "sms" | "in_app"
+      order_status:
+        | "draft"
+        | "tech_pack_pending"
+        | "sent_to_manufacturer"
+        | "manufacturer_review"
+        | "production_approval"
+        | "sample_development"
+        | "quality_check"
+        | "shipping"
+        | "delivered"
+        | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +458,21 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["designer", "manufacturer"],
+      notification_channel: ["email", "sms", "in_app"],
+      order_status: [
+        "draft",
+        "tech_pack_pending",
+        "sent_to_manufacturer",
+        "manufacturer_review",
+        "production_approval",
+        "sample_development",
+        "quality_check",
+        "shipping",
+        "delivered",
+        "cancelled",
+      ],
+    },
   },
 } as const
