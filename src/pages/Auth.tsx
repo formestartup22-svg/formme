@@ -21,7 +21,6 @@ const Auth = () => {
     password: "",
     fullName: "",
     companyName: "",
-    phone: "",
   });
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -69,7 +68,6 @@ const Auth = () => {
           data: {
             full_name: formData.fullName,
             company_name: formData.companyName,
-            phone: formData.phone,
           },
           emailRedirectTo: `${window.location.origin}/`,
         },
@@ -88,7 +86,6 @@ const Auth = () => {
       await supabase.from("profiles").update({
         full_name: formData.fullName,
         company_name: formData.companyName,
-        phone: formData.phone,
       }).eq("user_id", data.user.id);
 
       toast.success("Account created! Please check your email to verify.");
@@ -195,15 +192,6 @@ const Auth = () => {
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   required
-                />
-              </div>
-              <div>
-                <Label htmlFor="signup-phone">Phone</Label>
-                <Input
-                  id="signup-phone"
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 />
               </div>
               <div>
