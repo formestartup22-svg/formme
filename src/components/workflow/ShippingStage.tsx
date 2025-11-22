@@ -99,27 +99,41 @@ const ShippingStage = ({ design }: ShippingStageProps) => {
           {/* Invoices & Documents */}
           <section>
             <h3 className="text-sm font-semibold text-foreground mb-3">Shipping Documents</h3>
-            <Card className="border-border">
-              <CardContent className="p-6">
-                <div className="space-y-2">
-                  {mockInvoices.map((invoice, idx) => (
-                    <div key={idx} className="group relative">
-                      <span className="text-sm text-muted-foreground group-hover:opacity-0 transition-opacity">
-                        {invoice.name}
-                      </span>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="absolute left-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity gap-2"
-                      >
-                        <Download className="w-4 h-4" />
-                        {invoice.name}
-                      </Button>
+            <Tabs defaultValue="invoices" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="invoices">Invoices</TabsTrigger>
+                <TabsTrigger value="customs">Customs</TabsTrigger>
+              </TabsList>
+              <TabsContent value="invoices">
+                <Card className="border-border">
+                  <CardContent className="p-6">
+                    <div className="space-y-3">
+                      {mockInvoices.map((invoice, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                          <div>
+                            <p className="text-sm font-medium">{invoice.name}</p>
+                            <p className="text-xs text-muted-foreground">{invoice.date}</p>
+                          </div>
+                          <Button size="sm" variant="ghost" className="gap-2">
+                            <Download className="w-4 h-4" />
+                            Download
+                          </Button>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="customs">
+                <Card className="border-border">
+                  <CardContent className="p-6">
+                    <p className="text-sm text-muted-foreground text-center py-8">
+                      No customs documents available yet
+                    </p>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </section>
 
           {/* Confirm Delivery */}
