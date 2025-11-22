@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { Plus, Clock, AlertCircle, CheckCircle, Package, Truck, FileCheck, Factory, Send, CreditCard, ArrowLeft } from 'lucide-react';
+import { Plus, Clock, AlertCircle, CheckCircle, Package, Truck, FileCheck, Factory, Send, CreditCard, ArrowLeft, Lock } from 'lucide-react';
 import { useDesigns } from '@/hooks/useDesigns';
 import { useUserRole } from '@/hooks/useUserRole';
 import { WorkflowProvider, useWorkflow } from '@/context/WorkflowContext';
+import { supabase } from '@/integrations/supabase/client';
 import { WorkflowStepper } from '@/components/workflow/WorkflowStepper';
 import TechPackStage from '@/components/workflow/TechPackStage';
 import FactoryMatchStage from '@/components/workflow/FactoryMatchStage';
@@ -86,11 +87,21 @@ const Workflow = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const { designs, loading } = useDesigns();
   const { role, loading: roleLoading } = useUserRole();
   
   const designId = searchParams.get('designId');
   const selectedDesign = designId ? designs.find(d => d.id === designId) : null;
+  
+  // Check authentication
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAuthenticated(!!user);
+    };
+    checkAuth();
+  }, []);
   
   // Redirect to manufacturer dashboard if user is a manufacturer
   useEffect(() => {
@@ -99,12 +110,43 @@ const Workflow = () => {
     }
   }, [role, roleLoading, navigate]);
 
-  if (roleLoading || loading) {
+  if (isAuthenticated === null || roleLoading || loading) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
         <main className="container mx-auto px-4 sm:px-6 py-6 mt-20 max-w-7xl">
           <p className="text-muted-foreground">Loading...</p>
+        </main>
+      </div>
+    );
+  }
+
+  // Show sign-up prompt if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="container mx-auto px-4 sm:px-6 py-6 mt-20 max-w-7xl">
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <Card className="max-w-md w-full border-border">
+              <CardContent className="p-12 text-center">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Lock className="w-10 h-10 text-primary" />
+                </div>
+                <h2 className="text-2xl font-semibold text-foreground mb-3">
+                  Sign up to access your dashboard
+                </h2>
+                <p className="text-muted-foreground mb-8">
+                  You need to create an account or sign in to view your production dashboard and manage your designs.
+                </p>
+                <Link to="/auth">
+                  <Button size="lg" className="w-full">
+                    Sign up or Sign in
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
         </main>
       </div>
     );
