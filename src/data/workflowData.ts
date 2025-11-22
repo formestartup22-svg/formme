@@ -1,7 +1,7 @@
 export interface Design {
   id: string;
   name: string;
-  stage: 'tech-pack' | 'factory-match' | 'sending' | 'waiting' | 'review-timeline' | 'payment' | 'production' | 'sample' | 'quality' | 'shipping';
+  stage: 'tech-pack' | 'factory-match' | 'sending' | 'waiting' | 'review-timeline' | 'payment' | 'production' | 'waiting-sample' | 'sample' | 'quality' | 'shipping';
   status: 'on-track' | 'delayed' | 'action-required' | 'completed';
   nextAction: string;
   eta: string;
@@ -164,8 +164,9 @@ export const stageNames = {
   'waiting': 'Waiting for manufacturer',
   'review-timeline': 'Review production timeline',
   'payment': 'Make payment',
-  'sample': 'View your design sample',
   'production': 'Review production parameters',
+  'waiting-sample': 'Sample in production',
+  'sample': 'View your design sample',
   'quality': 'Quality Check',
   'shipping': 'Shipping & Logistics'
 };
@@ -178,6 +179,7 @@ export const stageOrder = [
   'review-timeline',
   'payment',
   'production',
+  'waiting-sample',
   'sample',
   'quality',
   'shipping'

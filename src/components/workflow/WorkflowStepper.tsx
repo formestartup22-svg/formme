@@ -11,6 +11,7 @@ const stages = [
   'review-timeline',
   'payment',
   'production',
+  'waiting-sample',
   'sample',
   'quality',
   'shipping'

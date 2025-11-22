@@ -96,7 +96,7 @@ const ProductionStage = ({ design }: ProductionStageProps) => {
             </Card>
           </section>
 
-          <StageNavigation onNext={() => true} nextLabel="Continue to Sample Development" showBack={true} />
+          <StageNavigation onNext={() => true} nextLabel="Continue to Sample Production" showBack={true} />
         </div>
         <div className="space-y-4">
           <FactoryCommunication />
