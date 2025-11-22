@@ -259,6 +259,7 @@ export type Database = {
           min_order_quantity: number | null
           name: string
           price_range: string | null
+          rating: number | null
           specialties: string[] | null
           sustainability_score: number | null
           updated_at: string | null
@@ -277,6 +278,7 @@ export type Database = {
           min_order_quantity?: number | null
           name: string
           price_range?: string | null
+          rating?: number | null
           specialties?: string[] | null
           sustainability_score?: number | null
           updated_at?: string | null
@@ -295,6 +297,7 @@ export type Database = {
           min_order_quantity?: number | null
           name?: string
           price_range?: string | null
+          rating?: number | null
           specialties?: string[] | null
           sustainability_score?: number | null
           updated_at?: string | null

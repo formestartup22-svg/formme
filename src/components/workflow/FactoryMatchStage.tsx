@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MapPin, Clock, DollarSign, Check, Factory as FactoryIcon } from 'lucide-react';
+import { MapPin, Clock, DollarSign, Check, Factory as FactoryIcon, Star } from 'lucide-react';
 import { useWorkflow } from '@/context/WorkflowContext';
 import { StageHeader } from './StageHeader';
 import { StageNavigation } from './StageNavigation';
@@ -13,10 +13,12 @@ import { FactoryCommunication } from './FactoryCommunication';
 import { FactoryDocuments } from './FactoryDocuments';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { calculateMatchScore } from '@/utils/matchingAlgorithm';
 
 interface Design {
   id: string;
   name: string;
+  category?: string;
 }
 
 interface Manufacturer {
@@ -26,7 +28,14 @@ interface Manufacturer {
   lead_time_days: number | null;
   price_range: string | null;
   specialties: string[] | null;
-  sustainability_score: number | null;
+  certifications: string[] | null;
+  min_order_quantity: number | null;
+  max_capacity: number | null;
+  rating: number | null;
+}
+
+interface ManufacturerWithScore extends Manufacturer {
+  matchScore: number;
 }
 
 interface FactoryMatchStageProps {
@@ -36,9 +45,66 @@ interface FactoryMatchStageProps {
 const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
   const { workflowData, updateWorkflowData } = useWorkflow();
   const [showFactories, setShowFactories] = useState(false);
-  const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
+  const [manufacturers, setManufacturers] = useState<ManufacturerWithScore[]>([]);
   const [loading, setLoading] = useState(false);
   const [viewAll, setViewAll] = useState(false);
+  const [designCategory, setDesignCategory] = useState<string>('');
+
+  // Fetch design category
+  useEffect(() => {
+    const fetchDesignCategory = async () => {
+      const { data, error } = await supabase
+        .from('designs')
+        .select('category')
+        .eq('id', design.id)
+        .single();
+      
+      if (!error && data?.category) {
+        setDesignCategory(data.category);
+      }
+    };
+
+    fetchDesignCategory();
+  }, [design.id]);
+
+  const calculateAndSortManufacturers = (manufacturersList: Manufacturer[]): ManufacturerWithScore[] => {
+    // Filter by category first
+    let filtered = manufacturersList;
+    
+    if (designCategory && !viewAll) {
+      filtered = manufacturersList.filter(m => 
+        m.certifications?.some(cert => 
+          cert.toLowerCase().includes(designCategory.toLowerCase()) ||
+          designCategory.toLowerCase().includes(cert.toLowerCase())
+        )
+      );
+    }
+
+    // Calculate match scores
+    const withScores = filtered.map(manufacturer => {
+      const matchScore = calculateMatchScore(
+        {
+          quantity: parseInt(workflowData.quantity || '0'),
+          leadTime: workflowData.leadTime || '4-6',
+          location: workflowData.location || 'any',
+          priceRange: workflowData.priceRange || 'mid'
+        },
+        {
+          moq: manufacturer.min_order_quantity || 0,
+          maxCapacity: manufacturer.max_capacity || undefined,
+          leadTime: manufacturer.lead_time_days || 30,
+          location: manufacturer.location || '',
+          priceTier: manufacturer.price_range || 'mid',
+          rating: manufacturer.rating || undefined
+        }
+      );
+
+      return { ...manufacturer, matchScore };
+    });
+
+    // Sort by match score descending
+    return withScores.sort((a, b) => b.matchScore - a.matchScore);
+  };
 
   const fetchFilteredManufacturers = async () => {
     try {
@@ -68,7 +134,9 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
       const { data, error } = await query;
 
       if (error) throw error;
-      setManufacturers(data || []);
+      
+      const manufacturersWithScores = calculateAndSortManufacturers(data || []);
+      setManufacturers(manufacturersWithScores);
       setViewAll(false);
     } catch (error: any) {
       toast.error(error.message || 'Failed to load manufacturers');
@@ -88,7 +156,9 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
         .eq('is_active', true);
 
       if (error) throw error;
-      setManufacturers(data || []);
+      
+      const manufacturersWithScores = calculateAndSortManufacturers(data || []);
+      setManufacturers(manufacturersWithScores);
       setViewAll(true);
     } catch (error: any) {
       toast.error(error.message || 'Failed to load manufacturers');
@@ -254,7 +324,7 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-2">
                                 <h4 className="font-semibold">{factory.name}</h4>
-                                {factory.sustainability_score && factory.sustainability_score >= 8 && (
+                                {factory.matchScore >= 80 && (
                                   <Badge className="bg-primary/10 text-primary border-primary/20 text-xs">
                                     Top Match
                                   </Badge>
@@ -276,6 +346,12 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
                                   <DollarSign className="w-3 h-3" />
                                   {factory.price_range || 'Varies'}
                                 </span>
+                                {factory.rating && (
+                                  <span className="flex items-center gap-1">
+                                    <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                                    {factory.rating.toFixed(1)}
+                                  </span>
+                                )}
                               </div>
                               {factory.specialties && factory.specialties.length > 0 && (
                                 <div className="flex gap-2 text-xs">
@@ -288,12 +364,10 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
                                 </div>
                               )}
                             </div>
-                            {factory.sustainability_score && (
-                              <div className="text-center">
-                                <div className="text-2xl font-bold text-primary">{factory.sustainability_score}</div>
-                                <div className="text-xs text-muted-foreground">Rating</div>
-                              </div>
-                            )}
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-primary">{factory.matchScore}</div>
+                              <div className="text-xs text-muted-foreground">Match Score</div>
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
