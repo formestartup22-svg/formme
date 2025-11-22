@@ -62,7 +62,7 @@ const NavBar: React.FC<NavBarProps> = ({ initialDark = false }) => {
         </div>
       </Link>
       <nav className="hidden md:flex gap-8 mr-10 ml-auto">
-        {["collection", "create", "dashboard", "reviews", "contact"].map((item) => (
+        {["collection", "create", "reviews", "contact"].map((item) => (
           <Link
             key={item}
             to={
@@ -70,9 +70,7 @@ const NavBar: React.FC<NavBarProps> = ({ initialDark = false }) => {
                 ? "/designer"
                 : item === "reviews"
                   ? "/reviews"
-                  : item === "dashboard"
-                    ? "/dashboard"
-                    : "#"
+                  : "#"
             }
             className={cn(
               "text-lg relative py-1 group transition-colors",
@@ -90,6 +88,40 @@ const NavBar: React.FC<NavBarProps> = ({ initialDark = false }) => {
             ></span>
           </Link>
         ))}
+        
+        {/* Dashboard Dropdown */}
+        <div className="relative group">
+          <button
+            className={cn(
+              "text-lg relative py-1 transition-colors",
+              initialDark && !scrolled
+                ? "text-[#111827] hover:text-[#111827]/80"
+                : "text-foreground hover:text-foreground/80",
+            )}
+          >
+            dashboard
+            <span
+              className={cn(
+                "absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full",
+                initialDark && !scrolled ? "bg-[#111827]" : "bg-foreground",
+              )}
+            ></span>
+          </button>
+          <div className="absolute top-full left-0 mt-2 w-48 bg-background border border-border rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+            <Link
+              to="/dashboard"
+              className="block px-4 py-3 text-sm hover:bg-muted transition-colors rounded-t-lg"
+            >
+              Designer
+            </Link>
+            <Link
+              to="/manufacturer"
+              className="block px-4 py-3 text-sm hover:bg-muted transition-colors rounded-b-lg"
+            >
+              Manufacturer
+            </Link>
+          </div>
+        </div>
       </nav>
       <div className="flex gap-6 items-center">
         {user && (

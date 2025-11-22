@@ -7,11 +7,13 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload, Palette } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Upload, Palette, Sparkles, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 const NewDesign = () => {
   const navigate = useNavigate();
+  const [showDialog, setShowDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [designName, setDesignName] = useState("");
   const [description, setDescription] = useState("");
@@ -68,7 +70,7 @@ const NewDesign = () => {
       if (designError) throw designError;
 
       toast.success("Design uploaded successfully!");
-      navigate(`/design/${design.id}`);
+      navigate(`/workflow/${design.id}`);
     } catch (error: any) {
       toast.error(error.message || "Failed to upload design");
     } finally {
@@ -76,9 +78,17 @@ const NewDesign = () => {
     }
   };
 
-  const handleUseStudio = () => {
-    // Show dialog to choose between Pro Studio and Free Studio
-    navigate("/studio-selection");
+  const handleNewDesignClick = () => {
+    setShowDialog(true);
+  };
+
+  const handleStudioSelect = (studio: string) => {
+    setShowDialog(false);
+    if (studio === 'pro') {
+      navigate("/professional-studio");
+    } else {
+      navigate("/designer");
+    }
   };
 
   return (
@@ -88,19 +98,58 @@ const NewDesign = () => {
         <div className="max-w-5xl mx-auto">
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-2">New Design</h1>
-            <p className="text-muted-foreground">Upload your own design or create one in our studio</p>
+            <p className="text-muted-foreground">Create your design or upload an existing one</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
-            {/* Upload Existing Design */}
+            {/* Design your garment with Formme */}
+            <Card className="p-8">
+              <div className="flex flex-col items-center text-center mb-6">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                  <Palette className="w-8 h-8 text-primary" />
+                </div>
+                <h2 className="text-2xl font-semibold mb-2">Design your garment with Formme</h2>
+                <p className="text-muted-foreground">
+                  Create your design from scratch using our design tools
+                </p>
+              </div>
+
+              <div className="space-y-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Sparkles className="w-3 h-3" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium">Professional Studio</h3>
+                    <p className="text-sm text-muted-foreground">Advanced tools for professional designers</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Zap className="w-3 h-3" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium">Basic Studio</h3>
+                    <p className="text-sm text-muted-foreground">Quick and easy garment design with pre-made templates</p>
+                  </div>
+                </div>
+              </div>
+
+              <Button onClick={handleNewDesignClick} className="w-full">
+                Start Designing
+              </Button>
+            </Card>
+
+            {/* Have a ready-to-manufacture design? */}
             <Card className="p-8">
               <div className="flex flex-col items-center text-center mb-6">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                   <Upload className="w-8 h-8 text-primary" />
                 </div>
-                <h2 className="text-2xl font-semibold mb-2">Upload Design</h2>
+                <h2 className="text-2xl font-semibold mb-2">Have a ready-to-manufacture design?</h2>
                 <p className="text-muted-foreground">
-                  Have an existing design? Upload it and we'll help you find manufacturers and generate tech packs
+                  Upload your existing design and start the production process
                 </p>
               </div>
 
@@ -152,58 +201,9 @@ const NewDesign = () => {
                 </div>
 
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Uploading..." : "Upload & Continue"}
+                  {isLoading ? "Uploading..." : "Upload & Continue to Tech Pack"}
                 </Button>
               </form>
-            </Card>
-
-            {/* Use Design Studio */}
-            <Card className="p-8">
-              <div className="flex flex-col items-center text-center mb-6">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <Palette className="w-8 h-8 text-primary" />
-                </div>
-                <h2 className="text-2xl font-semibold mb-2">Design Studio</h2>
-                <p className="text-muted-foreground">
-                  Create your design from scratch using our professional design tools
-                </p>
-              </div>
-
-              <div className="space-y-4 mb-6">
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-xs font-semibold">1</span>
-                  </div>
-                  <div>
-                    <h3 className="font-medium">Choose Your Studio</h3>
-                    <p className="text-sm text-muted-foreground">Pro Studio or Free Studio</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-xs font-semibold">2</span>
-                  </div>
-                  <div>
-                    <h3 className="font-medium">Design Your Garment</h3>
-                    <p className="text-sm text-muted-foreground">Use our tools to create your design</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-xs font-semibold">3</span>
-                  </div>
-                  <div>
-                    <h3 className="font-medium">Save & Manufacture</h3>
-                    <p className="text-sm text-muted-foreground">Save and start production workflow</p>
-                  </div>
-                </div>
-              </div>
-
-              <Button onClick={handleUseStudio} variant="outline" className="w-full">
-                Open Design Studio
-              </Button>
             </Card>
           </div>
 
@@ -214,6 +214,43 @@ const NewDesign = () => {
           </div>
         </div>
       </div>
+
+      {/* Studio Selection Dialog */}
+      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Choose Your Studio</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <Button 
+              onClick={() => handleStudioSelect('pro')} 
+              variant="outline" 
+              className="w-full h-auto py-4 flex flex-col items-start"
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <Sparkles className="w-4 h-4" />
+                <span className="font-semibold">Professional Studio</span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Advanced tools for professional designers
+              </p>
+            </Button>
+            <Button 
+              onClick={() => handleStudioSelect('basic')} 
+              variant="outline" 
+              className="w-full h-auto py-4 flex flex-col items-start"
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <Zap className="w-4 h-4" />
+                <span className="font-semibold">Basic Studio</span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Quick and easy garment design with pre-made templates
+              </p>
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

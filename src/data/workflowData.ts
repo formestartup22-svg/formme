@@ -173,8 +173,8 @@ export const stageOrder = [
   'factory-match',
   'sending',
   'payment',
-  'sample',
   'production',
+  'sample',
   'quality',
   'shipping'
 ] as const;

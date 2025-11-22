@@ -38,21 +38,7 @@ const ShippingStage = ({ design }: ShippingStageProps) => {
       <StageHeader icon={Truck} title="Shipping & Logistics" description="Track your shipment and access shipping documents." />
       <div className="grid grid-cols-3 gap-6">
         <div className="col-span-2 space-y-6">
-          {/* Tracking Number */}
-          <section>
-            <h3 className="text-sm font-semibold text-foreground mb-3">Tracking Information</h3>
-            <Card className="border-border">
-              <CardContent className="p-6">
-                <Label className="text-xs mb-1.5 block">Tracking Number</Label>
-                <Input 
-                  placeholder="Enter tracking number" 
-                  value={workflowData.trackingNumber} 
-                  onChange={(e) => updateWorkflowData({ trackingNumber: e.target.value })} 
-                  className="h-9 text-sm mb-4" 
-                />
-              </CardContent>
-            </Card>
-          </section>
+          {/* Tracking Information - Removed */}
 
           {/* Shipment Progress */}
           <section>
@@ -113,41 +99,27 @@ const ShippingStage = ({ design }: ShippingStageProps) => {
           {/* Invoices & Documents */}
           <section>
             <h3 className="text-sm font-semibold text-foreground mb-3">Shipping Documents</h3>
-            <Tabs defaultValue="invoices" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="invoices">Invoices</TabsTrigger>
-                <TabsTrigger value="customs">Customs</TabsTrigger>
-              </TabsList>
-              <TabsContent value="invoices">
-                <Card className="border-border">
-                  <CardContent className="p-6">
-                    <div className="space-y-3">
-                      {mockInvoices.map((invoice, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                          <div>
-                            <p className="text-sm font-medium">{invoice.name}</p>
-                            <p className="text-xs text-muted-foreground">{invoice.date}</p>
-                          </div>
-                          <Button size="sm" variant="ghost" className="gap-2">
-                            <Download className="w-4 h-4" />
-                            Download
-                          </Button>
-                        </div>
-                      ))}
+            <Card className="border-border">
+              <CardContent className="p-6">
+                <div className="space-y-2">
+                  {mockInvoices.map((invoice, idx) => (
+                    <div key={idx} className="group relative">
+                      <span className="text-sm text-muted-foreground group-hover:opacity-0 transition-opacity">
+                        {invoice.name}
+                      </span>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="absolute left-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity gap-2"
+                      >
+                        <Download className="w-4 h-4" />
+                        {invoice.name}
+                      </Button>
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              <TabsContent value="customs">
-                <Card className="border-border">
-                  <CardContent className="p-6">
-                    <p className="text-sm text-muted-foreground text-center py-8">
-                      No customs documents available yet
-                    </p>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </section>
 
           {/* Confirm Delivery */}

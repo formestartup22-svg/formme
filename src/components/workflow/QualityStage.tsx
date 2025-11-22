@@ -24,18 +24,34 @@ const QualityStage = ({ design }: QualityStageProps) => {
         <div className="col-span-2 space-y-6">
           <section>
             <Card className="border-border bg-primary/5">
-              <CardContent className="p-6"><div className="text-center"><p className="text-sm text-muted-foreground mb-2">Overall Quality Score</p><p className="text-4xl font-bold text-primary">{averageRating}/10</p></div></CardContent>
+              <CardContent className="p-6">
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground mb-2">Overall Quality Score (View Only)</p>
+                  <p className="text-4xl font-bold text-primary">{averageRating}/10</p>
+                </div>
+              </CardContent>
             </Card>
           </section>
 
           <section>
-            <h3 className="text-sm font-semibold text-foreground mb-3">Quality Metrics</h3>
+            <h3 className="text-sm font-semibold text-foreground mb-3">Quality Metrics (View Only)</h3>
             <Card className="border-border">
               <CardContent className="p-6 space-y-6">
                 {[{ key: 'measurements', label: 'Measurements Accuracy', desc: 'Tolerance within spec' }, { key: 'stitching', label: 'Stitching & Construction', desc: 'Seam quality and durability' }, { key: 'fabric', label: 'Fabric & Colour Consistency', desc: 'Material quality and colour match' }, { key: 'hardware', label: 'Trim or Hardware Function', desc: 'Zippers, buttons, and accessories' }].map(item => (
                   <div key={item.key}>
-                    <div className="flex justify-between items-center mb-2"><div><Label className="text-sm font-medium">{item.label}</Label><p className="text-xs text-muted-foreground">{item.desc}</p></div><span className="text-lg font-semibold text-primary">{ratings[item.key as keyof typeof ratings]}/10</span></div>
-                    <Slider value={[ratings[item.key as keyof typeof ratings]]} onValueChange={(value) => setRatings(prev => ({ ...prev, [item.key]: value[0] }))} max={10} min={1} step={1} className="w-full" />
+                    <div className="flex justify-between items-center mb-2">
+                      <div>
+                        <Label className="text-sm font-medium">{item.label}</Label>
+                        <p className="text-xs text-muted-foreground">{item.desc}</p>
+                      </div>
+                      <span className="text-lg font-semibold text-primary">{ratings[item.key as keyof typeof ratings]}/10</span>
+                    </div>
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-primary transition-all" 
+                        style={{ width: `${(ratings[item.key as keyof typeof ratings] / 10) * 100}%` }}
+                      />
+                    </div>
                   </div>
                 ))}
               </CardContent>
@@ -43,8 +59,14 @@ const QualityStage = ({ design }: QualityStageProps) => {
           </section>
 
           <section>
-            <h3 className="text-sm font-semibold text-foreground mb-3">Quality Control Notes</h3>
-            <Card className="border-border"><CardContent className="p-6"><Textarea placeholder="Explain any issues that may affect wearability or final appearance..." value={notes} onChange={(e) => setNotes(e.target.value)} className="min-h-[120px] text-sm resize-none" /></CardContent></Card>
+            <h3 className="text-sm font-semibold text-foreground mb-3">Factory Quality Control Notes (View Only)</h3>
+            <Card className="border-border">
+              <CardContent className="p-6">
+                <p className="text-sm text-muted-foreground">
+                  All measurements are within tolerance. Minor thread trimming needed on 3 units. Overall quality meets production standards.
+                </p>
+              </CardContent>
+            </Card>
           </section>
 
           <StageNavigation onNext={() => true} nextLabel="Continue to Shipping" showBack={true} />
