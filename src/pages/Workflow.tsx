@@ -1,19 +1,87 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Clock, AlertCircle, CheckCircle, Package, Truck, FileCheck, Factory, Send, CreditCard } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Plus, Clock, AlertCircle, CheckCircle, Package, Truck, FileCheck, Factory, Send, CreditCard, ArrowLeft } from 'lucide-react';
 import { useDesigns } from '@/hooks/useDesigns';
 import { useUserRole } from '@/hooks/useUserRole';
+import { WorkflowProvider, useWorkflow } from '@/context/WorkflowContext';
+import { WorkflowStepper } from '@/components/workflow/WorkflowStepper';
+import TechPackStage from '@/components/workflow/TechPackStage';
+import FactoryMatchStage from '@/components/workflow/FactoryMatchStage';
+import SendingStage from '@/components/workflow/SendingStage';
+import PaymentStage from '@/components/workflow/PaymentStage';
+import ProductionStage from '@/components/workflow/ProductionStage';
+import SampleStage from '@/components/workflow/SampleStage';
+import QualityStage from '@/components/workflow/QualityStage';
+import ShippingStage from '@/components/workflow/ShippingStage';
+
+const WorkspaceContent = ({ design }: { design: any }) => {
+  const { currentStage } = useWorkflow();
+
+  const renderStage = () => {
+    switch (currentStage) {
+      case 'tech-pack':
+        return <TechPackStage design={design} />;
+      case 'factory-match':
+        return <FactoryMatchStage design={design} />;
+      case 'sending':
+        return <SendingStage design={design} />;
+      case 'payment':
+        return <PaymentStage design={design} />;
+      case 'production':
+        return <ProductionStage design={design} />;
+      case 'sample':
+        return <SampleStage design={design} />;
+      case 'quality':
+        return <QualityStage design={design} />;
+      case 'shipping':
+        return <ShippingStage design={design} />;
+      default:
+        return <TechPackStage design={design} />;
+    }
+  };
+
+  return (
+    <div className="flex gap-6">
+      {/* Left Sidebar - Stepper */}
+      <div className="w-72 shrink-0">
+        <div className="sticky top-6">
+          <Card className="border-border">
+            <div className="p-4 border-b">
+              <h3 className="font-semibold text-sm mb-1">Production Pipeline</h3>
+              <p className="text-xs text-muted-foreground">
+                Follow each step to complete your order
+              </p>
+            </div>
+            <div className="p-4">
+              <WorkflowStepper />
+            </div>
+          </Card>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 min-w-0">
+        {renderStage()}
+      </div>
+    </div>
+  );
+};
 
 const Workflow = () => {
   const [activeTab, setActiveTab] = useState('all');
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { designs, loading } = useDesigns();
   const { role, loading: roleLoading } = useUserRole();
+  
+  const designId = searchParams.get('designId');
+  const selectedDesign = designId ? designs.find(d => d.id === designId) : null;
   
   // Redirect to manufacturer dashboard if user is a manufacturer
   useEffect(() => {
@@ -64,6 +132,67 @@ const Workflow = () => {
     }
   };
 
+  const getStatusColor = (status: string | null) => {
+    if (!status) return 'bg-muted text-muted-foreground';
+    if (status.includes('draft')) return 'bg-muted text-muted-foreground';
+    if (status.includes('completed') || status.includes('delivered')) return 'bg-primary/10 text-primary border-primary/20';
+    return 'bg-secondary/10 text-secondary-foreground border-secondary/20';
+  };
+
+  // If a design is selected, show the workflow for that design
+  if (designId && selectedDesign) {
+    return (
+      <WorkflowProvider>
+        <div className="min-h-screen bg-background">
+          <Navbar />
+          
+          <main className="container mx-auto px-6 py-6 mt-20 max-w-7xl">
+            {/* Back Button */}
+            <Button 
+              variant="ghost" 
+              className="mb-4" 
+              onClick={() => navigate('/dashboard')}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Dashboard
+            </Button>
+
+            {/* Compact Header */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h1 className="text-2xl font-bold text-foreground">{selectedDesign.name}</h1>
+                  <Badge variant="outline" className={getStatusColor(selectedDesign.status)}>
+                    {selectedDesign.status?.replace(/_/g, ' ') || 'draft'}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Compact Progress Bar */}
+              <Card className="border-border">
+                <div className="p-4">
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1">
+                      <div className="flex justify-between text-xs mb-1.5">
+                        <span className="text-muted-foreground">Overall Progress</span>
+                        <span className="font-medium text-foreground">0%</span>
+                      </div>
+                      <Progress value={0} className="h-1.5" />
+                    </div>
+                    <div className="text-xs text-muted-foreground">Get started with Tech Pack</div>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            <WorkspaceContent design={selectedDesign} />
+          </main>
+        </div>
+      </WorkflowProvider>
+    );
+  }
+
+  // Otherwise show the list of all designs
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -171,19 +300,21 @@ const Workflow = () => {
                       </div>
                     ) : (
                       designs.map((design) => (
-                        <Card key={design.id} className="border-border hover:border-primary/50 transition-all hover:shadow-sm cursor-pointer">
-                          <CardHeader className="pb-3">
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold text-foreground mb-2">{design.name}</h3>
-                                <p className="text-sm text-muted-foreground mb-2">
-                                  {design.category || 'Uncategorized'}
-                                </p>
-                                <Badge variant="outline">{design.status || 'draft'}</Badge>
+                        <Link key={design.id} to={`/workflow?designId=${design.id}`}>
+                          <Card className="border-border hover:border-primary/50 transition-all hover:shadow-sm cursor-pointer">
+                            <CardHeader className="pb-3">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="font-semibold text-foreground mb-2">{design.name}</h3>
+                                  <p className="text-sm text-muted-foreground mb-2">
+                                    {design.category || 'Uncategorized'}
+                                  </p>
+                                  <Badge variant="outline">{design.status || 'draft'}</Badge>
+                                </div>
                               </div>
-                            </div>
-                          </CardHeader>
-                        </Card>
+                            </CardHeader>
+                          </Card>
+                        </Link>
                       ))
                     )}
                   </TabsContent>
