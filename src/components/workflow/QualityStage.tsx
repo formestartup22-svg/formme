@@ -26,7 +26,7 @@ const QualityStage = ({ design }: QualityStageProps) => {
             <Card className="border-border bg-primary/5">
               <CardContent className="p-6">
                 <div className="text-center">
-                  <p className="text-sm text-muted-foreground mb-2">Overall Quality Score (View Only)</p>
+                  <p className="text-sm text-muted-foreground mb-2">Overall Quality Score</p>
                   <p className="text-4xl font-bold text-primary">{averageRating}/10</p>
                 </div>
               </CardContent>
@@ -34,7 +34,7 @@ const QualityStage = ({ design }: QualityStageProps) => {
           </section>
 
           <section>
-            <h3 className="text-sm font-semibold text-foreground mb-3">Quality Metrics (View Only)</h3>
+            <h3 className="text-sm font-semibold text-foreground mb-3">Quality Metrics</h3>
             <Card className="border-border">
               <CardContent className="p-6 space-y-6">
                 {[{ key: 'measurements', label: 'Measurements Accuracy', desc: 'Tolerance within spec' }, { key: 'stitching', label: 'Stitching & Construction', desc: 'Seam quality and durability' }, { key: 'fabric', label: 'Fabric & Colour Consistency', desc: 'Material quality and colour match' }, { key: 'hardware', label: 'Trim or Hardware Function', desc: 'Zippers, buttons, and accessories' }].map(item => (
@@ -59,7 +59,7 @@ const QualityStage = ({ design }: QualityStageProps) => {
           </section>
 
           <section>
-            <h3 className="text-sm font-semibold text-foreground mb-3">Factory Quality Control Notes (View Only)</h3>
+            <h3 className="text-sm font-semibold text-foreground mb-3">Factory Quality Control Notes</h3>
             <Card className="border-border">
               <CardContent className="p-6">
                 <p className="text-sm text-muted-foreground">

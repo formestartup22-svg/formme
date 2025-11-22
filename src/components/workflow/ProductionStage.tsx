@@ -41,7 +41,7 @@ const ProductionStage = ({ design }: ProductionStageProps) => {
       <div className="grid grid-cols-3 gap-6">
         <div className="col-span-2 space-y-6">
           <section>
-            <h3 className="text-sm font-semibold text-foreground mb-3">Fabric Specifications (View Only)</h3>
+            <h3 className="text-sm font-semibold text-foreground mb-3">Fabric Specifications</h3>
             <Card className="border-border">
               <CardContent className="p-6">
                 <div className="grid grid-cols-2 gap-4">
@@ -67,7 +67,7 @@ const ProductionStage = ({ design }: ProductionStageProps) => {
           </section>
 
           <section>
-            <h3 className="text-sm font-semibold text-foreground mb-3">Lab Dip Photos (View Only)</h3>
+            <h3 className="text-sm font-semibold text-foreground mb-3">Lab Dip Photos</h3>
             <Card className="border-border">
               <CardContent className="p-6">
                 <div className="grid grid-cols-3 gap-3">
@@ -82,7 +82,7 @@ const ProductionStage = ({ design }: ProductionStageProps) => {
           </section>
 
           <section>
-            <h3 className="text-sm font-semibold text-foreground mb-3">Production Timeline (View Only)</h3>
+            <h3 className="text-sm font-semibold text-foreground mb-3">Production Timeline</h3>
             <Card className="border-border">
               <CardContent className="p-6">
                 <div className="space-y-4">
