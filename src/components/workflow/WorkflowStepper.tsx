@@ -7,6 +7,7 @@ const stages = [
   'tech-pack',
   'factory-match',
   'sending',
+  'waiting',
   'payment',
   'production',
   'sample',
