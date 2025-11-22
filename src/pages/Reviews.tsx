@@ -1,9 +1,20 @@
-import { Star, ArrowRight } from 'lucide-react';
+import { Star, ArrowRight, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import NavBar from '@/components/Navbar';
+import { Textarea } from '@/components/ui/textarea';
+import { useState } from 'react';
 
 const Reviews = () => {
+  const [message, setMessage] = useState('');
+  const [email, setEmail] = useState('');
+
+  const handleSendMessage = () => {
+    console.log('Message sent:', { email, message });
+    setMessage('');
+    setEmail('');
+  };
+
   // Featured creator testimonials
   const featuredStories = [
     {
@@ -183,6 +194,53 @@ const Reviews = () => {
                 <p className="text-[#111827] text-sm leading-relaxed">"{review.review}"</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Formme Section */}
+      <section className="py-16 px-4 bg-white">
+        <div className="container mx-auto max-w-2xl">
+          <div className="text-center mb-8">
+            <h2 className="text-4xl font-serif text-[#111827] mb-4">Get in touch</h2>
+            <p className="text-lg text-[#4B5563]">
+              Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+            </p>
+          </div>
+
+          <div className="bg-[#F9FAFB] p-8 rounded-2xl border border-[#E5E7EB]">
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-[#111827] mb-2">
+                  Your email
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="hello@example.com"
+                  className="w-full px-4 py-3 rounded-lg border border-[#E5E7EB] bg-white text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-black"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#111827] mb-2">
+                  Your message
+                </label>
+                <Textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Tell us what's on your mind..."
+                  className="w-full min-h-[150px] px-4 py-3 rounded-lg border border-[#E5E7EB] bg-white text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-black resize-none"
+                />
+              </div>
+              <Button 
+                onClick={handleSendMessage}
+                className="w-full bg-black hover:bg-[#111111] text-white px-8 py-6 rounded-full text-base"
+              >
+                Send message
+                <Mail className="ml-2 w-5 h-5" />
+              </Button>
+            </div>
           </div>
         </div>
       </section>
