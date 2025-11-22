@@ -18,6 +18,9 @@ import DesignStudio from "./pages/DesignStudio";
 import ProfessionalStudio from "./pages/ProfessionalStudio";
 import ManufacturerDashboard from "./pages/ManufacturerDashboard";
 import ManufacturerOrderWorkspace from "./pages/ManufacturerOrderWorkspace";
+import Auth from "./pages/Auth";
+import DesignerDashboard from "./pages/DesignerDashboard";
+import Workflow from "./pages/Workflow";
 
 function App() {
   return (
@@ -25,6 +28,9 @@ function App() {
       <div className="App">
         <Routes>
           <Route path="/" element={<Templates />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/designer-dashboard" element={<DesignerDashboard />} />
+          <Route path="/workflow/:orderId" element={<Workflow />} />
           <Route path="/studio-selection" element={<StudioSelection />} />
           <Route path="/designer" element={<DesignStudio />} />
           <Route path="/old-designer" element={<Index />} />
