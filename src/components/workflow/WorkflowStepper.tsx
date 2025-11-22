@@ -8,8 +8,8 @@ const stages = [
   'factory-match',
   'sending',
   'payment',
-  'production',
   'sample',
+  'production',
   'quality',
   'shipping'
 ];
@@ -33,10 +33,10 @@ export const WorkflowStepper = () => {
 
         return (
           <div key={stage} className="relative">
-            {/* Connector Line - Centered */}
+            {/* Connector Line - Centered with circle */}
             {index < stages.length - 1 && (
               <div
-                className={`absolute left-4 top-8 w-0.5 h-8 ${
+                className={`absolute left-[15px] top-8 w-0.5 h-8 ${
                   isCompleted ? 'bg-primary' : 'bg-border'
                 }`}
               />

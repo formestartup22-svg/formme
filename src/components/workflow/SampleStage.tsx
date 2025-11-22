@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
@@ -66,6 +67,16 @@ const SampleStage = ({ design }: SampleStageProps) => {
             <Card className="border-border">
               <CardContent className="p-6">
                 <Textarea placeholder="Provide detailed feedback about the sample before production begins..." value={workflowData.fitNotes} onChange={(e) => updateWorkflowData({ fitNotes: e.target.value })} className="min-h-[120px] text-sm resize-none" />
+              </CardContent>
+            </Card>
+          </section>
+
+          <section>
+            <h3 className="text-sm font-semibold text-foreground mb-3">Communicate with Designer</h3>
+            <Card className="border-border">
+              <CardContent className="p-6">
+                <Textarea placeholder="Send a message directly to the designer about the sample..." className="min-h-[100px] text-sm resize-none" />
+                <Button className="mt-3 w-full">Send Message</Button>
               </CardContent>
             </Card>
           </section>

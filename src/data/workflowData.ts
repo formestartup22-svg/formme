@@ -162,8 +162,8 @@ export const stageNames = {
   'factory-match': 'Find your manufacturer',
   'sending': 'Confirm your order',
   'payment': 'Make payment',
-  'production': 'Review production parameters',
   'sample': 'View your design sample',
+  'production': 'Review production parameters',
   'quality': 'Quality Check',
   'shipping': 'Shipping & Logistics'
 };
@@ -173,8 +173,8 @@ export const stageOrder = [
   'factory-match',
   'sending',
   'payment',
-  'production',
   'sample',
+  'production',
   'quality',
   'shipping'
 ] as const;
