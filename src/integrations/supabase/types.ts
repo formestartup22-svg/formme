@@ -14,6 +14,153 @@ export type Database = {
   }
   public: {
     Tables: {
+      attachments: {
+        Row: {
+          created_at: string | null
+          design_id: string | null
+          file_id: string
+          file_url: string
+          id: string
+          message_id: string | null
+          techpack_id: string | null
+          type: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          design_id?: string | null
+          file_id: string
+          file_url: string
+          id?: string
+          message_id?: string | null
+          techpack_id?: string | null
+          type?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          design_id?: string | null
+          file_id?: string
+          file_url?: string
+          id?: string
+          message_id?: string | null
+          techpack_id?: string | null
+          type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attachments_design_id_fkey"
+            columns: ["design_id"]
+            isOneToOne: false
+            referencedRelation: "designs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attachments_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attachments_techpack_id_fkey"
+            columns: ["techpack_id"]
+            isOneToOne: false
+            referencedRelation: "techpacks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chats: {
+        Row: {
+          created_at: string | null
+          design_id: string
+          id: string
+          manufacturer_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          design_id: string
+          id?: string
+          manufacturer_id: string
+        }
+        Update: {
+          created_at?: string | null
+          design_id?: string
+          id?: string
+          manufacturer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chats_design_id_fkey"
+            columns: ["design_id"]
+            isOneToOne: false
+            referencedRelation: "designs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chats_manufacturer_id_fkey"
+            columns: ["manufacturer_id"]
+            isOneToOne: false
+            referencedRelation: "manufacturers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      design_specs: {
+        Row: {
+          artwork_url: string | null
+          attachments: Json | null
+          construction_notes: string | null
+          created_at: string | null
+          design_id: string
+          drawing_image_url: string | null
+          drawing_vector_data: Json | null
+          fabric_type: string | null
+          gsm: number | null
+          id: string
+          measurements: Json | null
+          print_type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          artwork_url?: string | null
+          attachments?: Json | null
+          construction_notes?: string | null
+          created_at?: string | null
+          design_id: string
+          drawing_image_url?: string | null
+          drawing_vector_data?: Json | null
+          fabric_type?: string | null
+          gsm?: number | null
+          id?: string
+          measurements?: Json | null
+          print_type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          artwork_url?: string | null
+          attachments?: Json | null
+          construction_notes?: string | null
+          created_at?: string | null
+          design_id?: string
+          drawing_image_url?: string | null
+          drawing_vector_data?: Json | null
+          fabric_type?: string | null
+          gsm?: number | null
+          id?: string
+          measurements?: Json | null
+          print_type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_specs_design_id_fkey"
+            columns: ["design_id"]
+            isOneToOne: true
+            referencedRelation: "designs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       designs: {
         Row: {
           category: string | null
@@ -22,6 +169,7 @@ export type Database = {
           design_file_url: string | null
           id: string
           name: string
+          status: string | null
           tech_pack_url: string | null
           thumbnail_url: string | null
           updated_at: string | null
@@ -34,6 +182,7 @@ export type Database = {
           design_file_url?: string | null
           id?: string
           name: string
+          status?: string | null
           tech_pack_url?: string | null
           thumbnail_url?: string | null
           updated_at?: string | null
@@ -46,12 +195,55 @@ export type Database = {
           design_file_url?: string | null
           id?: string
           name?: string
+          status?: string | null
           tech_pack_url?: string | null
           thumbnail_url?: string | null
           updated_at?: string | null
           user_id?: string
         }
         Relationships: []
+      }
+      manufacturer_matches: {
+        Row: {
+          created_at: string | null
+          design_id: string
+          id: string
+          manufacturer_id: string
+          score: number | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          design_id: string
+          id?: string
+          manufacturer_id: string
+          score?: number | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          design_id?: string
+          id?: string
+          manufacturer_id?: string
+          score?: number | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manufacturer_matches_design_id_fkey"
+            columns: ["design_id"]
+            isOneToOne: false
+            referencedRelation: "designs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manufacturer_matches_manufacturer_id_fkey"
+            columns: ["manufacturer_id"]
+            isOneToOne: false
+            referencedRelation: "manufacturers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       manufacturers: {
         Row: {
@@ -110,32 +302,45 @@ export type Database = {
       messages: {
         Row: {
           attachments: string[] | null
+          chat_id: string | null
           content: string
           created_at: string | null
           id: string
           is_read: boolean | null
           order_id: string
+          read_at: string | null
           sender_id: string
         }
         Insert: {
           attachments?: string[] | null
+          chat_id?: string | null
           content: string
           created_at?: string | null
           id?: string
           is_read?: boolean | null
           order_id: string
+          read_at?: string | null
           sender_id: string
         }
         Update: {
           attachments?: string[] | null
+          chat_id?: string | null
           content?: string
           created_at?: string | null
           id?: string
           is_read?: boolean | null
           order_id?: string
+          read_at?: string | null
           sender_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "messages_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "messages_order_id_fkey"
             columns: ["order_id"]
@@ -195,11 +400,15 @@ export type Database = {
           id: string
           lead_time_days: number | null
           manufacturer_id: string | null
+          notes: string | null
           preferred_location: string | null
+          price: number | null
           quantity: number | null
+          shipping_address: string | null
           status: Database["public"]["Enums"]["order_status"] | null
           sustainability_priority: string | null
           tech_pack_data: Json | null
+          techpack_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -211,11 +420,15 @@ export type Database = {
           id?: string
           lead_time_days?: number | null
           manufacturer_id?: string | null
+          notes?: string | null
           preferred_location?: string | null
+          price?: number | null
           quantity?: number | null
+          shipping_address?: string | null
           status?: Database["public"]["Enums"]["order_status"] | null
           sustainability_priority?: string | null
           tech_pack_data?: Json | null
+          techpack_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -227,11 +440,15 @@ export type Database = {
           id?: string
           lead_time_days?: number | null
           manufacturer_id?: string | null
+          notes?: string | null
           preferred_location?: string | null
+          price?: number | null
           quantity?: number | null
+          shipping_address?: string | null
           status?: Database["public"]["Enums"]["order_status"] | null
           sustainability_priority?: string | null
           tech_pack_data?: Json | null
+          techpack_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -249,40 +466,135 @@ export type Database = {
             referencedRelation: "manufacturers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "orders_techpack_id_fkey"
+            columns: ["techpack_id"]
+            isOneToOne: false
+            referencedRelation: "techpacks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      production_updates: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string | null
+          order_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          order_id: string
+          status: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          order_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_updates_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
         ]
       }
       profiles: {
         Row: {
           avatar_url: string | null
+          capabilities: Json | null
+          categories: Json | null
           company_name: string | null
           created_at: string | null
           full_name: string | null
           id: string
+          lead_time: number | null
+          location: string | null
+          moq: number | null
           phone: string | null
+          rating: number | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
           avatar_url?: string | null
+          capabilities?: Json | null
+          categories?: Json | null
           company_name?: string | null
           created_at?: string | null
           full_name?: string | null
           id?: string
+          lead_time?: number | null
+          location?: string | null
+          moq?: number | null
           phone?: string | null
+          rating?: number | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
           avatar_url?: string | null
+          capabilities?: Json | null
+          categories?: Json | null
           company_name?: string | null
           created_at?: string | null
           full_name?: string | null
           id?: string
+          lead_time?: number | null
+          location?: string | null
+          moq?: number | null
           phone?: string | null
+          rating?: number | null
           updated_at?: string | null
           user_id?: string
         }
         Relationships: []
+      }
+      techpacks: {
+        Row: {
+          created_at: string | null
+          design_id: string
+          generated_by: string | null
+          id: string
+          pdf_file_id: string | null
+          pdf_url: string | null
+          version: number
+        }
+        Insert: {
+          created_at?: string | null
+          design_id: string
+          generated_by?: string | null
+          id?: string
+          pdf_file_id?: string | null
+          pdf_url?: string | null
+          version?: number
+        }
+        Update: {
+          created_at?: string | null
+          design_id?: string
+          generated_by?: string | null
+          id?: string
+          pdf_file_id?: string | null
+          pdf_url?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "techpacks_design_id_fkey"
+            columns: ["design_id"]
+            isOneToOne: false
+            referencedRelation: "designs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
