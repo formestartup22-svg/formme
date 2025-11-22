@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Factory, CheckCircle, XCircle } from 'lucide-react';
 import NavBar from '@/components/Navbar';
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
 
 // Mock data for current orders
 const mockOrders = [
@@ -179,12 +180,32 @@ const ManufacturerDashboard = () => {
                         <TableCell className="font-medium">{order.designName}</TableCell>
                         <TableCell>{order.designerName}</TableCell>
                         <TableCell>
-                          <Badge variant="outline">{order.stage}</Badge>
+                          <span className="group relative">
+                            <span className="text-sm text-muted-foreground group-hover:opacity-0 transition-opacity">
+                              {order.stage}
+                            </span>
+                            <Badge 
+                              variant="outline" 
+                              className="absolute left-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap"
+                            >
+                              {order.stage}
+                            </Badge>
+                          </span>
                         </TableCell>
                         <TableCell>
-                          <Badge className={getStatusColor(order.status)}>
-                            {order.status}
-                          </Badge>
+                          <span className="group relative inline-block">
+                            <span className="text-sm group-hover:opacity-0 transition-opacity">
+                              {order.status}
+                            </span>
+                            <Badge 
+                              className={cn(
+                                "absolute left-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap",
+                                getStatusColor(order.status)
+                              )}
+                            >
+                              {order.status}
+                            </Badge>
+                          </span>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {order.nextAction}
