@@ -174,7 +174,7 @@ const NewDesign = () => {
                 </div>
 
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Uploading..." : "Upload & Start Production Pipeline"}
+                  {isLoading ? "Creating..." : "Start Production Pipeline"}
                 </Button>
               </form>
             </Card>
