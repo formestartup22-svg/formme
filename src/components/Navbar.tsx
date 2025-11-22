@@ -83,9 +83,11 @@ const NavBar: React.FC<NavBarProps> = ({ initialDark = false }) => {
           <CartIcon />
         </button>
         <ThemeToggle />
-        <button className="px-6 py-2.5 text-sm font-medium text-primary-foreground bg-primary shadow-sm cursor-pointer border-none rounded-full hover:bg-primary/90 transition-all duration-200">
-          Sign up
-        </button>
+        <Link to="/auth">
+          <button className="px-6 py-2.5 text-sm font-medium text-primary-foreground bg-primary shadow-sm cursor-pointer border-none rounded-full hover:bg-primary/90 transition-all duration-200">
+            Sign up
+          </button>
+        </Link>
         <button className="md:hidden p-2 rounded-full hover:bg-muted transition-colors">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M4 6H20M4 12H20M4 18H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
