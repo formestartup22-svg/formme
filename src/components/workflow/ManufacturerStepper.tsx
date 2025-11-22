@@ -9,8 +9,8 @@ interface ManufacturerStepperProps {
 const manufacturerStages = [
   { id: 'techpack', label: 'Tech Pack Review' },
   { id: 'clarifications', label: 'Clarifications' },
-  { id: 'production', label: 'Production Approval' },
   { id: 'sample', label: 'Sample Development' },
+  { id: 'production', label: 'Production Approval' },
   { id: 'quality', label: 'Quality Check' },
   { id: 'shipping', label: 'Shipping & Logistics' },
 ];

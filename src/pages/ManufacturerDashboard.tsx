@@ -117,7 +117,7 @@ const ManufacturerDashboard = () => {
         {/* Header with Profile Action */}
         <div className="mb-8 flex justify-between items-start">
           <div>
-            <h1 className="text-4xl font-bold text-foreground mb-2">Manufacturing Hub</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Manufacturing Hub</h1>
             <p className="text-muted-foreground text-lg">
               Manage orders, discover opportunities, and grow your business
             </p>
@@ -151,9 +151,9 @@ const ManufacturerDashboard = () => {
 
         {/* Tabs for Orders and Opportunities */}
         <Tabs defaultValue="current" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
-            <TabsTrigger value="current">Current Orders</TabsTrigger>
-            <TabsTrigger value="opportunities">Find Orders</TabsTrigger>
+          <TabsList className="grid w-full max-w-md grid-cols-2 mb-6 bg-primary/10">
+            <TabsTrigger value="current" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Current Orders</TabsTrigger>
+            <TabsTrigger value="opportunities" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Find Orders</TabsTrigger>
           </TabsList>
 
           {/* Current Orders Tab */}
