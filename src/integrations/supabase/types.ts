@@ -255,6 +255,7 @@ export type Database = {
           is_active: boolean | null
           lead_time_days: number | null
           location: string | null
+          max_capacity: number | null
           min_order_quantity: number | null
           name: string
           price_range: string | null
@@ -272,6 +273,7 @@ export type Database = {
           is_active?: boolean | null
           lead_time_days?: number | null
           location?: string | null
+          max_capacity?: number | null
           min_order_quantity?: number | null
           name: string
           price_range?: string | null
@@ -289,6 +291,7 @@ export type Database = {
           is_active?: boolean | null
           lead_time_days?: number | null
           location?: string | null
+          max_capacity?: number | null
           min_order_quantity?: number | null
           name?: string
           price_range?: string | null
