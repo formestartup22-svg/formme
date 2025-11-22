@@ -69,8 +69,22 @@ const NewDesign = () => {
 
       if (designError) throw designError;
 
+      // Create an order for this design to enter the workflow
+      const { data: order, error: orderError } = await supabase
+        .from("orders")
+        .insert({
+          designer_id: user.id,
+          design_id: design.id,
+          status: 'tech_pack_pending',
+        })
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
       toast.success("Design uploaded successfully!");
-      navigate(`/workflow/${design.id}`);
+      // Navigate to the workflow at tech-pack stage
+      navigate(`/workflow/${order.id}`);
     } catch (error: any) {
       toast.error(error.message || "Failed to upload design");
     } finally {
@@ -201,7 +215,7 @@ const NewDesign = () => {
                 </div>
 
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Uploading..." : "Upload & Continue to Tech Pack"}
+                  {isLoading ? "Uploading..." : "Upload & Start Production Pipeline"}
                 </Button>
               </form>
             </Card>
