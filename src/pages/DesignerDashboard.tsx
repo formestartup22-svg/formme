@@ -127,7 +127,7 @@ const DesignerDashboard = () => {
             <h1 className="text-4xl font-bold mb-2">Dashboard</h1>
             <p className="text-muted-foreground">Manage your designs and production orders</p>
           </div>
-          <Button onClick={() => navigate("/studio-selection")} size="lg">
+          <Button onClick={() => navigate("/new-design")} size="lg">
             <Plus className="w-4 h-4 mr-2" />
             New Design
           </Button>
@@ -139,7 +139,7 @@ const DesignerDashboard = () => {
             {orders.length === 0 ? (
               <Card className="p-8 text-center">
                 <p className="text-muted-foreground mb-4">No orders yet</p>
-                <Button onClick={() => navigate("/studio-selection")}>
+                <Button onClick={() => navigate("/new-design")}>
                   Create your first design
                 </Button>
               </Card>

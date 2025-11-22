@@ -22,6 +22,7 @@ import Auth from "./pages/Auth";
 import DesignerDashboard from "./pages/DesignerDashboard";
 import Workflow from "./pages/Workflow";
 import Profile from "./pages/Profile";
+import NewDesign from "./pages/NewDesign";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           <Route path="/" element={<Templates />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/new-design" element={<NewDesign />} />
           <Route path="/designer-dashboard" element={<DesignerDashboard />} />
           <Route path="/workflow/:orderId" element={<Workflow />} />
           <Route path="/studio-selection" element={<StudioSelection />} />
