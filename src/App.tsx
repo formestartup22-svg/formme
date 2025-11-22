@@ -9,6 +9,7 @@ import Marketplace from "./pages/Marketplace";
 import Checkout from "./pages/Checkout";
 import NotFound from "./pages/NotFound";
 import Reviews from "./pages/Reviews";
+import About from "./pages/About";
 import StudioSelection from "./pages/StudioSelection";
 import ComingSoon from "./pages/ComingSoon";
 import Dashboard from "./pages/Dashboard";
@@ -34,6 +35,7 @@ function App() {
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/reviews" element={<Reviews />} />
+          <Route path="/about" element={<About />} />
           <Route path="/simple" element={<SimpleDesigner />} />
           <Route path="/coming-soon" element={<ComingSoon />} />
           <Route path='/professional-studio' element={<ProfessionalStudio />} />

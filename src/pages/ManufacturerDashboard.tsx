@@ -10,9 +10,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Factory, CheckCircle, XCircle } from 'lucide-react';
 import NavBar from '@/components/Navbar';
+import { useState } from 'react';
 
-// Mock data
+// Mock data for current orders
 const mockOrders = [
   {
     id: '1',
@@ -48,6 +51,40 @@ const mockOrders = [
   },
 ];
 
+// Mock data for potential orders (order matching)
+const mockPotentialOrders = [
+  {
+    id: 'p1',
+    designName: 'Organic Cotton Tee',
+    designerName: 'Sarah Williams',
+    category: 'T-Shirts',
+    quantity: 500,
+    targetPrice: '$12-15',
+    deadline: '45 days',
+    requirements: 'Organic cotton, GOTS certified, custom embroidery'
+  },
+  {
+    id: 'p2',
+    designName: 'Athletic Joggers',
+    designerName: 'David Park',
+    category: 'Pants',
+    quantity: 300,
+    targetPrice: '$20-25',
+    deadline: '60 days',
+    requirements: 'Moisture-wicking fabric, elastic waistband, side pockets'
+  },
+  {
+    id: 'p3',
+    designName: 'Summer Dress Collection',
+    designerName: 'Maria Garcia',
+    category: 'Dresses',
+    quantity: 200,
+    targetPrice: '$30-40',
+    deadline: '75 days',
+    requirements: 'Lightweight fabric, multiple sizes, quality stitching'
+  },
+];
+
 const kpiData = [
   { title: 'Active Orders', value: 4, color: 'text-primary' },
   { title: 'Awaiting Your Action', value: 2, color: 'text-amber-600' },
@@ -69,23 +106,36 @@ const getStatusColor = (status: string) => {
 };
 
 const ManufacturerDashboard = () => {
+  const [profileCreated, setProfileCreated] = useState(true);
+
   return (
     <div className="min-h-screen bg-background">
       <NavBar />
       
       <div className="container mx-auto px-4 pt-32 pb-12">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-2">Manufacturer Dashboard</h1>
-          <p className="text-muted-foreground text-lg">
-            View your current orders, update status, and collaborate with designers.
-          </p>
+        {/* Header with Profile Action */}
+        <div className="mb-8 flex justify-between items-start">
+          <div>
+            <h1 className="text-4xl font-bold text-foreground mb-2">Manufacturing Hub</h1>
+            <p className="text-muted-foreground text-lg">
+              Manage orders, discover opportunities, and grow your business
+            </p>
+          </div>
+          {!profileCreated && (
+            <Button 
+              onClick={() => setProfileCreated(true)}
+              className="gap-2"
+            >
+              <Factory className="w-4 h-4" />
+              Create Factory Profile
+            </Button>
+          )}
         </div>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {kpiData.map((kpi) => (
-            <Card key={kpi.title}>
+            <Card key={kpi.title} className="border-l-4 border-l-primary">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   {kpi.title}
@@ -98,50 +148,131 @@ const ManufacturerDashboard = () => {
           ))}
         </div>
 
-        {/* Orders Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Current Orders</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Order / Design Name</TableHead>
-                  <TableHead>Designer Name</TableHead>
-                  <TableHead>Stage</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Next Action</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {mockOrders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.designName}</TableCell>
-                    <TableCell>{order.designerName}</TableCell>
-                    <TableCell>{order.stage}</TableCell>
-                    <TableCell>
-                      <Badge className={getStatusColor(order.status)}>
-                        {order.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {order.nextAction}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Link to={`/manufacturer/order/${order.id}`}>
-                        <Button variant="outline" size="sm">
-                          View Order
-                        </Button>
-                      </Link>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        {/* Tabs for Orders and Opportunities */}
+        <Tabs defaultValue="current" className="w-full">
+          <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
+            <TabsTrigger value="current">Current Orders</TabsTrigger>
+            <TabsTrigger value="opportunities">Find Orders</TabsTrigger>
+          </TabsList>
+
+          {/* Current Orders Tab */}
+          <TabsContent value="current">
+            <Card>
+              <CardHeader>
+                <CardTitle>Active Production Orders</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Design Name</TableHead>
+                      <TableHead>Designer</TableHead>
+                      <TableHead>Stage</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Next Action</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {mockOrders.map((order) => (
+                      <TableRow key={order.id} className="hover:bg-muted/50">
+                        <TableCell className="font-medium">{order.designName}</TableCell>
+                        <TableCell>{order.designerName}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{order.stage}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={getStatusColor(order.status)}>
+                            {order.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {order.nextAction}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Link to={`/manufacturer/order/${order.id}`}>
+                            <Button variant="default" size="sm">
+                              View Order
+                            </Button>
+                          </Link>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Potential Orders Tab */}
+          <TabsContent value="opportunities">
+            <Card>
+              <CardHeader>
+                <CardTitle>Available Order Opportunities</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Review designer requests and accept orders that match your capabilities
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {mockPotentialOrders.map((order) => (
+                    <Card key={order.id} className="border-l-4 border-l-primary">
+                      <CardContent className="pt-6">
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-3">
+                            <div>
+                              <h3 className="font-semibold text-lg text-foreground">
+                                {order.designName}
+                              </h3>
+                              <p className="text-sm text-muted-foreground">
+                                Designer: {order.designerName}
+                              </p>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-3 text-sm">
+                              <div>
+                                <span className="text-muted-foreground">Category:</span>
+                                <p className="font-medium">{order.category}</p>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground">Quantity:</span>
+                                <p className="font-medium">{order.quantity} units</p>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground">Target Price:</span>
+                                <p className="font-medium">{order.targetPrice}</p>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground">Deadline:</span>
+                                <p className="font-medium">{order.deadline}</p>
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <span className="text-sm text-muted-foreground">Requirements:</span>
+                              <p className="text-sm mt-1">{order.requirements}</p>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col justify-center gap-3">
+                            <Button className="w-full gap-2">
+                              <CheckCircle className="w-4 h-4" />
+                              Accept Order
+                            </Button>
+                            <Button variant="outline" className="w-full gap-2">
+                              <XCircle className="w-4 h-4" />
+                              Decline
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

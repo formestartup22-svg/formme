@@ -41,7 +41,8 @@ const NavBar: React.FC = () => {
             to={
               item === 'create' ? "/designer" : 
               item === 'reviews' ? "/reviews" : 
-              item === 'dashboard' ? "/dashboard" : 
+              item === 'dashboard' ? "/dashboard" :
+              item === 'about' ? "/about" :
               "#"
             } 
             className="text-lg text-foreground relative py-1 group transition-colors hover:text-foreground/80"
