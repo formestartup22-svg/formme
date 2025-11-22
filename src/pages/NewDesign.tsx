@@ -37,6 +37,21 @@ const NewDesign = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // Upload file to storage
+      const fileExt = designFile.name.split('.').pop();
+      const filePath = `${user.id}/${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('design-files')
+        .upload(filePath, designFile);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('design-files')
+        .getPublicUrl(filePath);
+
       // Insert design record
       const { data: design, error: designError } = await supabase
         .from("designs")
@@ -45,6 +60,7 @@ const NewDesign = () => {
           name: designName,
           description,
           category,
+          design_file_url: publicUrl,
         })
         .select()
         .single();
