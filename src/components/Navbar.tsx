@@ -6,7 +6,12 @@ import { UserIcon, CartIcon } from "./ui/Icons";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import ThemeToggle from "./ThemeToggle";
-const NavBar: React.FC = () => {
+
+interface NavBarProps {
+  initialDark?: boolean;
+}
+
+const NavBar: React.FC<NavBarProps> = ({ initialDark = false }) => {
   const [scrolled, setScrolled] = React.useState(false);
   React.useEffect(() => {
     const handleScroll = () => {
@@ -30,7 +35,10 @@ const NavBar: React.FC = () => {
       )}
     >
       <Link to="/" className="flex items-center">
-        <div className="text-3xl font-bold bg-none text-foreground -ml-2 tracking-tight drop-shadow-sm">
+        <div className={cn(
+          "text-3xl font-bold bg-none -ml-2 tracking-tight drop-shadow-sm transition-colors duration-300",
+          initialDark && !scrolled ? "text-[#111827]" : "text-foreground"
+        )}>
           formme
         </div>
       </Link>
@@ -45,10 +53,18 @@ const NavBar: React.FC = () => {
               item === 'about' ? "/about" :
               "#"
             } 
-            className="text-lg text-foreground relative py-1 group transition-colors hover:text-foreground/80"
+            className={cn(
+              "text-lg relative py-1 group transition-colors",
+              initialDark && !scrolled 
+                ? "text-[#111827] hover:text-[#111827]/80" 
+                : "text-foreground hover:text-foreground/80"
+            )}
           >
             {item}
-            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-foreground transition-all duration-300 group-hover:w-full"></span>
+            <span className={cn(
+              "absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full",
+              initialDark && !scrolled ? "bg-[#111827]" : "bg-foreground"
+            )}></span>
           </Link>
         ))}
       </nav>

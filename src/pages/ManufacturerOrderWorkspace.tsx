@@ -1,14 +1,14 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import NavBar from '@/components/Navbar';
-import { MessageSquare, FileDown, Upload, CheckCircle, XCircle } from 'lucide-react';
+import { MessageSquare, FileDown, Upload, CheckCircle, XCircle, ArrowLeft } from 'lucide-react';
+import { ManufacturerStepper } from '@/components/workflow/ManufacturerStepper';
 
 // Mock data for order
 const mockOrder = {
@@ -55,8 +55,14 @@ const ManufacturerOrderWorkspace = () => {
       <NavBar />
       
       <div className="container mx-auto px-4 pt-32 pb-12">
+        {/* Back Button */}
+        <Link to="/manufacturer" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
+          <ArrowLeft className="w-4 h-4" />
+          Back to Dashboard
+        </Link>
+
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-3xl font-bold text-foreground mb-2">
@@ -83,19 +89,24 @@ const ManufacturerOrderWorkspace = () => {
           </div>
         </div>
 
-        {/* Stage Navigation Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-6">
-            <TabsTrigger value="techpack">Tech Pack</TabsTrigger>
-            <TabsTrigger value="clarifications">Clarifications</TabsTrigger>
-            <TabsTrigger value="sample">Sample Development</TabsTrigger>
-            <TabsTrigger value="production">Production Approval</TabsTrigger>
-            <TabsTrigger value="quality">Quality Check</TabsTrigger>
-            <TabsTrigger value="shipping">Shipping</TabsTrigger>
-          </TabsList>
+        {/* Pipeline Layout */}
+        <div className="grid grid-cols-12 gap-8">
+          {/* Left Sidebar - Pipeline Stepper */}
+          <div className="col-span-3">
+            <Card className="sticky top-24">
+              <CardHeader>
+                <CardTitle className="text-lg">Order Pipeline</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ManufacturerStepper activeStep={activeTab} onStepChange={setActiveTab} />
+              </CardContent>
+            </Card>
+          </div>
 
-          {/* Tech Pack Tab */}
-          <TabsContent value="techpack">
+          {/* Right Content Area */}
+          <div className="col-span-9">
+            {/* Tech Pack Content */}
+            {activeTab === 'techpack' && (
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -138,10 +149,10 @@ const ManufacturerOrderWorkspace = () => {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+            )}
 
-          {/* Clarifications Tab */}
-          <TabsContent value="clarifications">
+            {/* Clarifications Content */}
+            {activeTab === 'clarifications' && (
             <Card>
               <CardHeader>
                 <CardTitle>Clarifications & Messages</CardTitle>
@@ -183,10 +194,10 @@ const ManufacturerOrderWorkspace = () => {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+            )}
 
-          {/* Sample Development Tab */}
-          <TabsContent value="sample">
+            {/* Sample Development Content */}
+            {activeTab === 'sample' && (
             <Card>
               <CardHeader>
                 <CardTitle>Sample Development</CardTitle>
@@ -244,10 +255,10 @@ const ManufacturerOrderWorkspace = () => {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+            )}
 
-          {/* Production Approval Tab */}
-          <TabsContent value="production">
+            {/* Production Approval Content */}
+            {activeTab === 'production' && (
             <Card>
               <CardHeader>
                 <CardTitle>Production Approval</CardTitle>
@@ -308,10 +319,10 @@ const ManufacturerOrderWorkspace = () => {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+            )}
 
-          {/* Quality Check Tab */}
-          <TabsContent value="quality">
+            {/* Quality Check Content */}
+            {activeTab === 'quality' && (
             <Card>
               <CardHeader>
                 <CardTitle>Quality Check</CardTitle>
@@ -362,10 +373,10 @@ const ManufacturerOrderWorkspace = () => {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+            )}
 
-          {/* Shipping Tab */}
-          <TabsContent value="shipping">
+            {/* Shipping Content */}
+            {activeTab === 'shipping' && (
             <Card>
               <CardHeader>
                 <CardTitle>Shipping & Logistics</CardTitle>
@@ -433,11 +444,12 @@ const ManufacturerOrderWorkspace = () => {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+            )}
+          </div>
+        </div>
 
         {/* Matching Controls (shown when relevant) */}
-        <Card className="mt-6">
+        <Card className="mt-8">
           <CardHeader>
             <CardTitle>Order Match Request</CardTitle>
           </CardHeader>

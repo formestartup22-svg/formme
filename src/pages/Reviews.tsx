@@ -3,11 +3,26 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import NavBar from '@/components/Navbar';
 import { Textarea } from '@/components/ui/textarea';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const Reviews = () => {
   const [message, setMessage] = useState('');
   const [email, setEmail] = useState('');
+  const [navbarDark, setNavbarDark] = useState(true);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // After scrolling 100px, transition to normal navbar
+      if (window.scrollY > 100) {
+        setNavbarDark(false);
+      } else {
+        setNavbarDark(true);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleSendMessage = () => {
     console.log('Message sent:', { email, message });
@@ -104,7 +119,7 @@ const Reviews = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      <NavBar />
+      <NavBar initialDark={navbarDark} />
 
       {/* Hero Section */}
       <section className="pt-32 pb-16 px-4">
