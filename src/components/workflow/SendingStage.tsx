@@ -7,20 +7,99 @@ import { Design } from '@/data/workflowData';
 import { useWorkflow } from '@/context/WorkflowContext';
 import { StageHeader } from './StageHeader';
 import { StageNavigation } from './StageNavigation';
-import { FactoryCommunication } from './FactoryCommunication';
+import { FactoryMessaging } from './FactoryMessaging';
 import { FactoryDocuments } from './FactoryDocuments';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 interface SendingStageProps {
   design: Design;
 }
 
 const SendingStage = ({ design }: SendingStageProps) => {
-  const { workflowData, updateWorkflowData } = useWorkflow();
+  const { workflowData, updateWorkflowData, markStageComplete } = useWorkflow();
+  const navigate = useNavigate();
+  const [sending, setSending] = React.useState(false);
+  const [orderId, setOrderId] = React.useState<string | null>(null);
+
+  // Check if order already exists
+  React.useEffect(() => {
+    const checkExistingOrder = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from('orders')
+        .select('id')
+        .eq('design_id', design.id)
+        .eq('designer_id', user.id)
+        .maybeSingle();
+
+      if (data) {
+        setOrderId(data.id);
+      }
+    };
+    checkExistingOrder();
+  }, [design.id]);
 
   const unitCost = 18.50;
   const shipping = 450;
   const quantity = parseInt(workflowData.quantity) || 0;
   const total = (unitCost * quantity) + shipping;
+
+  const handleSendToManufacturer = async () => {
+    if (!workflowData.selectedFactory) {
+      toast.error('Please select a manufacturer first');
+      return false;
+    }
+
+    setSending(true);
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // Create order
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          design_id: design.id,
+          designer_id: user.id,
+          manufacturer_id: null,
+          quantity: parseInt(workflowData.quantity) || 0,
+          status: 'sent_to_manufacturer',
+          notes: `Delivery date: ${workflowData.deliveryDate || 'TBD'}`
+        })
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      // Create manufacturer match
+      const { error: matchError } = await supabase
+        .from('manufacturer_matches')
+        .insert({
+          design_id: design.id,
+          manufacturer_id: workflowData.selectedFactory.id,
+          status: 'pending',
+          score: 0
+        });
+
+      if (matchError) throw matchError;
+
+      setOrderId(order.id);
+      toast.success('Order sent to manufacturer successfully!');
+      markStageComplete('sending');
+      navigate(`/workflow?designId=${design.id}&stage=waiting`);
+      return true;
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to send order');
+      return false;
+    } finally {
+      setSending(false);
+    }
+  };
 
   return (
     <div>
@@ -87,14 +166,14 @@ const SendingStage = ({ design }: SendingStageProps) => {
         </section>
 
           <StageNavigation 
-            onNext={() => true}
-            nextLabel="Continue to Payment"
+            onNext={handleSendToManufacturer}
+            nextLabel={sending ? "Sending..." : "Send to Manufacturer"}
             showBack={true}
           />
         </div>
 
         <div className="space-y-4">
-          <FactoryCommunication />
+          <FactoryMessaging designId={design.id} orderId={orderId} />
           <FactoryDocuments />
         </div>
       </div>

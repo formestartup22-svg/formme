@@ -5,7 +5,7 @@ import { useWorkflow } from '@/context/WorkflowContext';
 import { stageOrder } from '@/data/workflowData';
 
 interface StageNavigationProps {
-  onNext?: () => boolean; // Return true if can proceed
+  onNext?: () => boolean | Promise<boolean>; // Return true if can proceed
   nextLabel?: string;
   showBack?: boolean;
 }
@@ -21,9 +21,9 @@ export const StageNavigation = ({
   const hasNext = currentIndex < stageOrder.length - 1;
   const hasPrevious = currentIndex > 0;
 
-  const handleNext = () => {
+  const handleNext = async () => {
     // Run validation if provided
-    const canProceed = onNext ? onNext() : true;
+    const canProceed = onNext ? await onNext() : true;
     
     if (canProceed && hasNext) {
       markStageComplete(currentStage);

@@ -125,12 +125,6 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
         query = query.eq('price_range', workflowData.priceRange);
       }
 
-      if (workflowData.leadTime) {
-        // Extract max days from leadTime (e.g., "4-6" -> 6, "6-8" -> 8)
-        const maxDays = parseInt(workflowData.leadTime.split('-')[1]) * 7; // Convert weeks to days
-        query = query.lte('lead_time_days', maxDays);
-      }
-
       const { data, error } = await query;
 
       if (error) throw error;
@@ -203,7 +197,7 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
             <h3 className="text-sm font-semibold text-foreground mb-3">Production Requirements</h3>
             <Card className="border-border">
               <CardContent className="p-6">
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   <div>
                     <Label className="text-xs mb-1.5 block">Quantity</Label>
                     <Input
@@ -213,22 +207,6 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
                       onChange={(e) => updateWorkflowData({ quantity: e.target.value })}
                       className="h-9 text-sm"
                     />
-                  </div>
-                  <div>
-                    <Label className="text-xs mb-1.5 block">Lead Time</Label>
-                    <Select
-                      value={workflowData.leadTime}
-                      onValueChange={(value) => updateWorkflowData({ leadTime: value })}
-                    >
-                      <SelectTrigger className="h-9 text-sm">
-                        <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="4-6">4-6 weeks</SelectItem>
-                        <SelectItem value="6-8">6-8 weeks</SelectItem>
-                        <SelectItem value="8-12">8-12 weeks</SelectItem>
-                      </SelectContent>
-                    </Select>
                   </div>
                   <div>
                     <Label className="text-xs mb-1.5 block">Location</Label>
@@ -386,7 +364,6 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
         </div>
 
         <div className="space-y-4">
-          <FactoryCommunication />
           <FactoryDocuments />
         </div>
       </div>
