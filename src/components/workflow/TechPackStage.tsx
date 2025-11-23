@@ -160,32 +160,26 @@ Construction Notes:
 ${workflowData.constructionNotes || 'None provided'}
       `.trim();
 
-      // Convert design image to base64 if available
-      let templateImageB64 = '';
-      if (designFileUrl) {
-        try {
-          const response = await fetch(designFileUrl);
-          const blob = await response.blob();
-          const buffer = await blob.arrayBuffer();
-          const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
-          templateImageB64 = base64;
-        } catch (err) {
-          console.warn('Could not convert image to base64:', err);
-        }
-      }
-
-      // Start the agent orchestration
+      // Start the techpack generation with SVG URL
       const { data: agentData, error: agentError } = await supabase.functions.invoke('start-techpack-agents', {
         body: {
           garmentBrief,
-          templateImageB64,
+          svgUrl: designFileUrl || null,
           designId: design.id,
         }
       });
 
-      if (agentError) throw agentError;
+      if (agentError) {
+        console.error('Agent error:', agentError);
+        throw agentError;
+      }
 
-      toast.success('Agent-based tech pack generation started! This will take a few moments.');
+      if (agentData?.techpackContent) {
+        console.log('Techpack generated:', agentData.techpackContent);
+        toast.success('AI tech pack generation completed!');
+      } else {
+        toast.success('Tech pack generation started!');
+      }
 
       // Also call the existing generate-techpack as fallback/backup
       const { data, error } = await supabase.functions.invoke('generate-techpack', {
