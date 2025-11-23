@@ -82,9 +82,6 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
             location,
             price_range,
             rating
-          ),
-          orders:orders!orders_design_id_fkey (
-            id
           )
         `)
         .eq('design_id', design.id)
@@ -94,7 +91,25 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
 
       if (error) throw error;
 
-      setMatches((data as any) || []);
+      // For each match, fetch the corresponding order
+      const matchesWithOrders = await Promise.all(
+        (data || []).map(async (match: any) => {
+          const { data: order } = await supabase
+            .from('orders')
+            .select('id')
+            .eq('design_id', design.id)
+            .eq('manufacturer_id', match.manufacturer_id)
+            .maybeSingle();
+          
+          return {
+            ...match,
+            orders: order ? [order] : []
+          };
+        })
+      );
+
+      console.log('[ManufacturerSelectionStage] Matches with orders:', matchesWithOrders);
+      setMatches(matchesWithOrders as any);
 
       // Check if a manufacturer is already selected in the order
       const { data: order } = await supabase
