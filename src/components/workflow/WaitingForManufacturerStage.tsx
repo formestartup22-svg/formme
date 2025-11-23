@@ -44,12 +44,7 @@ const WaitingForManufacturerStage = ({ design }: WaitingForManufacturerStageProp
       if (matches) {
         setIsAccepted(true);
         setAcceptedManufacturer(matches.manufacturers?.name || 'Manufacturer');
-        
-        // Auto-proceed after 2 seconds
-        setTimeout(() => {
-          markStageComplete('waiting');
-          navigate(`/workflow?designId=${design.id}&stage=send-tech-pack`);
-        }, 2000);
+        // Don't auto-navigate - let designer manually proceed
       }
     };
 
@@ -80,12 +75,7 @@ const WaitingForManufacturerStage = ({ design }: WaitingForManufacturerStageProp
             setIsAccepted(true);
             setAcceptedManufacturer(manufacturer?.name || 'Manufacturer');
             toast.success(`${manufacturer?.name || 'A manufacturer'} has accepted your order!`);
-            
-            // Auto-proceed to manufacturer selection after 2 seconds
-            setTimeout(() => {
-              markStageComplete('waiting');
-              navigate(`/workflow?designId=${design.id}&stage=send-tech-pack`);
-            }, 2000);
+            // Don't auto-navigate - let designer manually proceed
           }
         }
       )
@@ -159,7 +149,7 @@ const WaitingForManufacturerStage = ({ design }: WaitingForManufacturerStageProp
 
                 <div className="pt-4">
                   <p className="text-sm text-muted-foreground">
-                    Proceeding to manufacturer selection...
+                    Click the button below to review and finalize your contract
                   </p>
                 </div>
               </div>
