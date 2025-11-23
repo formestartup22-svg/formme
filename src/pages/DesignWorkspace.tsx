@@ -11,7 +11,6 @@ import { WorkflowProvider, useWorkflow } from '@/context/WorkflowContext';
 import { WorkflowStepper } from '@/components/workflow/WorkflowStepper';
 import TechPackStage from '@/components/workflow/TechPackStage';
 import FactoryMatchStage from '@/components/workflow/FactoryMatchStage';
-import SendingStage from '@/components/workflow/SendingStage';
 import PaymentStage from '@/components/workflow/PaymentStage';
 import ProductionStage from '@/components/workflow/ProductionStage';
 import SampleStage from '@/components/workflow/SampleStage';
@@ -27,8 +26,6 @@ const WorkspaceContent = ({ design }: { design: any }) => {
         return <TechPackStage design={design} />;
       case 'factory-match':
         return <FactoryMatchStage design={design} />;
-      case 'sending':
-        return <SendingStage design={design} />;
       case 'payment':
         return <PaymentStage design={design} />;
       case 'production':

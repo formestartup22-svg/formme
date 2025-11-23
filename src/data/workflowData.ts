@@ -1,7 +1,7 @@
 export interface Design {
   id: string;
   name: string;
-  stage: 'tech-pack' | 'factory-match' | 'send-tech-pack' | 'sending' | 'waiting' | 'production' | 'payment' | 'waiting-sample' | 'sample' | 'quality' | 'shipping';
+  stage: 'tech-pack' | 'factory-match' | 'send-tech-pack' | 'waiting' | 'production' | 'payment' | 'waiting-sample' | 'sample' | 'quality' | 'shipping';
   status: 'on-track' | 'delayed' | 'action-required' | 'completed';
   nextAction: string;
   eta: string;
@@ -161,6 +161,7 @@ export const stageNames = {
   'tech-pack': 'Create your tech pack',
   'factory-match': 'Find your manufacturer',
   'send-tech-pack': 'Select manufacturer',
+  'waiting': 'Waiting for manufacturer',
   'production': 'Review production parameters',
   'payment': 'Make payment',
   'waiting-sample': 'Sample in production',
@@ -173,7 +174,6 @@ export const stageOrder = [
   'tech-pack',
   'factory-match',
   'send-tech-pack',
-  'sending',
   'waiting',
   'production',
   'payment',
