@@ -91,7 +91,8 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
           quantity: parseInt(workflowData.quantity || '0'),
           leadTime: workflowData.leadTime || '4-6',
           location: workflowData.location || 'any',
-          priceRange: workflowData.priceRange || 'mid'
+          priceRange: workflowData.priceRange || 'mid',
+          categories: designCategory ? [designCategory] : []
         },
         {
           moq: manufacturer.min_order_quantity || 0,
@@ -99,7 +100,8 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
           leadTime: manufacturer.lead_time_days || 30,
           location: manufacturer.location || '',
           priceTier: manufacturer.price_range || 'mid',
-          rating: manufacturer.rating || undefined
+          rating: manufacturer.rating || undefined,
+          categories: manufacturer.specialties || []
         }
       );
 
