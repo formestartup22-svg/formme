@@ -177,14 +177,21 @@ const Auth = () => {
           country: formData.location || null,
           specialties: formData.capabilities.length > 0 ? formData.capabilities : null,
           certifications: formData.categories.length > 0 ? formData.categories : null,
-          min_order_quantity: formData.moq ? parseInt(formData.moq) : null,
-          lead_time_days: 30, // Default lead time
+          min_order_quantity: formData.moq ? parseInt(formData.moq) : 100,
+          lead_time_days: formData.leadTime ? parseInt(formData.leadTime) : 30,
+          price_range: "$20-$40 per unit", // Default price range
+          max_capacity: formData.moq ? parseInt(formData.moq) * 10 : 1000,
+          rating: null,
+          sustainability_score: 5,
           is_active: true,
         });
 
         if (mfgError) {
           console.error("Manufacturer record creation failed:", mfgError);
+          throw new Error(`Failed to create manufacturer profile: ${mfgError.message}`);
         }
+
+        console.log("Manufacturer record created successfully");
       }
 
       toast.success("Account created successfully! You can now sign in.");
@@ -435,6 +442,18 @@ const Auth = () => {
                           placeholder="100"
                           value={formData.moq}
                           onChange={(e) => setFormData({ ...formData, moq: e.target.value })}
+                          className="mt-1"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="signup-leadTime" className="text-sm">Lead Time (days)</Label>
+                        <Input
+                          id="signup-leadTime"
+                          type="number"
+                          placeholder="30"
+                          value={formData.leadTime}
+                          onChange={(e) => setFormData({ ...formData, leadTime: e.target.value })}
                           className="mt-1"
                         />
                       </div>
