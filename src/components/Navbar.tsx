@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { useState, useEffect } from "react";
 import { UserIcon, CartIcon } from "./ui/Icons";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -13,10 +13,10 @@ interface NavBarProps {
 }
 
 const NavBar: React.FC<NavBarProps> = ({ initialDark = false }) => {
-  const [scrolled, setScrolled] = React.useState(false);
-  const [user, setUser] = React.useState<User | null>(null);
+  const [scrolled, setScrolled] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleScroll = () => {
       const isScrolled = window.scrollY > 10;
       if (isScrolled !== scrolled) {
@@ -28,7 +28,7 @@ const NavBar: React.FC<NavBarProps> = ({ initialDark = false }) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [scrolled]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
     });
