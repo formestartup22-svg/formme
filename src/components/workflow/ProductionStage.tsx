@@ -229,10 +229,36 @@ const ProductionStage = ({ design }: ProductionStageProps) => {
             <Card className="border-border">
               <CardContent className="p-6">
                 <div className="flex gap-3">
-                  <Button variant={workflowData.materialsApproved ? 'default' : 'outline'} className="flex-1 gap-2" onClick={() => updateWorkflowData({ materialsApproved: true, materialsRejected: false })}>
+                  <Button 
+                    variant={workflowData.materialsApproved ? 'default' : 'outline'} 
+                    className="flex-1 gap-2" 
+                    onClick={async () => {
+                      updateWorkflowData({ materialsApproved: true, materialsRejected: false });
+                      if (orderData?.id) {
+                        await supabase
+                          .from('orders')
+                          .update({ production_params_approved: true })
+                          .eq('id', orderData.id);
+                        toast.success('Production parameters approved!');
+                      }
+                    }}
+                  >
                     <CheckCircle className="w-4 h-4" />Approve Production Parameters
                   </Button>
-                  <Button variant={workflowData.materialsRejected ? 'destructive' : 'outline'} className="flex-1 gap-2" onClick={() => updateWorkflowData({ materialsApproved: false, materialsRejected: true })}>
+                  <Button 
+                    variant={workflowData.materialsRejected ? 'destructive' : 'outline'} 
+                    className="flex-1 gap-2" 
+                    onClick={async () => {
+                      updateWorkflowData({ materialsApproved: false, materialsRejected: true });
+                      if (orderData?.id) {
+                        await supabase
+                          .from('orders')
+                          .update({ production_params_approved: false })
+                          .eq('id', orderData.id);
+                        toast.error('Production parameters rejected');
+                      }
+                    }}
+                  >
                     <XCircle className="w-4 h-4" />Reject
                   </Button>
                 </div>

@@ -443,6 +443,13 @@ const ManufacturerOrderWorkspace = () => {
                 <CardTitle>Sample Development</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
+                {!order.production_params_approved && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+                    <p className="text-sm text-amber-800">
+                      ⚠️ You cannot proceed to sample development until the designer approves your production parameters.
+                    </p>
+                  </div>
+                )}
                 <div>
                   <h3 className="font-semibold mb-3">Sample Status</h3>
                   <div className="flex items-center gap-4">
@@ -502,7 +509,7 @@ const ManufacturerOrderWorkspace = () => {
                   />
                   <Button 
                     onClick={handleSubmitSampleUpdate}
-                    disabled={submitting || (!samplePhotos && !sampleNotes)}
+                    disabled={submitting || (!samplePhotos && !sampleNotes) || !order.production_params_approved}
                   >
                     {submitting ? 'Submitting...' : 'Submit Update'}
                   </Button>
