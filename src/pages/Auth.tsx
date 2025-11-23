@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -178,8 +178,53 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_30%_20%,rgba(212,196,176,0.6),rgba(212,196,176,1))] flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl p-8 bg-white/60 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.08)] rounded-2xl">
+    <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden">
+      {/* Background Home Page Content */}
+      <div className="absolute inset-0 bg-[#D4C4B0]">
+        <div className="absolute inset-0 opacity-30">
+          <section className="h-screen pt-52 pl-24 max-md:px-10 max-sm:px-5 max-sm:pt-32">
+            <h1
+              className="text-[128px] font-instrument font-bold leading-none text-transparent 
+              bg-gradient-to-r from-[#09100B] via-[#4A6A5C] to-[#09100B] 
+              bg-[length:300%_100%] bg-clip-text animate-shimmer"
+              style={{ textShadow: '0px 4px 4px rgba(0, 0, 0, 0.4)' }}
+            >
+              formme
+            </h1>
+
+            <p className="mb-10 text-3xl text-black max-sm:text-2xl">
+              redefining self-expression &amp; sustainability.
+            </p>
+
+            <div className="flex gap-6 max-md:flex-col max-md:max-w-[300px] max-sm:w-full">
+              <Link to="/marketplace">
+                <button
+                  className="w-[219px] h-[72px] flex-shrink-0 text-white text-base font-medium 
+                             rounded-[30px] relative overflow-hidden max-sm:w-full max-sm:p-5 
+                             bg-[#344C3D] shadow-[3px_7px_5px_0px_rgba(0,0,0,0.25)]"
+                >
+                  <div className="absolute inset-0 bg-[url('/imageButtons.png')] bg-cover bg-center mix-blend-multiply"></div>
+                  <span className="relative z-10">Explore Collection</span>
+                </button>
+              </Link>
+
+              <Link to="/studio-selection">
+                <button
+                  className="w-[219px] h-[72px] flex-shrink-0 text-white text-base font-medium 
+                             rounded-[30px] relative overflow-hidden max-sm:w-full max-sm:p-5 
+                             bg-[#974320] shadow-[3px_7px_5px_0px_rgba(0,0,0,0.25)]"
+                >
+                  <div className="absolute inset-0 bg-[url('/imageButtons.png')] bg-cover bg-center mix-blend-multiply"></div>
+                  <span className="relative z-10">Start Designing</span>
+                </button>
+              </Link>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      {/* Glass Card Form */}
+      <Card className="w-full max-w-2xl p-8 bg-white/70 backdrop-blur-xl border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.12)] rounded-2xl relative z-10">
         <div className="text-center mb-6">
           <h1 className="text-4xl font-bold mb-2">formme</h1>
           <p className="text-muted-foreground">
