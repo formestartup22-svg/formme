@@ -10,6 +10,7 @@ import NavBar from '@/components/Navbar';
 import { MessageSquare, FileDown, Upload, CheckCircle, XCircle, ArrowLeft } from 'lucide-react';
 import { ManufacturerStepper } from '@/components/workflow/ManufacturerStepper';
 import { FactoryMessaging } from '@/components/workflow/FactoryMessaging';
+import { FloatingMessagesWidget } from '@/components/workflow/FloatingMessagesWidget';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -756,6 +757,9 @@ const ManufacturerOrderWorkspace = () => {
           </Card>
         )}
       </div>
+
+      {/* Floating Messages Widget */}
+      {order?.design_id && <FloatingMessagesWidget designId={order.design_id} />}
     </div>
   );
 };
