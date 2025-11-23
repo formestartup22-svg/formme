@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { UserIcon, CartIcon } from "./ui/Icons";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
+import { toast } from "sonner";
 
 interface NavBarProps {
   initialDark?: boolean;
@@ -14,6 +15,7 @@ interface NavBarProps {
 const NavBar: React.FC<NavBarProps> = ({ initialDark = false }) => {
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -65,47 +67,49 @@ const NavBar: React.FC<NavBarProps> = ({ initialDark = false }) => {
       <nav className="hidden md:flex gap-8 mr-10 ml-auto">
         {["collection", "create", "dashboard", "reviews"].map((item) => {
           const isAuthRequired = item === "collection" || item === "create" || item === "dashboard";
-          const isDisabled = isAuthRequired && !user;
+          
+          const handleClick = (e: React.MouseEvent) => {
+            if (isAuthRequired && !user) {
+              e.preventDefault();
+              toast.error("Please sign up to access this feature", {
+                description: "Create an account to start designing and managing your collection.",
+                action: {
+                  label: "Sign up",
+                  onClick: () => navigate("/auth")
+                }
+              });
+            }
+          };
           
           return (
             <Link
               key={item}
               to={
-                isDisabled
-                  ? "#"
-                  : item === "create"
+                item === "create"
+                  ? "/dashboard"
+                  : item === "dashboard"
                     ? "/dashboard"
-                    : item === "dashboard"
-                      ? "/dashboard"
-                      : item === "reviews"
-                        ? "/reviews"
-                        : item === "collection"
-                          ? "/new-design"
-                          : "#"
+                    : item === "reviews"
+                      ? "/reviews"
+                      : item === "collection"
+                        ? "/new-design"
+                        : "#"
               }
-              onClick={(e) => {
-                if (isDisabled) {
-                  e.preventDefault();
-                }
-              }}
+              onClick={handleClick}
               className={cn(
                 "text-lg relative py-1 group transition-colors",
-                isDisabled 
-                  ? "opacity-40 cursor-not-allowed"
-                  : initialDark && !scrolled
-                    ? "text-[#111827] hover:text-[#111827]/80"
-                    : "text-foreground hover:text-foreground/80",
+                initialDark && !scrolled
+                  ? "text-[#111827] hover:text-[#111827]/80"
+                  : "text-foreground hover:text-foreground/80",
               )}
             >
               {item}
-              {!isDisabled && (
-                <span
-                  className={cn(
-                    "absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full",
-                    initialDark && !scrolled ? "bg-[#111827]" : "bg-foreground",
-                  )}
-                ></span>
-              )}
+              <span
+                className={cn(
+                  "absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full",
+                  initialDark && !scrolled ? "bg-[#111827]" : "bg-foreground",
+                )}
+              ></span>
             </Link>
           );
         })}

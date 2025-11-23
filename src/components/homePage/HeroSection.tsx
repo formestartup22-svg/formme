@@ -1,11 +1,13 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
+import { toast } from "sonner";
 
 const HeroSection: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -21,7 +23,33 @@ const HeroSection: React.FC = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const isAuthenticated = !!user;
+  const handleExploreClick = () => {
+    if (!user) {
+      toast.error("Please sign up to explore the collection", {
+        description: "Create an account to start designing your custom garments.",
+        action: {
+          label: "Sign up",
+          onClick: () => navigate("/auth")
+        }
+      });
+    } else {
+      navigate("/new-design");
+    }
+  };
+
+  const handleDesignClick = () => {
+    if (!user) {
+      toast.error("Please sign up to start designing", {
+        description: "Create an account to access the design dashboard.",
+        action: {
+          label: "Sign up",
+          onClick: () => navigate("/auth")
+        }
+      });
+    } else {
+      navigate("/dashboard");
+    }
+  };
 
   return (
     <section className="h-screen pt-52 pl-24 max-md:px-10 max-sm:px-5 max-sm:pt-32">
@@ -39,13 +67,12 @@ const HeroSection: React.FC = () => {
       </p>
 
       <div className="flex gap-6 max-md:flex-col max-md:max-w-[300px] max-sm:w-full">
-      <Link to={isAuthenticated ? "/new-design" : "#"} onClick={(e) => !isAuthenticated && e.preventDefault()}>
         <button
-          disabled={!isAuthenticated}
+          onClick={handleExploreClick}
           className="w-[219px] h-[72px] flex-shrink-0 text-white text-base font-medium 
                      rounded-[30px] relative overflow-hidden max-sm:w-full max-sm:p-5 
                      bg-[#344C3D] shadow-[3px_7px_5px_0px_rgba(0,0,0,0.25)]
-                     disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
+                     hover:opacity-90 transition-opacity"
         >
           {/* Gold image overlay with blend mode */}
           <div className="absolute inset-0 bg-[url('/imageButtons.png')] bg-cover bg-center mix-blend-multiply"></div>
@@ -53,15 +80,13 @@ const HeroSection: React.FC = () => {
           {/* Text content on top */}
           <span className="relative z-10">Explore Collection</span>
         </button>
-      </Link>
 
-      <Link to={isAuthenticated ? "/dashboard" : "#"} onClick={(e) => !isAuthenticated && e.preventDefault()}>
         <button
-          disabled={!isAuthenticated}
+          onClick={handleDesignClick}
           className="w-[219px] h-[72px] flex-shrink-0 text-white text-base font-medium 
                      rounded-[30px] relative overflow-hidden max-sm:w-full max-sm:p-5 
                      bg-[#974320] shadow-[3px_7px_5px_0px_rgba(0,0,0,0.25)]
-                     disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
+                     hover:opacity-90 transition-opacity"
         >
           {/* Gold image overlay with blend mode */}
           <div className="absolute inset-0 bg-[url('/imageButtons.png')] bg-cover bg-center mix-blend-multiply"></div>
@@ -69,7 +94,6 @@ const HeroSection: React.FC = () => {
           {/* Text content on top */}
           <span className="relative z-10">Start Designing</span>
         </button>
-      </Link>
     </div>
     </section>
   );
