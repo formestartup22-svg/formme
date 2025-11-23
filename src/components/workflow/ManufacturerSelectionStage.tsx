@@ -25,7 +25,9 @@ interface ManufacturerMatch {
   };
   orders: Array<{
     id: string;
+    status?: string;
   }>;
+  isFinalized?: boolean;
 }
 
 interface ManufacturerSelectionStageProps {
@@ -96,14 +98,15 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
         (data || []).map(async (match: any) => {
           const { data: order } = await supabase
             .from('orders')
-            .select('id')
+            .select('id, status')
             .eq('design_id', design.id)
             .eq('manufacturer_id', match.manufacturer_id)
             .maybeSingle();
           
           return {
             ...match,
-            orders: order ? [order] : []
+            orders: order ? [order] : [],
+            isFinalized: order?.status === 'manufacturer_review'
           };
         })
       );
@@ -111,17 +114,18 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
       console.log('[ManufacturerSelectionStage] Matches with orders:', matchesWithOrders);
       setMatches(matchesWithOrders as any);
 
-      // Check if a manufacturer is already selected in the order
-      const { data: order } = await supabase
+      // Check if a manufacturer is already finalized
+      const { data: finalizedOrder } = await supabase
         .from('orders')
         .select('manufacturer_id')
         .eq('design_id', design.id)
+        .eq('status', 'manufacturer_review')
         .maybeSingle();
 
-      console.log('[ManufacturerSelectionStage] Order query result:', order);
+      console.log('[ManufacturerSelectionStage] Finalized order:', finalizedOrder);
 
-      if (order?.manufacturer_id) {
-        setSelectedManufacturer(order.manufacturer_id);
+      if (finalizedOrder?.manufacturer_id) {
+        setSelectedManufacturer(finalizedOrder.manufacturer_id);
       }
     } catch (error: any) {
       console.error('[ManufacturerSelectionStage] Error fetching matches:', error);
@@ -295,7 +299,7 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
                           </div>
 
                           <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                            {match.status === 'accepted' && selectedManufacturer !== match.manufacturer_id && (
+                            {match.status === 'accepted' && !match.isFinalized && (
                               <Button
                                 size="sm"
                                 onClick={() => handleFinalizeManufacturer(match.manufacturer_id)}
@@ -306,7 +310,7 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
                               </Button>
                             )}
 
-                            {match.status === 'accepted' && selectedManufacturer === match.manufacturer_id && (
+                            {match.status === 'accepted' && match.isFinalized && (
                               <div className="flex items-center gap-2 text-sm font-medium text-primary">
                                 <CheckCircle2 className="w-4 h-4" />
                                 Contract Finalized
