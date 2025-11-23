@@ -23,6 +23,11 @@ const ManufacturerOrderWorkspace = () => {
   const [productionStartDate, setProductionStartDate] = useState('');
   const [productionCompletionDate, setProductionCompletionDate] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [fabricType, setFabricType] = useState('');
+  const [gsm, setGsm] = useState('');
+  const [shrinkage, setShrinkage] = useState('');
+  const [colorFastness, setColorFastness] = useState('');
+  const [labDipFiles, setLabDipFiles] = useState<FileList | null>(null);
 
   useEffect(() => {
   const fetchOrder = async () => {
@@ -83,6 +88,11 @@ const ManufacturerOrderWorkspace = () => {
         if (orderData.production_completion_date) {
           setProductionCompletionDate(orderData.production_completion_date);
         }
+        // Set fabric specs if they exist
+        if (orderData.fabric_type) setFabricType(orderData.fabric_type);
+        if (orderData.gsm) setGsm(orderData.gsm);
+        if (orderData.shrinkage) setShrinkage(orderData.shrinkage);
+        if (orderData.color_fastness) setColorFastness(orderData.color_fastness);
 
         setMatchStatus((matchData?.status as 'pending' | 'accepted' | 'rejected') || null);
       } catch (err: any) {
@@ -134,21 +144,56 @@ const ManufacturerOrderWorkspace = () => {
       toast.error('Please provide both start and completion dates');
       return;
     }
+
+    if (!fabricType || !gsm) {
+      toast.error('Please provide fabric type and GSM');
+      return;
+    }
     
     setSubmitting(true);
     try {
+      // Upload lab dip photos if any
+      let photoUrls: string[] = [];
+      if (labDipFiles && labDipFiles.length > 0) {
+        const uploadPromises = Array.from(labDipFiles).map(async (file) => {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${order.id}-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+          const filePath = `${order.designer_id}/${fileName}`;
+
+          const { error: uploadError, data } = await supabase.storage
+            .from('design-files')
+            .upload(filePath, file);
+
+          if (uploadError) throw uploadError;
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('design-files')
+            .getPublicUrl(filePath);
+
+          return publicUrl;
+        });
+
+        photoUrls = await Promise.all(uploadPromises);
+      }
+
       const { error } = await supabase
         .from('orders')
         .update({
           production_start_date: productionStartDate,
           production_completion_date: productionCompletionDate,
+          fabric_type: fabricType,
+          gsm: gsm,
+          shrinkage: shrinkage || null,
+          color_fastness: colorFastness || null,
+          lab_dip_photos: photoUrls.length > 0 ? photoUrls : null,
+          production_params_submitted_at: new Date().toISOString(),
           status: 'production_approval'
         })
         .eq('id', order.id);
 
       if (error) throw error;
 
-      toast.success('Production timeline submitted successfully!');
+      toast.success('Production parameters submitted successfully!');
       // Refresh order data
       const { data: updatedOrder } = await supabase
         .from('orders')
@@ -421,32 +466,61 @@ const ManufacturerOrderWorkspace = () => {
                 <div className="space-y-3">
                   <Label>Upload Lab Dip Photos</Label>
                   <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
-                    <Input type="file" className="hidden" id="lab-dip" multiple />
+                    <Input 
+                      type="file" 
+                      className="hidden" 
+                      id="lab-dip" 
+                      multiple 
+                      accept="image/*"
+                      onChange={(e) => setLabDipFiles(e.target.files)}
+                    />
                     <Label htmlFor="lab-dip" className="cursor-pointer">
                       <Button variant="outline" className="gap-2" asChild>
                         <span>
                           <Upload className="w-4 h-4" />
-                          Upload Photos
+                          Upload Photos {labDipFiles && labDipFiles.length > 0 && `(${labDipFiles.length})`}
                         </span>
                       </Button>
                     </Label>
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>GSM</Label>
-                    <Input placeholder="e.g., 180" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Shrinkage Data</Label>
-                    <Input placeholder="e.g., 3-5%" />
-                  </div>
-                </div>
-                
                 <div className="space-y-3">
-                  <Label>Fabric Details</Label>
-                  <Textarea placeholder="Add fabric specifications..." rows={3} />
+                  <h3 className="font-semibold mb-3">Fabric Specifications</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Fabric Type *</Label>
+                      <Input 
+                        placeholder="e.g., 100% Cotton" 
+                        value={fabricType}
+                        onChange={(e) => setFabricType(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>GSM *</Label>
+                      <Input 
+                        placeholder="e.g., 180 GSM" 
+                        value={gsm}
+                        onChange={(e) => setGsm(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Shrinkage (%)</Label>
+                      <Input 
+                        placeholder="e.g., 3-5%" 
+                        value={shrinkage}
+                        onChange={(e) => setShrinkage(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Color Fastness</Label>
+                      <Input 
+                        placeholder="e.g., Grade 4-5" 
+                        value={colorFastness}
+                        onChange={(e) => setColorFastness(e.target.value)}
+                      />
+                    </div>
+                  </div>
                 </div>
                 
                 <div className="space-y-3">
@@ -472,7 +546,7 @@ const ManufacturerOrderWorkspace = () => {
                   <Button 
                     className="w-full" 
                     onClick={handleSubmitProductionApproval}
-                    disabled={submitting || !productionStartDate || !productionCompletionDate}
+                    disabled={submitting || !productionStartDate || !productionCompletionDate || !fabricType || !gsm}
                   >
                     {submitting ? 'Submitting...' : 'Submit for Designer Approval'}
                   </Button>

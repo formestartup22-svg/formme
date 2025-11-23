@@ -403,20 +403,26 @@ export type Database = {
         Row: {
           budget_max: number | null
           budget_min: number | null
+          color_fastness: string | null
           created_at: string | null
           design_id: string
           designer_id: string
+          fabric_type: string | null
+          gsm: string | null
           id: string
+          lab_dip_photos: string[] | null
           lead_time_days: number | null
           manufacturer_id: string | null
           notes: string | null
           preferred_location: string | null
           price: number | null
           production_completion_date: string | null
+          production_params_submitted_at: string | null
           production_start_date: string | null
           production_timeline_data: Json | null
           quantity: number | null
           shipping_address: string | null
+          shrinkage: string | null
           status: Database["public"]["Enums"]["order_status"] | null
           sustainability_priority: string | null
           tech_pack_data: Json | null
@@ -426,20 +432,26 @@ export type Database = {
         Insert: {
           budget_max?: number | null
           budget_min?: number | null
+          color_fastness?: string | null
           created_at?: string | null
           design_id: string
           designer_id: string
+          fabric_type?: string | null
+          gsm?: string | null
           id?: string
+          lab_dip_photos?: string[] | null
           lead_time_days?: number | null
           manufacturer_id?: string | null
           notes?: string | null
           preferred_location?: string | null
           price?: number | null
           production_completion_date?: string | null
+          production_params_submitted_at?: string | null
           production_start_date?: string | null
           production_timeline_data?: Json | null
           quantity?: number | null
           shipping_address?: string | null
+          shrinkage?: string | null
           status?: Database["public"]["Enums"]["order_status"] | null
           sustainability_priority?: string | null
           tech_pack_data?: Json | null
@@ -449,20 +461,26 @@ export type Database = {
         Update: {
           budget_max?: number | null
           budget_min?: number | null
+          color_fastness?: string | null
           created_at?: string | null
           design_id?: string
           designer_id?: string
+          fabric_type?: string | null
+          gsm?: string | null
           id?: string
+          lab_dip_photos?: string[] | null
           lead_time_days?: number | null
           manufacturer_id?: string | null
           notes?: string | null
           preferred_location?: string | null
           price?: number | null
           production_completion_date?: string | null
+          production_params_submitted_at?: string | null
           production_start_date?: string | null
           production_timeline_data?: Json | null
           quantity?: number | null
           shipping_address?: string | null
+          shrinkage?: string | null
           status?: Database["public"]["Enums"]["order_status"] | null
           sustainability_priority?: string | null
           tech_pack_data?: Json | null
