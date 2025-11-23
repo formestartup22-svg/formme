@@ -17,6 +17,8 @@ import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useManufacturerOrders } from '@/hooks/useManufacturerOrders';
 import { useUserRole } from '@/hooks/useUserRole';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 
 const getStatusColor = (status: string) => {
@@ -37,6 +39,8 @@ const ManufacturerDashboard = () => {
   const [profileCreated, setProfileCreated] = useState(true);
   const { orders, loading } = useManufacturerOrders();
   const { role, loading: roleLoading } = useUserRole();
+  const [pendingRequests, setPendingRequests] = useState<any[]>([]);
+  const [loadingRequests, setLoadingRequests] = useState(false);
 
   // Redirect to designer dashboard if user is a designer
   useEffect(() => {
@@ -44,6 +48,98 @@ const ManufacturerDashboard = () => {
       navigate('/dashboard');
     }
   }, [role, roleLoading, navigate]);
+
+  // Fetch pending order requests
+  useEffect(() => {
+    const fetchPendingRequests = async () => {
+      setLoadingRequests(true);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Get manufacturer ID for current user
+        const { data: manufacturer } = await supabase
+          .from('manufacturers')
+          .select('id')
+          .eq('user_id', user.id)
+          .single();
+
+        if (!manufacturer) return;
+
+        // Fetch pending manufacturer matches
+        const { data: matches, error } = await supabase
+          .from('manufacturer_matches')
+          .select(`
+            *,
+            designs (
+              id,
+              name,
+              category,
+              user_id,
+              profiles:user_id (full_name)
+            )
+          `)
+          .eq('manufacturer_id', manufacturer.id)
+          .eq('status', 'pending');
+
+        if (error) throw error;
+        setPendingRequests(matches || []);
+      } catch (error: any) {
+        console.error('Error fetching pending requests:', error);
+      } finally {
+        setLoadingRequests(false);
+      }
+    };
+
+    if (!roleLoading && role === 'manufacturer') {
+      fetchPendingRequests();
+    }
+  }, [role, roleLoading]);
+
+  const handleApprove = async (matchId: string, designId: string) => {
+    try {
+      // Update match status to accepted
+      const { error: matchError } = await supabase
+        .from('manufacturer_matches')
+        .update({ status: 'accepted' })
+        .eq('id', matchId);
+
+      if (matchError) throw matchError;
+
+      // Update order status
+      const { error: orderError } = await supabase
+        .from('orders')
+        .update({ status: 'manufacturer_review' })
+        .eq('design_id', designId);
+
+      if (orderError) throw orderError;
+
+      toast.success('Order approved successfully!');
+      
+      // Refresh pending requests
+      setPendingRequests(prev => prev.filter(req => req.id !== matchId));
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to approve order');
+    }
+  };
+
+  const handleReject = async (matchId: string) => {
+    try {
+      const { error } = await supabase
+        .from('manufacturer_matches')
+        .update({ status: 'rejected' })
+        .eq('id', matchId);
+
+      if (error) throw error;
+
+      toast.success('Order rejected');
+      
+      // Refresh pending requests
+      setPendingRequests(prev => prev.filter(req => req.id !== matchId));
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to reject order');
+    }
+  };
 
   const activeOrders = orders.length;
   const awaitingAction = orders.filter(o => 
@@ -212,21 +308,83 @@ const ManufacturerDashboard = () => {
             </Card>
           </TabsContent>
 
-          {/* Potential Orders Tab */}
+          {/* Pending Order Requests Tab */}
           <TabsContent value="opportunities">
             <Card>
               <CardHeader>
-                <CardTitle>Available Order Opportunities</CardTitle>
+                <CardTitle>Pending Order Requests</CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
                   Review designer requests and accept orders that match your capabilities
                 </p>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-12 text-muted-foreground">
-                  <Factory className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p>No available orders at the moment</p>
-                  <p className="text-sm mt-2">Check back later for new opportunities</p>
-                </div>
+                {loadingRequests ? (
+                  <div className="text-center py-12">
+                    <Clock className="w-8 h-8 mx-auto mb-2 opacity-50 animate-spin" />
+                    <p className="text-muted-foreground">Loading requests...</p>
+                  </div>
+                ) : pendingRequests.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Factory className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p>No pending order requests</p>
+                    <p className="text-sm mt-2">Check back later for new opportunities</p>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Design Name</TableHead>
+                        <TableHead>Designer</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Match Score</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {pendingRequests.map((request) => (
+                        <TableRow key={request.id}>
+                          <TableCell className="font-medium">
+                            {request.designs?.name || 'Unknown Design'}
+                          </TableCell>
+                          <TableCell>
+                            {request.designs?.profiles?.full_name || 'Unknown Designer'}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">
+                              {request.designs?.category || 'N/A'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="secondary">
+                              {request.score || 0}% match
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex gap-2 justify-end">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleReject(request.id)}
+                                className="gap-1"
+                              >
+                                <XCircle className="w-4 h-4" />
+                                Reject
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={() => handleApprove(request.id, request.designs.id)}
+                                className="gap-1"
+                              >
+                                <CheckCircle className="w-4 h-4" />
+                                Approve
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

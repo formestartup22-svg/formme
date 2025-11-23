@@ -66,7 +66,7 @@ const SendingStage = ({ design }: SendingStageProps) => {
         .insert({
           design_id: design.id,
           designer_id: user.id,
-          manufacturer_id: null,
+          manufacturer_id: workflowData.selectedFactory.id,
           quantity: parseInt(workflowData.quantity) || 0,
           status: 'sent_to_manufacturer',
           notes: `Delivery date: ${workflowData.deliveryDate || 'TBD'}`
