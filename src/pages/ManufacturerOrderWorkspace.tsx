@@ -19,44 +19,50 @@ const ManufacturerOrderWorkspace = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchOrder = async () => {
+  const fetchOrder = async () => {
       if (!id) return;
       
       try {
-      const { data, error } = await supabase
-        .from('orders')
-        .select(`
-          *,
-          designs (
-            id,
-            name,
-            category,
-            user_id
-          )
-        `)
-        .eq('id', id)
-        .single();
+        // Fetch order with design and design specs
+        const { data: orderData, error: orderError } = await supabase
+          .from('orders')
+          .select('*')
+          .eq('id', id)
+          .single();
 
-      if (error) throw error;
+        if (orderError) throw orderError;
 
-      // Fetch designer profile separately
-      if (data) {
+        // Fetch design details
+        const { data: designData, error: designError } = await supabase
+          .from('designs')
+          .select('id, name, category, user_id')
+          .eq('id', orderData.design_id)
+          .maybeSingle();
+
+        if (designError) console.error('Design error:', designError);
+
+        // Fetch design specs
+        const { data: specsData } = await supabase
+          .from('design_specs')
+          .select('*')
+          .eq('design_id', orderData.design_id)
+          .maybeSingle();
+
+        // Fetch designer profile
         const { data: profile } = await supabase
           .from('profiles')
           .select('full_name')
-          .eq('user_id', data.designer_id)
+          .eq('user_id', orderData.designer_id)
           .maybeSingle();
-        
-        setOrder({
-          ...data,
-          profiles: profile
-        });
-      }
 
-        if (error) throw error;
-        setOrder(data);
-      } catch (error) {
-        console.error('Error fetching order:', error);
+        setOrder({
+          ...orderData,
+          designs: designData,
+          design_specs: specsData,
+          profiles: profile || { full_name: 'Unknown' }
+        });
+      } catch (err: any) {
+        console.error('Error fetching order:', err);
       } finally {
         setLoading(false);
       }
@@ -158,30 +164,43 @@ const ManufacturerOrderWorkspace = () => {
                 <div>
                   <h3 className="font-semibold mb-2">Garment Overview</h3>
                   <p className="text-sm text-muted-foreground">
-                    Cotton pajama set with all-over print design. Includes top and pants.
+                    {order.designs?.category || 'No category specified'}
                   </p>
+                  {order.design_specs?.construction_notes && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      {order.design_specs.construction_notes}
+                    </p>
+                  )}
                 </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Measurements</h3>
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <p className="text-muted-foreground">Size</p>
-                      <p className="font-medium">S, M, L, XL</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Fabric</p>
-                      <p className="font-medium">95% Cotton, 5% Elastane</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">GSM</p>
-                      <p className="font-medium">180</p>
+                {(order.design_specs?.measurements || order.design_specs?.fabric_type || order.design_specs?.gsm) && (
+                  <div>
+                    <h3 className="font-semibold mb-2">Specifications</h3>
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                      {order.design_specs?.measurements && (
+                        <div>
+                          <p className="text-muted-foreground">Measurements</p>
+                          <p className="font-medium">{JSON.stringify(order.design_specs.measurements)}</p>
+                        </div>
+                      )}
+                      {order.design_specs?.fabric_type && (
+                        <div>
+                          <p className="text-muted-foreground">Fabric</p>
+                          <p className="font-medium">{order.design_specs.fabric_type}</p>
+                        </div>
+                      )}
+                      {order.design_specs?.gsm && (
+                        <div>
+                          <p className="text-muted-foreground">GSM</p>
+                          <p className="font-medium">{order.design_specs.gsm}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
+                )}
                 <div>
                   <h3 className="font-semibold mb-2">Notes</h3>
                   <p className="text-sm text-muted-foreground">
-                    Please ensure seams are double-stitched for durability.
+                    {order.notes || 'No notes provided'}
                   </p>
                 </div>
               </CardContent>
