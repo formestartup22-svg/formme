@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,46 +9,70 @@ import { Label } from '@/components/ui/label';
 import NavBar from '@/components/Navbar';
 import { MessageSquare, FileDown, Upload, CheckCircle, XCircle, ArrowLeft } from 'lucide-react';
 import { ManufacturerStepper } from '@/components/workflow/ManufacturerStepper';
-
-// Mock data for order
-const mockOrder = {
-  id: '1',
-  designName: 'Cotton Pajama Set',
-  designerName: 'Emma Johnson',
-  status: 'On Track',
-  stage: 'Sample Development',
-};
+import { FactoryMessaging } from '@/components/workflow/FactoryMessaging';
+import { supabase } from '@/integrations/supabase/client';
 
 const ManufacturerOrderWorkspace = () => {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState('techpack');
-  const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState([
-    {
-      sender: 'Designer',
-      text: 'Can you confirm the GSM for the main fabric?',
-      timestamp: '2 hours ago',
-    },
-    {
-      sender: 'Manufacturer',
-      text: 'Yes, we will use 180 GSM cotton jersey as specified.',
-      timestamp: '1 hour ago',
-    },
-  ]);
+  const [order, setOrder] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleSendMessage = () => {
-    if (message.trim()) {
-      setMessages([
-        ...messages,
-        {
-          sender: 'Manufacturer',
-          text: message,
-          timestamp: 'Just now',
-        },
-      ]);
-      setMessage('');
-    }
-  };
+  useEffect(() => {
+    const fetchOrder = async () => {
+      if (!id) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .select(`
+            *,
+            designs (
+              id,
+              name,
+              category,
+              user_id
+            ),
+            profiles!orders_designer_id_fkey (
+              full_name
+            )
+          `)
+          .eq('id', id)
+          .single();
+
+        if (error) throw error;
+        setOrder(data);
+      } catch (error) {
+        console.error('Error fetching order:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrder();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <NavBar />
+        <div className="container mx-auto px-4 pt-32 pb-12">
+          <p className="text-muted-foreground">Loading order...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!order) {
+    return (
+      <div className="min-h-screen bg-background">
+        <NavBar />
+        <div className="container mx-auto px-4 pt-32 pb-12">
+          <p className="text-muted-foreground">Order not found</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -66,15 +90,15 @@ const ManufacturerOrderWorkspace = () => {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-3xl font-bold text-foreground mb-2">
-                {mockOrder.designName}
+                {order.designs?.name || 'Unknown Design'}
               </h1>
-              <p className="text-muted-foreground">Designer: {mockOrder.designerName}</p>
+              <p className="text-muted-foreground">Designer: {order.profiles?.full_name || 'Unknown'}</p>
             </div>
             <div className="flex items-center gap-3">
               <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                {mockOrder.status}
+                On Track
               </Badge>
-              <Badge variant="outline">{mockOrder.stage}</Badge>
+              <Badge variant="outline">{order.status?.replace(/_/g, ' ') || 'Pending'}</Badge>
             </div>
           </div>
           
@@ -153,47 +177,7 @@ const ManufacturerOrderWorkspace = () => {
 
             {/* Clarifications Content */}
             {activeTab === 'clarifications' && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Clarifications & Messages</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4 mb-4 max-h-96 overflow-y-auto">
-                  {messages.map((msg, idx) => (
-                    <div
-                      key={idx}
-                      className={`p-4 rounded-lg ${
-                        msg.sender === 'Manufacturer'
-                          ? 'bg-primary/10 ml-auto max-w-[80%]'
-                          : 'bg-muted max-w-[80%]'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-semibold text-sm">{msg.sender}</span>
-                        <span className="text-xs text-muted-foreground">{msg.timestamp}</span>
-                      </div>
-                      <p className="text-sm">{msg.text}</p>
-                    </div>
-                  ))}
-                </div>
-                
-                <div className="space-y-3">
-                  <Textarea
-                    placeholder="Type your message..."
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    rows={3}
-                  />
-                  <div className="flex gap-2">
-                    <Button variant="outline" className="gap-2">
-                      <Upload className="w-4 h-4" />
-                      Attach File
-                    </Button>
-                    <Button onClick={handleSendMessage}>Send Message</Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              <FactoryMessaging designId={order.designs?.id} orderId={order.id} />
             )}
 
             {/* Production Approval Content */}
