@@ -143,6 +143,7 @@ export const WorkflowProvider = ({ children, initialStage }: { children: ReactNo
     'factory-match',
     'sending',
     'waiting',
+    'review-timeline',
     'payment',
     'production',
     'waiting-sample',
