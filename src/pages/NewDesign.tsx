@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -218,6 +219,8 @@ const NewDesign = () => {
           </div>
         </div>
       </div>
+
+      <Footer />
 
       {/* Studio Selection Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
