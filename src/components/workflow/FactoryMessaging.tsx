@@ -37,11 +37,20 @@ export const FactoryMessaging = ({ designId, orderId }: FactoryMessagingProps) =
   }, []);
 
   useEffect(() => {
-    if (!orderId) return;
+    if (!orderId || !currentUserId) return;
 
     const fetchMessages = async () => {
       setLoading(true);
       try {
+        // First get the order to determine designer_id
+        const { data: orderData, error: orderError } = await supabase
+          .from('orders')
+          .select('designer_id')
+          .eq('id', orderId)
+          .single();
+
+        if (orderError) throw orderError;
+
         const { data, error } = await supabase
           .from('messages')
           .select('*')
@@ -50,10 +59,10 @@ export const FactoryMessaging = ({ designId, orderId }: FactoryMessagingProps) =
 
         if (error) throw error;
 
-        // Determine if each message is from designer
+        // Mark messages from designer (not from current user perspective)
         const messagesWithRole = data.map(msg => ({
           ...msg,
-          is_designer: msg.sender_id === currentUserId
+          is_designer: msg.sender_id === orderData.designer_id
         }));
 
         setMessages(messagesWithRole);
@@ -77,11 +86,19 @@ export const FactoryMessaging = ({ designId, orderId }: FactoryMessagingProps) =
           table: 'messages',
           filter: `order_id=eq.${orderId}`
         },
-        (payload) => {
+        async (payload) => {
           const newMsg = payload.new as Message;
+          
+          // Get designer_id to properly mark messages
+          const { data: orderData } = await supabase
+            .from('orders')
+            .select('designer_id')
+            .eq('id', orderId)
+            .single();
+          
           setMessages(prev => [...prev, {
             ...newMsg,
-            is_designer: newMsg.sender_id === currentUserId
+            is_designer: newMsg.sender_id === orderData?.designer_id
           }]);
           
           // Scroll to bottom

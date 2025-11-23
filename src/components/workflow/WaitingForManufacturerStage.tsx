@@ -178,6 +178,14 @@ const WaitingForManufacturerStage = ({ design }: WaitingForManufacturerStageProp
         <StageNavigation 
           nextLabel="Continue to Review Timeline"
           showBack={true}
+          onNext={async () => {
+            // Only allow proceeding if manufacturer has accepted
+            if (!isAccepted) {
+              toast.error('Please wait for manufacturer approval before proceeding');
+              return false;
+            }
+            return true;
+          }}
         />
       </div>
     </div>
