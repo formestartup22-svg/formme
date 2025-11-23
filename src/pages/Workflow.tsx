@@ -17,7 +17,6 @@ import FactoryMatchStage from '@/components/workflow/FactoryMatchStage';
 import { ManufacturerSelectionStage } from '@/components/workflow/ManufacturerSelectionStage';
 import SendingStage from '@/components/workflow/SendingStage';
 import WaitingForManufacturerStage from '@/components/workflow/WaitingForManufacturerStage';
-import ReviewProductionTimelineStage from '@/components/workflow/ReviewProductionTimelineStage';
 import PaymentStage from '@/components/workflow/PaymentStage';
 import ProductionStage from '@/components/workflow/ProductionStage';
 import WaitingForSampleStage from '@/components/workflow/WaitingForSampleStage';
@@ -65,8 +64,6 @@ const WorkspaceContent = ({ design }: { design: any }) => {
         return <SendingStage design={design} />;
       case 'waiting':
         return <WaitingForManufacturerStage design={design} />;
-      case 'review-timeline':
-        return <ReviewProductionTimelineStage design={design} />;
       case 'payment':
         return <PaymentStage design={design} />;
       case 'production':
@@ -165,8 +162,8 @@ const Workflow = () => {
         .maybeSingle();
       
       if (finalizedOrder) {
-        console.log('[Workflow] Contract finalized, going to review-timeline');
-        setInitialStage('review-timeline');
+        console.log('[Workflow] Contract finalized, going to payment');
+        setInitialStage('payment');
         return;
       }
       
@@ -189,7 +186,7 @@ const Workflow = () => {
         'draft': 'tech-pack',
         'tech_pack_pending': 'tech-pack',
         'sent_to_manufacturer': 'send-tech-pack',
-        'manufacturer_review': 'review-timeline',
+        'manufacturer_review': 'payment',
         'production_approval': 'production',
         'sample_development': 'waiting-sample',
         'quality_check': 'quality',
@@ -269,7 +266,6 @@ const Workflow = () => {
       case 'factory-match': return <Factory className="w-4 h-4" />;
       case 'sending': return <Send className="w-4 h-4" />;
       case 'waiting': return <Clock className="w-4 h-4" />;
-      case 'review-timeline': return <CheckCircle className="w-4 h-4" />;
       case 'payment': return <CreditCard className="w-4 h-4" />;
       case 'production': return <Factory className="w-4 h-4" />;
       case 'waiting-sample': return <Clock className="w-4 h-4" />;
