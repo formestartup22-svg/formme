@@ -6,8 +6,6 @@ import { Design } from '@/data/workflowData';
 import { useWorkflow } from '@/context/WorkflowContext';
 import { StageHeader } from './StageHeader';
 import { StageNavigation } from './StageNavigation';
-import { FactoryCommunication } from './FactoryCommunication';
-import { FactoryDocuments } from './FactoryDocuments';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -83,83 +81,76 @@ const PaymentStage = ({ design }: PaymentStageProps) => {
         ]}
       />
 
-      <div className="grid grid-cols-3 gap-6">
-        <div className="col-span-2 space-y-6">
-          {/* Cost Breakdown */}
-          <section>
-            <h3 className="text-sm font-semibold text-foreground mb-3">Cost Breakdown</h3>
-            <Card className="border-border">
-              <CardContent className="p-6">
-                <div className="space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Unit Cost</span>
-                    <span className="font-medium">${unitCost.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Quantity × {quantity}</span>
-                    <span className="font-medium">${subtotal.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Shipping & Handling</span>
-                    <span className="font-medium">${shipping.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Taxes & Fees</span>
-                    <span className="font-medium">${taxes.toFixed(2)}</span>
-                  </div>
-                  <div className="h-px bg-border my-3" />
-                  <div className="flex justify-between text-lg font-semibold">
-                    <span>Total Amount</span>
-                    <span className="text-primary">${total.toFixed(2)}</span>
-                  </div>
+      <div className="space-y-6">
+        {/* Cost Breakdown */}
+        <section>
+          <h3 className="text-sm font-semibold text-foreground mb-3">Cost Breakdown</h3>
+          <Card className="border-border">
+            <CardContent className="p-6">
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Unit Cost</span>
+                  <span className="font-medium">${unitCost.toFixed(2)}</span>
                 </div>
-              </CardContent>
-            </Card>
-          </section>
-
-          {/* Payment Method */}
-          <section>
-            <h3 className="text-sm font-semibold text-foreground mb-3">Payment Method</h3>
-            <Card className="border-border">
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    Payment processing will be handled securely. You'll be redirected to complete your payment.
-                  </p>
-                  <Button 
-                    onClick={handlePayment} 
-                    className="w-full gap-2" 
-                    size="lg"
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <CreditCard className="w-4 h-4" />
-                        Proceed to Payment
-                      </>
-                    )}
-                  </Button>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Quantity × {quantity}</span>
+                  <span className="font-medium">${subtotal.toFixed(2)}</span>
                 </div>
-              </CardContent>
-            </Card>
-          </section>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Shipping & Handling</span>
+                  <span className="font-medium">${shipping.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Taxes & Fees</span>
+                  <span className="font-medium">${taxes.toFixed(2)}</span>
+                </div>
+                <div className="h-px bg-border my-3" />
+                <div className="flex justify-between text-lg font-semibold">
+                  <span>Total Amount</span>
+                  <span className="text-primary">${total.toFixed(2)}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
 
-          <StageNavigation 
-            onNext={() => true}
-            nextLabel="Continue to Production Parameters"
-            showBack={true}
-          />
-        </div>
+        {/* Payment Method */}
+        <section>
+          <h3 className="text-sm font-semibold text-foreground mb-3">Payment Method</h3>
+          <Card className="border-border">
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Payment processing will be handled securely. You'll be redirected to complete your payment.
+                </p>
+                <Button 
+                  onClick={handlePayment} 
+                  className="w-full gap-2" 
+                  size="lg"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard className="w-4 h-4" />
+                      Proceed to Payment
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
 
-        <div className="space-y-4">
-          <FactoryCommunication />
-          <FactoryDocuments />
-        </div>
+        <StageNavigation 
+          onNext={() => true}
+          nextLabel="Continue to Production Parameters"
+          showBack={true}
+        />
       </div>
     </div>
   );
