@@ -44,6 +44,8 @@ const PaymentStage = ({ design }: PaymentStageProps) => {
     try {
       setLoading(true);
       
+      console.log('[PaymentStage] Initiating checkout for design:', design.id);
+      
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: {
           orderId: design.id,
@@ -52,17 +54,24 @@ const PaymentStage = ({ design }: PaymentStageProps) => {
         },
       });
 
-      if (error) throw error;
+      console.log('[PaymentStage] Checkout response:', { data, error });
+
+      if (error) {
+        console.error('[PaymentStage] Checkout error:', error);
+        throw error;
+      }
 
       if (data?.url) {
-        // Redirect to Stripe Checkout
-        window.location.href = data.url;
+        console.log('[PaymentStage] Opening Stripe checkout:', data.url);
+        // Open Stripe Checkout in a new tab
+        window.open(data.url, '_blank');
+        toast.success('Redirecting to payment...');
       } else {
         throw new Error('No checkout URL received');
       }
     } catch (error: any) {
-      console.error('Payment error:', error);
-      toast.error('Failed to initiate payment. Please try again.');
+      console.error('[PaymentStage] Payment error:', error);
+      toast.error(error?.message || 'Failed to initiate payment. Please try again.');
     } finally {
       setLoading(false);
     }
