@@ -49,6 +49,8 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
   const [loading, setLoading] = useState(false);
   const [viewAll, setViewAll] = useState(false);
   const [designCategory, setDesignCategory] = useState<string>('');
+  const [selectedManufacturers, setSelectedManufacturers] = useState<Set<string>>(new Set());
+  const [sending, setSending] = useState(false);
 
   // Fetch design category
   useEffect(() => {
@@ -179,20 +181,90 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
   };
 
   const handleFactorySelect = (factory: Manufacturer) => {
-    updateWorkflowData({
-      selectedFactory: {
-        id: factory.id,
-        name: factory.name,
-        location: factory.location || '',
-        leadTime: factory.lead_time_days?.toString() || '',
-        priceRange: factory.price_range || ''
-      }
-    });
-    toast.success(`Selected ${factory.name}`);
+    const newSelected = new Set(selectedManufacturers);
+    if (newSelected.has(factory.id)) {
+      newSelected.delete(factory.id);
+    } else {
+      newSelected.add(factory.id);
+    }
+    setSelectedManufacturers(newSelected);
   };
 
-  const handleNext = () => {
-    return true;
+  const handleSendRequests = async () => {
+    if (selectedManufacturers.size === 0) {
+      toast.error('Please select at least one manufacturer');
+      return false;
+    }
+
+    setSending(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      // Get or create order for this design
+      let { data: order, error: orderError } = await supabase
+        .from('orders')
+        .select('id')
+        .eq('design_id', design.id)
+        .eq('designer_id', user.id)
+        .maybeSingle();
+
+      if (orderError) throw orderError;
+
+      // Create order if it doesn't exist
+      if (!order) {
+        const { data: newOrder, error: createError } = await supabase
+          .from('orders')
+          .insert({
+            design_id: design.id,
+            designer_id: user.id,
+            quantity: parseInt(workflowData.quantity || '100'),
+            status: 'sent_to_manufacturer'
+          })
+          .select()
+          .single();
+
+        if (createError) throw createError;
+        order = newOrder;
+      }
+
+      // Create manufacturer matches for all selected manufacturers
+      const matchPromises = Array.from(selectedManufacturers).map(async (manufacturerId) => {
+        const manufacturer = manufacturers.find(m => m.id === manufacturerId);
+        
+        // Check if match already exists
+        const { data: existing } = await supabase
+          .from('manufacturer_matches')
+          .select('id')
+          .eq('design_id', design.id)
+          .eq('manufacturer_id', manufacturerId)
+          .maybeSingle();
+
+        if (existing) {
+          return; // Already exists
+        }
+
+        return supabase
+          .from('manufacturer_matches')
+          .insert({
+            design_id: design.id,
+            manufacturer_id: manufacturerId,
+            score: manufacturer?.matchScore || 0,
+            status: 'pending'
+          });
+      });
+
+      await Promise.all(matchPromises);
+
+      toast.success(`Sent requests to ${selectedManufacturers.size} manufacturer(s)`);
+      return true;
+    } catch (error: any) {
+      console.error('Error sending requests:', error);
+      toast.error(error.message || 'Failed to send requests');
+      return false;
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -306,7 +378,7 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
               ) : (
                 <div className="space-y-3">
                   {manufacturers.map((factory) => {
-                    const isSelected = workflowData.selectedFactory?.id === factory.id;
+                    const isSelected = selectedManufacturers.has(factory.id);
                     
                     return (
                       <Card
@@ -377,9 +449,19 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
             </section>
           )}
 
+          {selectedManufacturers.size > 0 && (
+            <Card className="bg-primary/5 border-primary/20">
+              <CardContent className="p-4">
+                <p className="text-sm text-muted-foreground">
+                  {selectedManufacturers.size} manufacturer(s) selected. Click "Send Requests" to notify them about your order.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
           <StageNavigation 
-            onNext={handleNext}
-            nextLabel="Continue to Sending"
+            onNext={handleSendRequests}
+            nextLabel={sending ? 'Sending...' : `Send Requests to ${selectedManufacturers.size || 'Selected'} Manufacturer(s)`}
             showBack={true}
           />
         </div>
