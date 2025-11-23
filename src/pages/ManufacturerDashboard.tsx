@@ -370,7 +370,7 @@ const ManufacturerDashboard = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {pendingRequests.map((request) => (
+                      {pendingRequests.filter(request => request.designs).map((request) => (
                         <TableRow key={request.id}>
                           <TableCell className="font-medium">
                             {request.designs?.name || 'Unknown Design'}
@@ -401,8 +401,9 @@ const ManufacturerDashboard = () => {
                               </Button>
                               <Button
                                 size="sm"
-                                onClick={() => handleApprove(request.id, request.designs.id)}
+                                onClick={() => handleApprove(request.id, request.designs?.id || '')}
                                 className="gap-1"
+                                disabled={!request.designs?.id}
                               >
                                 <CheckCircle className="w-4 h-4" />
                                 Approve
