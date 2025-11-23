@@ -178,8 +178,8 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#D4C4B0] flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl p-8">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_30%_20%,rgba(212,196,176,0.6),rgba(212,196,176,1))] flex items-center justify-center p-4">
+      <Card className="w-full max-w-2xl p-8 bg-white/60 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.08)] rounded-2xl">
         <div className="text-center mb-6">
           <h1 className="text-4xl font-bold mb-2">formme</h1>
           <p className="text-muted-foreground">
@@ -188,14 +188,14 @@ const Auth = () => {
         </div>
 
         <Tabs value={mode} onValueChange={(v) => setMode(v as "signin" | "signup")}>
-          <div className="flex justify-center gap-8 mb-6 border-b border-border">
+          <div className="flex justify-center gap-8 mb-6 border-b border-border/30">
             <button
               type="button"
               onClick={() => setMode("signin")}
-              className={`pb-2 px-1 transition-all ${
+              className={`pb-3 px-2 transition-all rounded-t-lg ${
                 mode === "signin"
-                  ? "border-b-2 border-primary font-semibold text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "border-b-2 border-primary font-bold text-foreground bg-white/20"
+                  : "text-muted-foreground hover:text-foreground hover:bg-white/10"
               }`}
             >
               Sign In
@@ -203,10 +203,10 @@ const Auth = () => {
             <button
               type="button"
               onClick={() => setMode("signup")}
-              className={`pb-2 px-1 transition-all ${
+              className={`pb-3 px-2 transition-all rounded-t-lg ${
                 mode === "signup"
-                  ? "border-b-2 border-primary font-semibold text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "border-b-2 border-primary font-bold text-foreground bg-white/20"
+                  : "text-muted-foreground hover:text-foreground hover:bg-white/10"
               }`}
             >
               Sign Up
@@ -242,7 +242,7 @@ const Auth = () => {
               >
                 Forgot password?
               </button>
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" className="w-full h-11 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all" disabled={isLoading}>
                 {isLoading ? "Signing in..." : "Sign In"}
               </Button>
               <div className="relative my-4">
@@ -283,18 +283,18 @@ const Auth = () => {
           </TabsContent>
 
           <TabsContent value="signup">
-            <form onSubmit={handleSignUp} className="space-y-4">
+            <form onSubmit={handleSignUp} className="space-y-3">
               {/* Role Selection */}
               <div>
                 <Label className="text-sm font-medium mb-2 block">I am a...</Label>
-                <div className="flex rounded-md border border-border overflow-hidden">
+                <div className="flex gap-1 bg-muted/30 p-1 rounded-xl">
                   <button
                     type="button"
                     onClick={() => setUserRole("designer")}
-                    className={`flex-1 py-2 text-sm font-medium transition-colors ${
+                    className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all shadow-[0_2px_8px_rgba(0,0,0,0.06)] ${
                       userRole === "designer"
                         ? "bg-primary text-primary-foreground"
-                        : "bg-background text-foreground hover:bg-muted"
+                        : "bg-white text-foreground border border-border/50 hover:bg-primary/5"
                     }`}
                   >
                     Designer
@@ -302,10 +302,10 @@ const Auth = () => {
                   <button
                     type="button"
                     onClick={() => setUserRole("manufacturer")}
-                    className={`flex-1 py-2 text-sm font-medium transition-colors ${
+                    className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all shadow-[0_2px_8px_rgba(0,0,0,0.06)] ${
                       userRole === "manufacturer"
                         ? "bg-primary text-primary-foreground"
-                        : "bg-background text-foreground hover:bg-muted"
+                        : "bg-white text-foreground border border-border/50 hover:bg-primary/5"
                     }`}
                   >
                     Manufacturer
@@ -314,9 +314,9 @@ const Auth = () => {
               </div>
 
               {/* Personal Information */}
-              <div className="pt-2">
-                <h3 className="text-sm font-semibold text-muted-foreground mb-3">Personal Information</h3>
-                <div className="space-y-3">
+              <div className="pt-1">
+                <h3 className="text-sm font-semibold text-muted-foreground mb-2">Personal Information</h3>
+                <div className="space-y-2">
                   <div>
                     <Label htmlFor="signup-fullName" className="text-sm">Full Name</Label>
                     <Input
@@ -332,9 +332,9 @@ const Auth = () => {
               </div>
 
               {/* Company Info */}
-              <div className="pt-2">
-                <h3 className="text-sm font-semibold text-muted-foreground mb-3">Company Info</h3>
-                <div className="space-y-3">
+              <div className="pt-1">
+                <h3 className="text-sm font-semibold text-muted-foreground mb-2">Company Info</h3>
+                <div className="space-y-2">
                   <div>
                     <Label htmlFor="signup-companyName" className="text-sm">Company Name</Label>
                     <Input
@@ -373,9 +373,9 @@ const Auth = () => {
               {userRole === "manufacturer" && (
                 <>
                   {/* Additional Info */}
-                  <div className="pt-2">
-                    <h3 className="text-sm font-semibold text-muted-foreground mb-3">Additional Information</h3>
-                    <div className="space-y-3">
+                  <div className="pt-1">
+                    <h3 className="text-sm font-semibold text-muted-foreground mb-2">Additional Information</h3>
+                    <div className="space-y-2">
                       <div>
                         <Label htmlFor="signup-location" className="text-sm">Location</Label>
                         <Input
@@ -402,9 +402,9 @@ const Auth = () => {
                   </div>
 
                   {/* Production Details */}
-                  <div className="pt-2">
-                    <h3 className="text-sm font-semibold text-muted-foreground mb-3">Production Details</h3>
-                    <div className="space-y-3">
+                  <div className="pt-1">
+                    <h3 className="text-sm font-semibold text-muted-foreground mb-2">Production Details</h3>
+                    <div className="space-y-2">
                       <div>
                         <Label htmlFor="signup-moq" className="text-sm">Min Order Qty</Label>
                         <Input
@@ -453,8 +453,8 @@ const Auth = () => {
                   </div>
 
                   {/* Categories */}
-                  <div className="pt-2">
-                    <h3 className="text-sm font-semibold text-muted-foreground mb-3">Categories</h3>
+                  <div className="pt-1">
+                    <h3 className="text-sm font-semibold text-muted-foreground mb-2">Categories</h3>
                     <div className="grid grid-cols-2 gap-2 p-3 border border-border rounded-md bg-background">
                       {categoriesOptions.map((category) => (
                         <div key={category} className="flex items-center space-x-2">
@@ -487,7 +487,7 @@ const Auth = () => {
                   </div>
                 </>
               )}
-              <Button type="submit" className="w-full mt-4" disabled={isLoading}>
+              <Button type="submit" className="w-full mt-3 h-11 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all" disabled={isLoading}>
                 {isLoading ? "Creating account..." : "Sign Up"}
               </Button>
               <div className="relative my-4">
@@ -502,7 +502,7 @@ const Auth = () => {
                 type="button"
                 variant="outline"
                 onClick={handleGoogleSignIn}
-                className="w-full"
+                className="w-full h-11 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all"
               >
                 <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                   <path

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Upload, Palette, Sparkles, Zap } from "lucide-react";
 import { toast } from "sonner";
@@ -15,7 +16,26 @@ const NewDesign = () => {
   const [showDialog, setShowDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [designName, setDesignName] = useState("");
-  const [category, setCategory] = useState("");
+  const [categories, setCategories] = useState<string[]>([]);
+
+  const categoryOptions = [
+    "T-Shirts",
+    "Pants",
+    "Jackets",
+    "Underwear",
+    "Hoodies",
+    "Dresses",
+    "Activewear",
+    "Accessories",
+  ];
+
+  const handleCategoryToggle = (category: string) => {
+    setCategories(prev => 
+      prev.includes(category) 
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
 
   const handleUploadDesign = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +56,7 @@ const NewDesign = () => {
         .insert({
           user_id: user.id,
           name: designName,
-          category,
+          category: categories.join(", "),
           status: 'draft',
         })
         .select()
@@ -164,13 +184,24 @@ const NewDesign = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="category">Category</Label>
-                  <Input
-                    id="category"
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    placeholder="T-Shirt, Hoodie, etc."
-                  />
+                  <Label className="mb-3 block">Categories</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {categoryOptions.map((cat) => (
+                      <div key={cat} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`category-${cat}`}
+                          checked={categories.includes(cat)}
+                          onCheckedChange={() => handleCategoryToggle(cat)}
+                        />
+                        <label
+                          htmlFor={`category-${cat}`}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                        >
+                          {cat}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 <Button type="submit" className="w-full" disabled={isLoading}>
