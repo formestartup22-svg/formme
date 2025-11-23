@@ -157,18 +157,7 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
 
       setSelectedManufacturer(manufacturerId);
       
-      // Mark all previous stages as complete
-      markStageComplete('tech-pack');
-      markStageComplete('factory-match');
-      markStageComplete('send-tech-pack');
-      
-      toast.success('Manufacturer finalized! Proceeding to timeline review...');
-      
-      // Navigate to next stage
-      setTimeout(() => {
-        setCurrentStage('review-timeline');
-        navigate(`/workflow?designId=${design.id}&stage=review-timeline`);
-      }, 1000);
+      toast.success('Contract finalized! Click "Continue to Review Timeline" when ready to proceed.');
     } catch (error: any) {
       console.error('Error finalizing manufacturer:', error);
       toast.error('Failed to finalize manufacturer');
@@ -228,6 +217,14 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
       return false;
     }
 
+    // Mark all previous stages as complete
+    markStageComplete('tech-pack');
+    markStageComplete('factory-match');
+    markStageComplete('send-tech-pack');
+    
+    // Navigate to next stage
+    setCurrentStage('review-timeline');
+    
     return true;
   };
 
