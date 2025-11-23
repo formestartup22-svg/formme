@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import NavBar from '@/components/Navbar';
-import { MessageSquare, FileDown, Upload, CheckCircle, XCircle, ArrowLeft } from 'lucide-react';
+import { MessageSquare, FileDown, Upload, CheckCircle, XCircle, ArrowLeft, Clock } from 'lucide-react';
 import { ManufacturerStepper } from '@/components/workflow/ManufacturerStepper';
 import { FactoryMessaging } from '@/components/workflow/FactoryMessaging';
 import { FloatingMessagesWidget } from '@/components/workflow/FloatingMessagesWidget';
@@ -608,16 +608,48 @@ const ManufacturerOrderWorkspace = () => {
                 </div>
                 
                 <div className="pt-4 border-t">
+                  {order.production_params_submitted_at && !order.production_params_approved && order.production_params_approved !== false ? (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                          <Clock className="w-5 h-5 text-blue-600 animate-pulse" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-blue-900">Waiting for designer approval</p>
+                          <p className="text-xs text-blue-700 mt-0.5">Your production parameters have been submitted and are under review</p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : order.production_params_approved === true ? (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                      <div className="flex items-center gap-3">
+                        <CheckCircle className="w-5 h-5 text-green-600" />
+                        <p className="text-sm font-medium text-green-900">Designer approved your production parameters</p>
+                      </div>
+                    </div>
+                  ) : order.production_params_approved === false ? (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                      <div className="flex items-center gap-3">
+                        <XCircle className="w-5 h-5 text-red-600" />
+                        <p className="text-sm font-medium text-red-900">Designer rejected your production parameters</p>
+                      </div>
+                    </div>
+                  ) : null}
+                  
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-medium">Status:</span>
-                    <Badge variant="outline">Waiting for Approval</Badge>
+                    <Badge variant="outline">
+                      {order.production_params_approved === true ? 'Approved' : 
+                       order.production_params_approved === false ? 'Rejected' :
+                       order.production_params_submitted_at ? 'Pending Approval' : 'Not Submitted'}
+                    </Badge>
                   </div>
                   <Button 
                     className="w-full" 
                     onClick={handleSubmitProductionApproval}
-                    disabled={submitting || !productionStartDate || !productionCompletionDate || !fabricType || !gsm}
+                    disabled={submitting || !productionStartDate || !productionCompletionDate || !fabricType || !gsm || (order.production_params_submitted_at && order.production_params_approved !== false)}
                   >
-                    {submitting ? 'Submitting...' : 'Submit for Designer Approval'}
+                    {submitting ? 'Submitting...' : order.production_params_submitted_at && order.production_params_approved !== false ? 'Awaiting Designer Approval' : 'Submit for Designer Approval'}
                   </Button>
                 </div>
               </CardContent>

@@ -198,34 +198,6 @@ const ProductionStage = ({ design }: ProductionStageProps) => {
           </section>
 
           <section>
-            <h3 className="text-sm font-semibold text-foreground mb-3">Lab Dip Photos</h3>
-            <Card className="border-border">
-              <CardContent className="p-6">
-                {orderData.lab_dip_photos && orderData.lab_dip_photos.length > 0 ? (
-                  <div className="grid grid-cols-3 gap-3">
-                    {orderData.lab_dip_photos.map((url: string, idx: number) => (
-                      <div key={idx} className="aspect-square rounded-lg overflow-hidden">
-                        <img 
-                          src={url} 
-                          alt={`Lab dip ${idx + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-                    <div className="text-center">
-                      <ImageIcon className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">No photos uploaded yet</p>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </section>
-
-          <section>
             <Card className="border-border">
               <CardContent className="p-6">
                 <div className="flex gap-3">
