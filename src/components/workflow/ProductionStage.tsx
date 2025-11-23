@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Factory, CheckCircle, XCircle, Upload, Image as ImageIcon, Clock } from 'lucide-react';
+import { Factory, CheckCircle, XCircle, Upload, Image as ImageIcon, Clock, Calendar } from 'lucide-react';
 import { Design } from '@/data/workflowData';
 import { useWorkflow } from '@/context/WorkflowContext';
 import { StageHeader } from './StageHeader';
@@ -90,6 +90,12 @@ const ProductionStage = ({ design }: ProductionStageProps) => {
   const hasProductionParams = orderData?.production_params_submitted_at;
   const manufacturerName = orderData?.manufacturers?.name || workflowData.selectedFactory?.name || 'the manufacturer';
 
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'Not set';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
   return (
     <div>
       <StageHeader 
@@ -154,29 +160,39 @@ const ProductionStage = ({ design }: ProductionStageProps) => {
           </section>
 
           <section>
-            <h3 className="text-sm font-semibold text-foreground mb-3">Lab Dip Photos</h3>
+            <div className="flex items-center gap-2 mb-3">
+              <Calendar className="w-4 h-4 text-primary" />
+              <h3 className="text-sm font-semibold text-foreground">Production Timeline</h3>
+            </div>
             <Card className="border-border">
               <CardContent className="p-6">
-                {orderData.lab_dip_photos && orderData.lab_dip_photos.length > 0 ? (
-                  <div className="grid grid-cols-3 gap-3">
-                    {orderData.lab_dip_photos.map((url: string, idx: number) => (
-                      <div key={idx} className="aspect-square rounded-lg overflow-hidden">
-                        <img 
-                          src={url} 
-                          alt={`Lab dip ${idx + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-                    <div className="text-center">
-                      <ImageIcon className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">No photos uploaded yet</p>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-xs text-muted-foreground mb-1 block">Start Date</Label>
+                      <p className="text-sm font-medium">{formatDate(orderData?.production_start_date)}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground mb-1 block">Expected Completion</Label>
+                      <p className="text-sm font-medium">{formatDate(orderData?.production_completion_date)}</p>
                     </div>
                   </div>
-                )}
+                  {orderData?.production_start_date && orderData?.production_completion_date && (
+                  <div className="mt-6">
+                    <div className="relative pt-1">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-medium text-muted-foreground">{formatDate(orderData.production_start_date)}</span>
+                        <span className="text-xs font-medium text-muted-foreground">{formatDate(orderData.production_completion_date)}</span>
+                      </div>
+                      <div className="overflow-hidden h-3 text-xs flex rounded-full bg-muted">
+                        <div className="bg-primary w-1/3 flex items-center justify-center text-white text-[10px] font-semibold">Cutting</div>
+                        <div className="bg-primary/60 w-1/3 flex items-center justify-center text-white text-[10px] font-semibold">Sewing</div>
+                        <div className="bg-primary/30 w-1/3 flex items-center justify-center text-white text-[10px] font-semibold">Finishing</div>
+                      </div>
+                    </div>
+                  </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </section>

@@ -247,7 +247,7 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
     markStageComplete('send-tech-pack');
     
     // Navigate to next stage
-    setCurrentStage('review-timeline');
+    setCurrentStage('payment');
     
     return true;
   };
@@ -386,7 +386,7 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
 
         {selectedManufacturer && (
           <StageNavigation
-            nextLabel="Continue to Review Timeline"
+            nextLabel="Continue to Payment"
             onNext={handleProceed}
             showBack={true}
           />
