@@ -19,6 +19,8 @@ interface WorkflowData {
   leadTime: string;
   location: string;
   priceRange: string;
+  minPrice?: string;
+  maxPrice?: string;
   selectedFactory?: {
     id: string;
     name: string;

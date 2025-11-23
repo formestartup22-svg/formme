@@ -67,11 +67,11 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
     fetchDesignCategory();
   }, [design.id]);
 
-  const calculateAndSortManufacturers = (manufacturersList: Manufacturer[]): ManufacturerWithScore[] => {
-    // Filter by category first
+  const calculateAndSortManufacturers = (manufacturersList: Manufacturer[], applyFilters: boolean = true): ManufacturerWithScore[] => {
+    // Filter by category first only if filters are applied
     let filtered = manufacturersList;
     
-    if (designCategory && !viewAll) {
+    if (designCategory && applyFilters && !viewAll) {
       filtered = manufacturersList.filter(m => 
         m.certifications?.some(cert => 
           cert.toLowerCase().includes(designCategory.toLowerCase()) ||
@@ -121,15 +121,32 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
         query = query.ilike('location', `%${workflowData.location}%`);
       }
 
-      if (workflowData.priceRange) {
-        query = query.eq('price_range', workflowData.priceRange);
-      }
-
       const { data, error } = await query;
 
       if (error) throw error;
       
-      const manufacturersWithScores = calculateAndSortManufacturers(data || []);
+      // Filter by custom price range if specified
+      let filtered = data || [];
+      if (workflowData.minPrice || workflowData.maxPrice) {
+        filtered = filtered.filter(m => {
+          if (!m.price_range) return true;
+          
+          // Extract price from format like "$15-$30 per unit"
+          const priceMatch = m.price_range.match(/\$(\d+)-\$(\d+)/);
+          if (priceMatch) {
+            const manufacturerMin = parseInt(priceMatch[1]);
+            const manufacturerMax = parseInt(priceMatch[2]);
+            const userMin = workflowData.minPrice ? parseInt(workflowData.minPrice) : 0;
+            const userMax = workflowData.maxPrice ? parseInt(workflowData.maxPrice) : Infinity;
+            
+            // Check if ranges overlap
+            return manufacturerMin <= userMax && manufacturerMax >= userMin;
+          }
+          return true;
+        });
+      }
+      
+      const manufacturersWithScores = calculateAndSortManufacturers(filtered, true);
       setManufacturers(manufacturersWithScores);
       setViewAll(false);
     } catch (error: any) {
@@ -151,9 +168,9 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
 
       if (error) throw error;
       
-      const manufacturersWithScores = calculateAndSortManufacturers(data || []);
-      setManufacturers(manufacturersWithScores);
       setViewAll(true);
+      const manufacturersWithScores = calculateAndSortManufacturers(data || [], false);
+      setManufacturers(manufacturersWithScores);
     } catch (error: any) {
       toast.error(error.message || 'Failed to load manufacturers');
     } finally {
@@ -197,7 +214,7 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
             <h3 className="text-sm font-semibold text-foreground mb-3">Production Requirements</h3>
             <Card className="border-border">
               <CardContent className="p-6">
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-4 gap-4">
                   <div>
                     <Label className="text-xs mb-1.5 block">Quantity</Label>
                     <Input
@@ -226,20 +243,24 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
                     </Select>
                   </div>
                   <div>
-                    <Label className="text-xs mb-1.5 block">Price Range</Label>
-                    <Select
-                      value={workflowData.priceRange}
-                      onValueChange={(value) => updateWorkflowData({ priceRange: value })}
-                    >
-                      <SelectTrigger className="h-9 text-sm">
-                        <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="budget">Budget</SelectItem>
-                        <SelectItem value="mid">Mid-range</SelectItem>
-                        <SelectItem value="premium">Premium</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label className="text-xs mb-1.5 block">Min Price ($)</Label>
+                    <Input
+                      type="number"
+                      placeholder="5"
+                      value={workflowData.minPrice || ''}
+                      onChange={(e) => updateWorkflowData({ minPrice: e.target.value })}
+                      className="h-9 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs mb-1.5 block">Max Price ($)</Label>
+                    <Input
+                      type="number"
+                      placeholder="50"
+                      value={workflowData.maxPrice || ''}
+                      onChange={(e) => updateWorkflowData({ maxPrice: e.target.value })}
+                      className="h-9 text-sm"
+                    />
                   </div>
                 </div>
               </CardContent>
