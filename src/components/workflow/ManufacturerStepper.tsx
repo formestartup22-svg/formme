@@ -1,5 +1,6 @@
 import React from 'react';
-import { Check } from 'lucide-react';
+import { Check, Lock } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface ManufacturerStepperProps {
   activeStep: string;
@@ -10,7 +11,7 @@ interface ManufacturerStepperProps {
 const manufacturerStages = [
   { id: 'techpack', label: 'Tech Pack Review', completionKey: 'status' },
   { id: 'sample', label: 'Production Approval', completionKey: 'production_params_submitted_at' },
-  { id: 'production', label: 'Sample Development', completionKey: 'sample_photos' },
+  { id: 'production', label: 'Sample Development', completionKey: 'sample_photos', requiresApproval: true },
   { id: 'quality', label: 'Quality Check', completionKey: 'quality_check_completed' },
   { id: 'shipping', label: 'Shipping & Logistics', completionKey: 'shipping_completed' },
 ];
@@ -29,16 +30,35 @@ export const ManufacturerStepper = ({ activeStep, onStepChange, orderData }: Man
       case 'production':
       case 'quality':
       case 'shipping':
-        return false; // These will be implemented later
+        return false;
       default:
         return false;
     }
+  };
+
+  const isStageAccessible = (stage: typeof manufacturerStages[0], index: number) => {
+    if (!orderData) return false;
+    
+    // Tech Pack is always accessible
+    if (stage.id === 'techpack') return true;
+    
+    // Production Approval is accessible after tech pack review
+    if (stage.id === 'sample') return true;
+    
+    // Sample Development requires designer approval of production params
+    if (stage.id === 'production') {
+      return orderData.production_params_approved === true;
+    }
+    
+    // Other stages - check if previous stage is completed
+    return index > 0 && isStageCompleted(manufacturerStages[index - 1]);
   };
 
   const getStageStatus = (index: number) => {
     const stage = manufacturerStages[index];
     if (isStageCompleted(stage)) return 'completed';
     if (index === currentIndex) return 'current';
+    if (!isStageAccessible(stage, index)) return 'locked';
     return 'accessible';
   };
 
@@ -48,6 +68,8 @@ export const ManufacturerStepper = ({ activeStep, onStepChange, orderData }: Man
         const status = getStageStatus(index);
         const isCompleted = status === 'completed';
         const isCurrent = status === 'current';
+        const isLocked = status === 'locked';
+        const isAccessible = isStageAccessible(stage, index);
 
         return (
           <div key={stage.id} className="relative">
@@ -62,10 +84,20 @@ export const ManufacturerStepper = ({ activeStep, onStepChange, orderData }: Man
 
             {/* Step Item */}
             <button
-              onClick={() => onStepChange(stage.id)}
+              onClick={() => {
+                if (isLocked) {
+                  toast.error('This stage is locked until the designer approves your production parameters');
+                  return;
+                }
+                if (isAccessible) {
+                  onStepChange(stage.id);
+                }
+              }}
               className={`w-full text-left flex items-start gap-3 p-2 rounded-lg transition-all ${
                 isCurrent
                   ? 'bg-primary/5'
+                  : isLocked
+                  ? 'opacity-50 cursor-not-allowed'
                   : 'hover:bg-muted/50 cursor-pointer'
               }`}
             >
@@ -76,6 +108,8 @@ export const ManufacturerStepper = ({ activeStep, onStepChange, orderData }: Man
                     ? 'bg-primary border-primary'
                     : isCurrent
                     ? 'bg-primary/10 border-primary'
+                    : isLocked
+                    ? 'bg-muted border-border'
                     : 'bg-background border-border'
                 }`}
               >
@@ -84,7 +118,7 @@ export const ManufacturerStepper = ({ activeStep, onStepChange, orderData }: Man
                 ) : (
                   <span
                     className={`text-xs font-semibold ${
-                      isCurrent ? 'text-primary' : 'text-muted-foreground'
+                      isCurrent ? 'text-primary' : isLocked ? 'text-muted-foreground/50' : 'text-muted-foreground'
                     }`}
                   >
                     {index + 1}
@@ -100,6 +134,8 @@ export const ManufacturerStepper = ({ activeStep, onStepChange, orderData }: Man
                       ? 'text-primary'
                       : isCompleted
                       ? 'text-foreground'
+                      : isLocked
+                      ? 'text-muted-foreground/50'
                       : 'text-muted-foreground'
                   }`}
                 >
@@ -107,6 +143,9 @@ export const ManufacturerStepper = ({ activeStep, onStepChange, orderData }: Man
                 </p>
                 {isCompleted && (
                   <p className="text-xs text-muted-foreground mt-0.5">Completed</p>
+                )}
+                {isLocked && stage.requiresApproval && (
+                  <p className="text-xs text-amber-600 mt-0.5">Awaiting approval</p>
                 )}
               </div>
             </button>
