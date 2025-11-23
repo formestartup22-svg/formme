@@ -145,11 +145,13 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
   };
 
   const handleOpenConfirmDialog = (match: ManufacturerMatch) => {
+    console.log('[handleOpenConfirmDialog] Opening dialog for manufacturer:', match.manufacturers.name);
     setManufacturerToFinalize(match);
     setConfirmDialogOpen(true);
   };
 
   const handleConfirmFinalize = async () => {
+    console.log('[handleConfirmFinalize] User confirmed, finalizing contract');
     if (!manufacturerToFinalize) return;
 
     try {
