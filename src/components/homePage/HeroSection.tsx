@@ -3,10 +3,14 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
-import { toast } from "sonner";
+import { LockedFeatureDialog } from "@/components/LockedFeatureDialog";
 
 const HeroSection: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
+  const [lockedFeature, setLockedFeature] = useState<{
+    name: string;
+    description: string;
+  } | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,28 +27,22 @@ const HeroSection: React.FC = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleExploreClick = () => {
+  const handleDashboardClick = () => {
     if (!user) {
-      toast.error("Please sign up to explore the collection", {
-        description: "Create an account to start designing your custom garments.",
-        action: {
-          label: "Sign up",
-          onClick: () => navigate("/auth")
-        }
+      setLockedFeature({
+        name: "Dashboard",
+        description: "Create an account to access your personal dashboard and manage all your designs in one place.",
       });
     } else {
       navigate("/new-design");
     }
   };
 
-  const handleDesignClick = () => {
+  const handleCreateClick = () => {
     if (!user) {
-      toast.error("Please sign up to start designing", {
-        description: "Create an account to access the design dashboard.",
-        action: {
-          label: "Sign up",
-          onClick: () => navigate("/auth")
-        }
+      setLockedFeature({
+        name: "Create",
+        description: "Create an account to start designing custom garments and bring your creative vision to life.",
       });
     } else {
       navigate("/dashboard");
@@ -68,7 +66,7 @@ const HeroSection: React.FC = () => {
 
       <div className="flex gap-6 max-md:flex-col max-md:max-w-[300px] max-sm:w-full">
         <button
-          onClick={handleExploreClick}
+          onClick={handleDashboardClick}
           className="w-[219px] h-[72px] flex-shrink-0 text-white text-base font-medium 
                      rounded-[30px] relative overflow-hidden max-sm:w-full max-sm:p-5 
                      bg-[#344C3D] shadow-[3px_7px_5px_0px_rgba(0,0,0,0.25)]
@@ -78,11 +76,11 @@ const HeroSection: React.FC = () => {
           <div className="absolute inset-0 bg-[url('/imageButtons.png')] bg-cover bg-center mix-blend-multiply"></div>
 
           {/* Text content on top */}
-          <span className="relative z-10">Explore Collection</span>
+          <span className="relative z-10">Dashboard</span>
         </button>
 
         <button
-          onClick={handleDesignClick}
+          onClick={handleCreateClick}
           className="w-[219px] h-[72px] flex-shrink-0 text-white text-base font-medium 
                      rounded-[30px] relative overflow-hidden max-sm:w-full max-sm:p-5 
                      bg-[#974320] shadow-[3px_7px_5px_0px_rgba(0,0,0,0.25)]
@@ -92,9 +90,16 @@ const HeroSection: React.FC = () => {
           <div className="absolute inset-0 bg-[url('/imageButtons.png')] bg-cover bg-center mix-blend-multiply"></div>
 
           {/* Text content on top */}
-          <span className="relative z-10">Start Designing</span>
+          <span className="relative z-10">Create</span>
         </button>
     </div>
+    
+    <LockedFeatureDialog
+      open={!!lockedFeature}
+      onOpenChange={(open) => !open && setLockedFeature(null)}
+      featureName={lockedFeature?.name || ""}
+      description={lockedFeature?.description || ""}
+    />
     </section>
   );
 };
