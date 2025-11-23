@@ -28,6 +28,7 @@ const ManufacturerOrderWorkspace = () => {
   const [shrinkage, setShrinkage] = useState('');
   const [colorFastness, setColorFastness] = useState('');
   const [labDipFiles, setLabDipFiles] = useState<FileList | null>(null);
+  const [firstBatchFiles, setFirstBatchFiles] = useState<FileList | null>(null);
 
   useEffect(() => {
   const fetchOrder = async () => {
@@ -153,7 +154,7 @@ const ManufacturerOrderWorkspace = () => {
     setSubmitting(true);
     try {
       // Upload lab dip photos if any
-      let photoUrls: string[] = [];
+      let labDipUrls: string[] = [];
       if (labDipFiles && labDipFiles.length > 0) {
         const uploadPromises = Array.from(labDipFiles).map(async (file) => {
           const fileExt = file.name.split('.').pop();
@@ -173,7 +174,31 @@ const ManufacturerOrderWorkspace = () => {
           return publicUrl;
         });
 
-        photoUrls = await Promise.all(uploadPromises);
+        labDipUrls = await Promise.all(uploadPromises);
+      }
+
+      // Upload first batch photos if any
+      let firstBatchUrls: string[] = [];
+      if (firstBatchFiles && firstBatchFiles.length > 0) {
+        const uploadPromises = Array.from(firstBatchFiles).map(async (file) => {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${order.id}-batch-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+          const filePath = `${order.designer_id}/${fileName}`;
+
+          const { error: uploadError, data } = await supabase.storage
+            .from('design-files')
+            .upload(filePath, file);
+
+          if (uploadError) throw uploadError;
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('design-files')
+            .getPublicUrl(filePath);
+
+          return publicUrl;
+        });
+
+        firstBatchUrls = await Promise.all(uploadPromises);
       }
 
       const { error } = await supabase
@@ -185,7 +210,8 @@ const ManufacturerOrderWorkspace = () => {
           gsm: gsm,
           shrinkage: shrinkage || null,
           color_fastness: colorFastness || null,
-          lab_dip_photos: photoUrls.length > 0 ? photoUrls : null,
+          lab_dip_photos: labDipUrls.length > 0 ? labDipUrls : null,
+          production_timeline_data: firstBatchUrls.length > 0 ? { first_batch_photos: firstBatchUrls } : null,
           production_params_submitted_at: new Date().toISOString(),
           status: 'production_approval'
         })
@@ -526,12 +552,19 @@ const ManufacturerOrderWorkspace = () => {
                 <div className="space-y-3">
                   <Label>First Batch Photos</Label>
                   <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
-                    <Input type="file" className="hidden" id="batch-photos" multiple />
+                    <Input 
+                      type="file" 
+                      className="hidden" 
+                      id="batch-photos" 
+                      multiple 
+                      accept="image/*"
+                      onChange={(e) => setFirstBatchFiles(e.target.files)}
+                    />
                     <Label htmlFor="batch-photos" className="cursor-pointer">
                       <Button variant="outline" className="gap-2" asChild>
                         <span>
                           <Upload className="w-4 h-4" />
-                          Upload Photos
+                          Upload Photos {firstBatchFiles && firstBatchFiles.length > 0 && `(${firstBatchFiles.length})`}
                         </span>
                       </Button>
                     </Label>
