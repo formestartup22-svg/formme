@@ -112,7 +112,7 @@ const ManufacturerOrderWorkspace = () => {
     
     setAccepting(true);
     try {
-      // Update manufacturer match status
+      // Update manufacturer match status only
       const { error: matchError } = await supabase
         .from('manufacturer_matches')
         .update({ status: 'accepted' })
@@ -121,19 +121,13 @@ const ManufacturerOrderWorkspace = () => {
 
       if (matchError) throw matchError;
 
-      // Update order status
-      const { error: orderError } = await supabase
-        .from('orders')
-        .update({ status: 'manufacturer_review' })
-        .eq('id', order.id);
-
-      if (orderError) throw orderError;
+      // Don't update order status here - wait for designer to finalize contract
 
       setMatchStatus('accepted');
-      alert('Match accepted! The designer will be notified.');
+      toast.success('Match accepted! The designer will be notified.');
     } catch (error: any) {
       console.error('Error accepting match:', error);
-      alert('Failed to accept match. Please try again.');
+      toast.error('Failed to accept match. Please try again.');
     } finally {
       setAccepting(false);
     }
