@@ -33,7 +33,9 @@ const NavBar: React.FC<NavBarProps> = ({ initialDark = false }) => {
       setUser(session?.user ?? null);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
 
@@ -104,7 +106,7 @@ const NavBar: React.FC<NavBarProps> = ({ initialDark = false }) => {
         <button aria-label="Shopping cart" className="p-2 rounded-full hover:bg-muted transition-colors">
           <CartIcon />
         </button>
-        <ThemeToggle />
+
         {!user && (
           <Link to="/auth">
             <button className="px-6 py-2.5 text-sm font-medium text-primary-foreground bg-primary shadow-sm cursor-pointer border-none rounded-full hover:bg-primary/90 transition-all duration-200">
