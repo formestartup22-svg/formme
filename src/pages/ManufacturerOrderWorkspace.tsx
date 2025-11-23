@@ -17,6 +17,8 @@ const ManufacturerOrderWorkspace = () => {
   const [activeTab, setActiveTab] = useState('techpack');
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [matchStatus, setMatchStatus] = useState<'pending' | 'accepted' | 'rejected' | null>(null);
+  const [accepting, setAccepting] = useState(false);
 
   useEffect(() => {
   const fetchOrder = async () => {
@@ -55,12 +57,22 @@ const ManufacturerOrderWorkspace = () => {
           .eq('user_id', orderData.designer_id)
           .maybeSingle();
 
+        // Fetch match status
+        const { data: matchData } = await supabase
+          .from('manufacturer_matches')
+          .select('status')
+          .eq('design_id', orderData.design_id)
+          .eq('manufacturer_id', orderData.manufacturer_id)
+          .maybeSingle();
+
         setOrder({
           ...orderData,
           designs: designData,
           design_specs: specsData,
           profiles: profile || { full_name: 'Unknown' }
         });
+
+        setMatchStatus((matchData?.status as 'pending' | 'accepted' | 'rejected') || null);
       } catch (err: any) {
         console.error('Error fetching order:', err);
       } finally {
@@ -70,6 +82,58 @@ const ManufacturerOrderWorkspace = () => {
 
     fetchOrder();
   }, [id]);
+
+  const handleAcceptMatch = async () => {
+    if (!order || !order.manufacturer_id) return;
+    
+    setAccepting(true);
+    try {
+      // Update manufacturer match status
+      const { error: matchError } = await supabase
+        .from('manufacturer_matches')
+        .update({ status: 'accepted' })
+        .eq('design_id', order.design_id)
+        .eq('manufacturer_id', order.manufacturer_id);
+
+      if (matchError) throw matchError;
+
+      // Update order status
+      const { error: orderError } = await supabase
+        .from('orders')
+        .update({ status: 'manufacturer_review' })
+        .eq('id', order.id);
+
+      if (orderError) throw orderError;
+
+      setMatchStatus('accepted');
+      alert('Match accepted! The designer will be notified.');
+    } catch (error: any) {
+      console.error('Error accepting match:', error);
+      alert('Failed to accept match. Please try again.');
+    } finally {
+      setAccepting(false);
+    }
+  };
+
+  const handleDeclineMatch = async () => {
+    if (!order || !order.manufacturer_id) return;
+    
+    try {
+      const { error } = await supabase
+        .from('manufacturer_matches')
+        .update({ status: 'rejected' })
+        .eq('design_id', order.design_id)
+        .eq('manufacturer_id', order.manufacturer_id);
+
+      if (error) throw error;
+
+      setMatchStatus('rejected');
+      alert('Match declined.');
+    } catch (error: any) {
+      console.error('Error declining match:', error);
+      alert('Failed to decline match. Please try again.');
+    }
+  };
 
   if (loading) {
     return (
@@ -464,27 +528,51 @@ const ManufacturerOrderWorkspace = () => {
           </div>
         </div>
 
-        {/* Matching Controls (shown when relevant) */}
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle>Order Match Request</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              The designer has requested to work with your factory for this order.
-            </p>
-            <div className="flex gap-3">
-              <Button className="gap-2">
-                <CheckCircle className="w-4 h-4" />
-                Accept Match
-              </Button>
-              <Button variant="outline" className="gap-2">
-                <XCircle className="w-4 h-4" />
-                Decline Match
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Matching Controls (shown only when status is pending) */}
+        {matchStatus === 'pending' && (
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle>Order Match Request</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                The designer has requested to work with your factory for this order.
+              </p>
+              <div className="flex gap-3">
+                <Button 
+                  onClick={handleAcceptMatch} 
+                  disabled={accepting}
+                  className="gap-2"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  {accepting ? 'Accepting...' : 'Accept Match'}
+                </Button>
+                <Button 
+                  onClick={handleDeclineMatch}
+                  disabled={accepting}
+                  variant="outline" 
+                  className="gap-2"
+                >
+                  <XCircle className="w-4 h-4" />
+                  Decline Match
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {matchStatus === 'accepted' && (
+          <Card className="mt-8 bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+                <p className="text-sm font-medium text-green-900 dark:text-green-100">
+                  You have accepted this order. The designer has been notified.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
