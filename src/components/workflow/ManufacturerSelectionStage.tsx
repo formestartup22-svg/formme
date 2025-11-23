@@ -44,7 +44,7 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
   const [chatDialogOpen, setChatDialogOpen] = useState(false);
   const [currentChatOrderId, setCurrentChatOrderId] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { markStageComplete } = useWorkflow();
+  const { markStageComplete, setCurrentStage } = useWorkflow();
 
   useEffect(() => {
     fetchMatches();
@@ -166,6 +166,7 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
       
       // Navigate to next stage
       setTimeout(() => {
+        setCurrentStage('review-timeline');
         navigate(`/workflow?designId=${design.id}&stage=review-timeline`);
       }, 1000);
     } catch (error: any) {
