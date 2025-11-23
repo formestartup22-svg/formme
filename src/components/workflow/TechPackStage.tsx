@@ -789,31 +789,51 @@ ${workflowData.constructionNotes || 'None provided'}
                       {agentResults.materialsSection.shell_fabric && (
                         <div>
                           <span className="font-medium">Shell Fabric:</span>
-                          <p className="text-muted-foreground mt-1">{agentResults.materialsSection.shell_fabric}</p>
+                          {typeof agentResults.materialsSection.shell_fabric === 'string' ? (
+                            <p className="text-muted-foreground mt-1">{agentResults.materialsSection.shell_fabric}</p>
+                          ) : (
+                            <div className="ml-4 mt-1 space-y-1 text-muted-foreground text-xs">
+                              {Object.entries(agentResults.materialsSection.shell_fabric).map(([key, value]) => (
+                                <div key={key}>
+                                  <span className="font-medium capitalize">{key.replace(/_/g, ' ')}:</span> {String(value)}
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       )}
                       {agentResults.materialsSection.lining_fabric && (
                         <div>
                           <span className="font-medium">Lining Fabric:</span>
-                          <p className="text-muted-foreground mt-1">{agentResults.materialsSection.lining_fabric}</p>
+                          {typeof agentResults.materialsSection.lining_fabric === 'string' ? (
+                            <p className="text-muted-foreground mt-1">{agentResults.materialsSection.lining_fabric}</p>
+                          ) : (
+                            <div className="ml-4 mt-1 space-y-1 text-muted-foreground text-xs">
+                              {Object.entries(agentResults.materialsSection.lining_fabric).map(([key, value]) => (
+                                <div key={key}>
+                                  <span className="font-medium capitalize">{key.replace(/_/g, ' ')}:</span> {String(value)}
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       )}
-                      {agentResults.materialsSection.trims && (
+                      {agentResults.materialsSection.trims && Array.isArray(agentResults.materialsSection.trims) && (
                         <div>
                           <span className="font-medium">Trims:</span>
                           <ul className="ml-4 mt-1 space-y-1 text-muted-foreground">
-                            {agentResults.materialsSection.trims.map((trim: string, idx: number) => (
-                              <li key={idx}>• {trim}</li>
+                            {agentResults.materialsSection.trims.map((trim: any, idx: number) => (
+                              <li key={idx}>• {typeof trim === 'string' ? trim : JSON.stringify(trim)}</li>
                             ))}
                           </ul>
                         </div>
                       )}
-                      {agentResults.materialsSection.hardware && (
+                      {agentResults.materialsSection.hardware && Array.isArray(agentResults.materialsSection.hardware) && (
                         <div>
                           <span className="font-medium">Hardware:</span>
                           <ul className="ml-4 mt-1 space-y-1 text-muted-foreground">
-                            {agentResults.materialsSection.hardware.map((hw: string, idx: number) => (
-                              <li key={idx}>• {hw}</li>
+                            {agentResults.materialsSection.hardware.map((hw: any, idx: number) => (
+                              <li key={idx}>• {typeof hw === 'string' ? hw : JSON.stringify(hw)}</li>
                             ))}
                           </ul>
                         </div>
