@@ -96,10 +96,22 @@ export const FactoryMessaging = ({ designId, orderId }: FactoryMessagingProps) =
             .eq('id', orderId)
             .single();
           
-          setMessages(prev => [...prev, {
-            ...newMsg,
-            is_designer: newMsg.sender_id === orderData?.designer_id
-          }]);
+          // Only add if not already in the list (prevent duplicates from optimistic updates)
+          setMessages(prev => {
+            const exists = prev.some(msg => msg.id === newMsg.id || (msg.id.startsWith('temp-') && msg.content === newMsg.content && msg.sender_id === newMsg.sender_id));
+            if (exists) {
+              // Replace temp message with real one
+              return prev.map(msg => 
+                (msg.id.startsWith('temp-') && msg.content === newMsg.content && msg.sender_id === newMsg.sender_id)
+                  ? { ...newMsg, is_designer: newMsg.sender_id === orderData?.designer_id }
+                  : msg
+              );
+            }
+            return [...prev, {
+              ...newMsg,
+              is_designer: newMsg.sender_id === orderData?.designer_id
+            }];
+          });
           
           // Scroll to bottom
           setTimeout(() => {
