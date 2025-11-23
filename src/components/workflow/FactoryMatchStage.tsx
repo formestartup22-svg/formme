@@ -259,7 +259,12 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
       await Promise.all(matchPromises);
 
       toast.success(`Sent requests to ${selectedManufacturers.size} manufacturer(s)`);
-      return true;
+      
+      // Mark stage complete and navigate to send-tech-pack stage
+      markStageComplete('factory-match');
+      navigate(`/workflow?designId=${design.id}&stage=send-tech-pack`);
+      
+      return false; // Return false to prevent StageNavigation from also navigating
     } catch (error: any) {
       console.error('Error sending requests:', error);
       toast.error(error.message || 'Failed to send requests');
