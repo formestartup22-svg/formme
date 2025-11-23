@@ -373,7 +373,7 @@ ${workflowData.constructionNotes || 'None provided'}
                 <input
                   ref={designFileInputRef}
                   type="file"
-                  accept="image/png,image/jpeg,image/jpg,application/pdf"
+                  accept=".svg,image/svg+xml"
                   onChange={handleDesignFileUpload}
                   className="hidden"
                 />
@@ -411,7 +411,7 @@ ${workflowData.constructionNotes || 'None provided'}
                       Upload your design sketch or mockup
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      PNG, JPG, or PDF • Max 10MB
+                      SVG files only • Max 10MB
                     </p>
                   </div>
                 )}
