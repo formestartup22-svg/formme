@@ -1,7 +1,7 @@
 export interface Design {
   id: string;
   name: string;
-  stage: 'tech-pack' | 'factory-match' | 'sending' | 'waiting' | 'review-timeline' | 'payment' | 'production' | 'waiting-sample' | 'sample' | 'quality' | 'shipping';
+  stage: 'tech-pack' | 'factory-match' | 'send-tech-pack' | 'sending' | 'waiting' | 'review-timeline' | 'payment' | 'production' | 'waiting-sample' | 'sample' | 'quality' | 'shipping';
   status: 'on-track' | 'delayed' | 'action-required' | 'completed';
   nextAction: string;
   eta: string;
@@ -160,6 +160,7 @@ export const mockTasks: Task[] = [
 export const stageNames = {
   'tech-pack': 'Create your tech pack',
   'factory-match': 'Find your manufacturer',
+  'send-tech-pack': 'Manage manufacturer requests',
   'sending': 'Confirm your order',
   'waiting': 'Waiting for manufacturer',
   'review-timeline': 'Review production timeline',
@@ -174,6 +175,7 @@ export const stageNames = {
 export const stageOrder = [
   'tech-pack',
   'factory-match',
+  'send-tech-pack',
   'sending',
   'waiting',
   'review-timeline',

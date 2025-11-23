@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { WorkflowStepper } from '@/components/workflow/WorkflowStepper';
 import TechPackStage from '@/components/workflow/TechPackStage';
 import FactoryMatchStage from '@/components/workflow/FactoryMatchStage';
+import { ManufacturerSelectionStage } from '@/components/workflow/ManufacturerSelectionStage';
 import SendingStage from '@/components/workflow/SendingStage';
 import WaitingForManufacturerStage from '@/components/workflow/WaitingForManufacturerStage';
 import ReviewProductionTimelineStage from '@/components/workflow/ReviewProductionTimelineStage';
@@ -57,6 +58,8 @@ const WorkspaceContent = ({ design }: { design: any }) => {
         return <TechPackStage design={design} />;
       case 'factory-match':
         return <FactoryMatchStage design={design} />;
+      case 'send-tech-pack':
+        return <ManufacturerSelectionStage design={design} />;
       case 'sending':
         return <SendingStage design={design} />;
       case 'waiting':

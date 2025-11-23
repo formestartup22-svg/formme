@@ -135,6 +135,29 @@ export const FactoryMessaging = ({ designId, orderId }: FactoryMessagingProps) =
       if (error) throw error;
 
       setNewMessage('');
+      toast.success('Message sent');
+      
+      // Immediately add the message to the local state for instant feedback
+      const { data: orderData } = await supabase
+        .from('orders')
+        .select('designer_id')
+        .eq('id', orderId)
+        .single();
+
+      const tempMessage = {
+        id: `temp-${Date.now()}`,
+        content: newMessage.trim(),
+        sender_id: currentUserId,
+        created_at: new Date().toISOString(),
+        is_designer: currentUserId === orderData?.designer_id
+      };
+
+      setMessages(prev => [...prev, tempMessage]);
+      
+      // Scroll to bottom immediately
+      setTimeout(() => {
+        scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 50);
     } catch (error: any) {
       toast.error(error.message || 'Failed to send message');
     } finally {
