@@ -157,10 +157,51 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
     }
   };
 
-  const handleOpenChat = (orderId: string) => {
-    console.log('[ManufacturerSelectionStage] Opening chat with order ID:', orderId);
-    setCurrentChatOrderId(orderId);
-    setChatDialogOpen(true);
+  const handleOpenChat = async (match: ManufacturerMatch) => {
+    console.log('[handleOpenChat] Match:', match);
+    
+    // If order exists, use it
+    if (match.orders && match.orders.length > 0) {
+      console.log('[handleOpenChat] Using existing order:', match.orders[0].id);
+      setCurrentChatOrderId(match.orders[0].id);
+      setChatDialogOpen(true);
+      return;
+    }
+
+    // Create order if it doesn't exist
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      console.log('[handleOpenChat] Creating new order for manufacturer:', match.manufacturer_id);
+      
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          design_id: design.id,
+          designer_id: user.id,
+          manufacturer_id: match.manufacturer_id,
+          quantity: 100,
+          status: 'sent_to_manufacturer',
+          notes: 'Delivery date: TBD'
+        })
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      console.log('[handleOpenChat] Created order:', orderData.id);
+      
+      // Refresh matches to get the new order
+      await fetchMatches();
+      
+      setCurrentChatOrderId(orderData.id);
+      setChatDialogOpen(true);
+      toast.success('Chat opened');
+    } catch (error: any) {
+      console.error('[handleOpenChat] Error creating order:', error);
+      toast.error('Failed to open chat');
+    }
   };
 
   const handleProceed = async () => {
@@ -222,15 +263,7 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
                   <Card 
                     key={match.id} 
                     className={`${selectedManufacturer === match.manufacturer_id ? 'border-primary border-2' : ''} cursor-pointer hover:shadow-md transition-shadow`}
-                    onClick={() => {
-                      console.log('[Card Click] Match:', match);
-                      console.log('[Card Click] Orders:', match.orders);
-                      if (match.orders && match.orders.length > 0) {
-                        handleOpenChat(match.orders[0].id);
-                      } else {
-                        console.warn('[Card Click] No orders found for this match');
-                      }
-                    }}
+                    onClick={() => handleOpenChat(match)}
                   >
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between">
