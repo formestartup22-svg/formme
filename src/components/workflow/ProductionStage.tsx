@@ -237,7 +237,7 @@ const ProductionStage = ({ design }: ProductionStageProps) => {
                       if (orderData?.id) {
                         await supabase
                           .from('orders')
-                          .update({ production_params_approved: true })
+                          .update({ production_params_approved: true } as any)
                           .eq('id', orderData.id);
                         toast.success('Production parameters approved!');
                       }
@@ -253,7 +253,7 @@ const ProductionStage = ({ design }: ProductionStageProps) => {
                       if (orderData?.id) {
                         await supabase
                           .from('orders')
-                          .update({ production_params_approved: false })
+                          .update({ production_params_approved: false } as any)
                           .eq('id', orderData.id);
                         toast.error('Production parameters rejected');
                       }

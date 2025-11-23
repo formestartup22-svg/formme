@@ -417,6 +417,7 @@ export type Database = {
           preferred_location: string | null
           price: number | null
           production_completion_date: string | null
+          production_params_approved: boolean | null
           production_params_submitted_at: string | null
           production_start_date: string | null
           production_timeline_data: Json | null
@@ -446,6 +447,7 @@ export type Database = {
           preferred_location?: string | null
           price?: number | null
           production_completion_date?: string | null
+          production_params_approved?: boolean | null
           production_params_submitted_at?: string | null
           production_start_date?: string | null
           production_timeline_data?: Json | null
@@ -475,6 +477,7 @@ export type Database = {
           preferred_location?: string | null
           price?: number | null
           production_completion_date?: string | null
+          production_params_approved?: boolean | null
           production_params_submitted_at?: string | null
           production_start_date?: string | null
           production_timeline_data?: Json | null
