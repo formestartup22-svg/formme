@@ -35,17 +35,51 @@ const Footer = () => {
           <div>
             <h4 className="font-medium uppercase text-sm tracking-wider mb-6">Quick Links</h4>
             <ul className="space-y-3">
-              {['Home', 'About Us', 'Services', 'Portfolio', 'Contact'].map((item) => (
-                <li key={item}>
-                  <Link 
-                    to="#" 
-                    className="text-gray-300 hover:text-white transition-colors flex items-center group"
-                  >
-                    <ChevronRight className="h-4 w-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <span>{item}</span>
-                  </Link>
-                </li>
-              ))}
+              <li>
+                <Link 
+                  to="/" 
+                  className="text-gray-300 hover:text-white transition-colors flex items-center group"
+                >
+                  <ChevronRight className="h-4 w-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <span>Home</span>
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/about" 
+                  className="text-gray-300 hover:text-white transition-colors flex items-center group"
+                >
+                  <ChevronRight className="h-4 w-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <span>About Us</span>
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/marketplace" 
+                  className="text-gray-300 hover:text-white transition-colors flex items-center group"
+                >
+                  <ChevronRight className="h-4 w-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <span>Marketplace</span>
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/reviews" 
+                  className="text-gray-300 hover:text-white transition-colors flex items-center group"
+                >
+                  <ChevronRight className="h-4 w-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <span>Reviews</span>
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/dashboard" 
+                  className="text-gray-300 hover:text-white transition-colors flex items-center group"
+                >
+                  <ChevronRight className="h-4 w-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <span>Dashboard</span>
+                </Link>
+              </li>
             </ul>
           </div>
           
@@ -53,17 +87,51 @@ const Footer = () => {
           <div>
             <h4 className="font-medium uppercase text-sm tracking-wider mb-6">Services</h4>
             <ul className="space-y-3">
-              {['Design Tools', 'Manufacturing', 'Sustainable Fashion', 'Custom Branding', 'Enterprise Solutions'].map((item) => (
-                <li key={item}>
-                  <Link 
-                    to="#" 
-                    className="text-gray-300 hover:text-white transition-colors flex items-center group"
-                  >
-                    <ChevronRight className="h-4 w-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <span>{item}</span>
-                  </Link>
-                </li>
-              ))}
+              <li>
+                <Link 
+                  to="/new-design" 
+                  className="text-gray-300 hover:text-white transition-colors flex items-center group"
+                >
+                  <ChevronRight className="h-4 w-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <span>Design Tools</span>
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/workflow" 
+                  className="text-gray-300 hover:text-white transition-colors flex items-center group"
+                >
+                  <ChevronRight className="h-4 w-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <span>Manufacturing</span>
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/marketplace" 
+                  className="text-gray-300 hover:text-white transition-colors flex items-center group"
+                >
+                  <ChevronRight className="h-4 w-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <span>Sustainable Fashion</span>
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/professional-studio" 
+                  className="text-gray-300 hover:text-white transition-colors flex items-center group"
+                >
+                  <ChevronRight className="h-4 w-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <span>Custom Branding</span>
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/dashboard" 
+                  className="text-gray-300 hover:text-white transition-colors flex items-center group"
+                >
+                  <ChevronRight className="h-4 w-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <span>Enterprise Solutions</span>
+                </Link>
+              </li>
             </ul>
           </div>
           

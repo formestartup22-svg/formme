@@ -62,17 +62,19 @@ const NavBar: React.FC<NavBarProps> = ({ initialDark = false }) => {
         </div>
       </Link>
       <nav className="hidden md:flex gap-8 mr-10 ml-auto">
-        {["collection", "create", "dashboard", "reviews", "contact"].map((item) => (
+        {["collection", "create", "dashboard", "reviews"].map((item) => (
           <Link
             key={item}
             to={
               item === "create"
-                ? "/designer"
+                ? "/new-design"
                 : item === "dashboard"
                   ? "/dashboard"
                   : item === "reviews"
                     ? "/reviews"
-                    : "#"
+                    : item === "collection"
+                      ? "/marketplace"
+                      : "#"
             }
             className={cn(
               "text-lg relative py-1 group transition-colors",
