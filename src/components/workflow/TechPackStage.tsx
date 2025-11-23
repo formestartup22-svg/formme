@@ -239,9 +239,12 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
     if (!file) return;
 
     try {
-      // Upload to Supabase Storage
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      // Upload to Supabase Storage with user_id in path
       const fileExt = file.name.split('.').pop();
-      const fileName = `${design.id}-design-${Date.now()}.${fileExt}`;
+      const fileName = `${user.id}/${design.id}-design-${Date.now()}.${fileExt}`;
       const { data, error } = await supabase.storage
         .from('design-files')
         .upload(fileName, file);
