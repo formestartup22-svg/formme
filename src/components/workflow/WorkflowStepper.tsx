@@ -19,15 +19,22 @@ export const WorkflowStepper = () => {
   const { currentStage, completedStages, setCurrentStage } = useWorkflow();
 
   const getStageStatus = (stage: string, index: number) => {
+    const currentIndex = stages.indexOf(currentStage);
+    
+    // If current stage is found and this stage is before it, mark as completed
+    if (currentIndex !== -1 && index < currentIndex) {
+      return 'completed';
+    }
+    
+    // If explicitly in completed stages
     if (completedStages.includes(stage)) return 'completed';
+    
+    // Current stage
     if (stage === currentStage) return 'current';
     
-    // Check if previous stage is completed
-    if (index > 0) {
-      const previousStage = stages[index - 1];
-      if (!completedStages.includes(previousStage)) {
-        return 'locked';
-      }
+    // Lock stages after current
+    if (currentIndex !== -1 && index > currentIndex) {
+      return 'locked';
     }
     
     return 'accessible';
@@ -48,7 +55,7 @@ export const WorkflowStepper = () => {
             {index < stages.length - 1 && (
               <div
                 className={`absolute left-6 top-10 w-0.5 h-8 ${
-                  isCompleted ? 'bg-primary' : 'bg-border'
+                  isCompleted || (stages.indexOf(currentStage) > index) ? 'bg-primary' : 'bg-border'
                 }`}
               />
             )}

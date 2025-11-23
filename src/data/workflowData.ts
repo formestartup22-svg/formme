@@ -161,8 +161,6 @@ export const stageNames = {
   'tech-pack': 'Create your tech pack',
   'factory-match': 'Find your manufacturer',
   'send-tech-pack': 'Select manufacturer',
-  'sending': 'Confirm your order',
-  'waiting': 'Waiting for manufacturer',
   'production': 'Review production parameters',
   'payment': 'Make payment',
   'waiting-sample': 'Sample in production',
