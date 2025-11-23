@@ -43,7 +43,7 @@ async def handle_design(ctx: Context, sender: str, msg: SectionTask):
     # Call Gemini Flash (NEW API)
     # ---------------------------------------
     response = client.models.generate_content(
-        model="models/gemini-2.5-pro",
+        model="gemini-2.0-flash-exp",
         contents=prompt
     )
 
