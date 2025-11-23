@@ -62,28 +62,57 @@ const ManufacturerDashboard = () => {
           .from('manufacturers')
           .select('id')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
 
-        if (!manufacturer) return;
+        if (!manufacturer) {
+          console.log('No manufacturer profile found for user');
+          return;
+        }
 
-        // Fetch pending manufacturer matches
+        // Fetch pending manufacturer matches with proper join
         const { data: matches, error } = await supabase
           .from('manufacturer_matches')
           .select(`
             *,
-            designs (
+            designs!manufacturer_matches_design_id_fkey (
               id,
               name,
               category,
-              user_id,
-              profiles:user_id (full_name)
+              user_id
             )
           `)
           .eq('manufacturer_id', manufacturer.id)
           .eq('status', 'pending');
 
-        if (error) throw error;
-        setPendingRequests(matches || []);
+        if (error) {
+          console.error('Error fetching matches:', error);
+          throw error;
+        }
+
+        // Fetch designer profiles for each design
+        if (matches && matches.length > 0) {
+          const matchesWithDesigners = await Promise.all(
+            matches.map(async (match) => {
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('full_name')
+                .eq('user_id', match.designs.user_id)
+                .maybeSingle();
+              
+              return {
+                ...match,
+                designs: {
+                  ...match.designs,
+                  designer_name: profile?.full_name || 'Unknown Designer'
+                }
+              };
+            })
+          );
+          
+          setPendingRequests(matchesWithDesigners);
+        } else {
+          setPendingRequests([]);
+        }
       } catch (error: any) {
         console.error('Error fetching pending requests:', error);
       } finally {
@@ -347,7 +376,7 @@ const ManufacturerDashboard = () => {
                             {request.designs?.name || 'Unknown Design'}
                           </TableCell>
                           <TableCell>
-                            {request.designs?.profiles?.full_name || 'Unknown Designer'}
+                            {request.designs?.designer_name || 'Unknown Designer'}
                           </TableCell>
                           <TableCell>
                             <Badge variant="outline">
