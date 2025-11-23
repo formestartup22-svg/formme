@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 
 type UserRole = "designer" | "manufacturer";
@@ -180,8 +180,8 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-[#D4C4B0] flex items-center justify-center p-4">
-      <Card className="w-full max-w-md p-8">
-        <div className="text-center mb-8">
+      <Card className="w-full max-w-2xl p-8">
+        <div className="text-center mb-6">
           <h1 className="text-4xl font-bold mb-2">formme</h1>
           <p className="text-muted-foreground">
             {mode === "signin" ? "Welcome back" : "Join our community"}
@@ -189,13 +189,33 @@ const Auth = () => {
         </div>
 
         <Tabs value={mode} onValueChange={(v) => setMode(v as "signin" | "signup")}>
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="signin">Sign In</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
-          </TabsList>
+          <div className="flex justify-center gap-8 mb-6 border-b border-border">
+            <button
+              type="button"
+              onClick={() => setMode("signin")}
+              className={`pb-2 px-1 transition-all ${
+                mode === "signin"
+                  ? "border-b-2 border-primary font-semibold text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Sign In
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("signup")}
+              className={`pb-2 px-1 transition-all ${
+                mode === "signup"
+                  ? "border-b-2 border-primary font-semibold text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Sign Up
+            </button>
+          </div>
 
           <TabsContent value="signin">
-            <form onSubmit={handleSignIn} className="space-y-4">
+            <form onSubmit={handleSignIn} className="space-y-3">
               <div>
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -264,213 +284,224 @@ const Auth = () => {
           </TabsContent>
 
           <TabsContent value="signup">
-            <div className="mb-6">
-              <Label>I am a...</Label>
-              <div className="grid grid-cols-2 gap-4 mt-2">
-                <Button
-                  type="button"
-                  variant={userRole === "designer" ? "default" : "outline"}
-                  onClick={() => setUserRole("designer")}
-                  className="w-full"
-                >
-                  Designer
-                </Button>
-                <Button
-                  type="button"
-                  variant={userRole === "manufacturer" ? "default" : "outline"}
-                  onClick={() => setUserRole("manufacturer")}
-                  className="w-full"
-                >
-                  Manufacturer
-                </Button>
-              </div>
-            </div>
-
             <form onSubmit={handleSignUp} className="space-y-4">
+              {/* Role Selection */}
               <div>
-                <Label htmlFor="signup-fullName">Full Name</Label>
-                <Input
-                  id="signup-fullName"
-                  type="text"
-                  value={formData.fullName}
-                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="signup-companyName">Company Name</Label>
-                <Input
-                  id="signup-companyName"
-                  type="text"
-                  value={formData.companyName}
-                  onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                />
+                <Label className="text-sm font-medium mb-2 block">I am a...</Label>
+                <div className="flex rounded-md border border-border overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setUserRole("designer")}
+                    className={`flex-1 py-2 text-sm font-medium transition-colors ${
+                      userRole === "designer"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-background text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    Designer
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setUserRole("manufacturer")}
+                    className={`flex-1 py-2 text-sm font-medium transition-colors ${
+                      userRole === "manufacturer"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-background text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    Manufacturer
+                  </button>
+                </div>
               </div>
 
-              <div>
-                <Label htmlFor="signup-email">Email</Label>
-                <Input
-                  id="signup-email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
-                />
+              {/* Personal Information */}
+              <div className="pt-2">
+                <h3 className="text-sm font-semibold text-muted-foreground mb-3">Personal Information</h3>
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="signup-fullName" className="text-sm">Full Name</Label>
+                    <Input
+                      id="signup-fullName"
+                      type="text"
+                      value={formData.fullName}
+                      onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                      required
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
               </div>
-              <div>
-                <Label htmlFor="signup-password">Password</Label>
-                <Input
-                  id="signup-password"
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  required
-                />
+
+              {/* Company Info */}
+              <div className="pt-2">
+                <h3 className="text-sm font-semibold text-muted-foreground mb-3">Company Info</h3>
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="signup-companyName" className="text-sm">Company Name</Label>
+                    <Input
+                      id="signup-companyName"
+                      type="text"
+                      value={formData.companyName}
+                      onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="signup-email" className="text-sm">Email</Label>
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      required
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="signup-password" className="text-sm">Password</Label>
+                    <Input
+                      id="signup-password"
+                      type="password"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      required
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
               </div>
               
               {userRole === "manufacturer" && (
                 <>
-                  <div>
-                    <Label htmlFor="signup-location">Location</Label>
-                    <Input
-                      id="signup-location"
-                      type="text"
-                      placeholder="City, Country"
-                      value={formData.location}
-                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="signup-phone">Phone</Label>
-                    <Input
-                      id="signup-phone"
-                      type="tel"
-                      placeholder="+1 234 567 8900"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="signup-moq">Min Order Qty</Label>
-                      <Input
-                        id="signup-moq"
-                        type="number"
-                        placeholder="100"
-                        value={formData.moq}
-                        onChange={(e) => setFormData({ ...formData, moq: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="signup-leadTime">Lead Time (days)</Label>
-                      <Input
-                        id="signup-leadTime"
-                        type="number"
-                        placeholder="30"
-                        value={formData.leadTime}
-                        onChange={(e) => setFormData({ ...formData, leadTime: e.target.value })}
-                      />
+                  {/* Additional Info */}
+                  <div className="pt-2">
+                    <h3 className="text-sm font-semibold text-muted-foreground mb-3">Additional Information</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <Label htmlFor="signup-location" className="text-sm">Location</Label>
+                        <Input
+                          id="signup-location"
+                          type="text"
+                          placeholder="City, Country"
+                          value={formData.location}
+                          onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="signup-phone" className="text-sm">Phone</Label>
+                        <Input
+                          id="signup-phone"
+                          type="tel"
+                          placeholder="+1 234 567 8900"
+                          value={formData.phone}
+                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                          className="mt-1"
+                        />
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <Label htmlFor="signup-capabilities">Capabilities</Label>
-                    <Select
-                      onValueChange={(value) => {
-                        if (!formData.capabilities.includes(value)) {
-                          setFormData({
-                            ...formData,
-                            capabilities: [...formData.capabilities, value]
-                          });
-                        }
-                      }}
-                    >
-                      <SelectTrigger className="bg-background">
-                        <SelectValue placeholder="Select capabilities" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-background z-50">
-                        {capabilitiesOptions.map((capability) => (
-                          <SelectItem key={capability} value={capability}>
-                            {capability}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {formData.capabilities.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {formData.capabilities.map((cap) => (
-                          <span
-                            key={cap}
-                            className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary text-xs rounded"
-                          >
-                            {cap}
-                            <button
-                              type="button"
-                              onClick={() =>
+
+                  {/* Production Details */}
+                  <div className="pt-2">
+                    <h3 className="text-sm font-semibold text-muted-foreground mb-3">Production Details</h3>
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label htmlFor="signup-moq" className="text-sm">Min Order Qty</Label>
+                          <Input
+                            id="signup-moq"
+                            type="number"
+                            placeholder="100"
+                            value={formData.moq}
+                            onChange={(e) => setFormData({ ...formData, moq: e.target.value })}
+                            className="mt-1"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="signup-leadTime" className="text-sm">Lead Time (days)</Label>
+                          <Input
+                            id="signup-leadTime"
+                            type="number"
+                            placeholder="30"
+                            value={formData.leadTime}
+                            onChange={(e) => setFormData({ ...formData, leadTime: e.target.value })}
+                            className="mt-1"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <Label className="text-sm mb-2 block">Capabilities</Label>
+                        <div className="grid grid-cols-2 gap-2 p-3 border border-border rounded-md bg-background">
+                          {capabilitiesOptions.map((capability) => (
+                            <div key={capability} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={`capability-${capability}`}
+                                checked={formData.capabilities.includes(capability)}
+                                onCheckedChange={(checked) => {
+                                  if (checked) {
+                                    setFormData({
+                                      ...formData,
+                                      capabilities: [...formData.capabilities, capability]
+                                    });
+                                  } else {
+                                    setFormData({
+                                      ...formData,
+                                      capabilities: formData.capabilities.filter((c) => c !== capability)
+                                    });
+                                  }
+                                }}
+                              />
+                              <label
+                                htmlFor={`capability-${capability}`}
+                                className="text-sm cursor-pointer"
+                              >
+                                {capability}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Categories */}
+                  <div className="pt-2">
+                    <h3 className="text-sm font-semibold text-muted-foreground mb-3">Categories</h3>
+                    <div className="grid grid-cols-2 gap-2 p-3 border border-border rounded-md bg-background">
+                      {categoriesOptions.map((category) => (
+                        <div key={category} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`category-${category}`}
+                            checked={formData.categories.includes(category)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
                                 setFormData({
                                   ...formData,
-                                  capabilities: formData.capabilities.filter((c) => c !== cap)
-                                })
+                                  categories: [...formData.categories, category]
+                                });
+                              } else {
+                                setFormData({
+                                  ...formData,
+                                  categories: formData.categories.filter((c) => c !== category)
+                                });
                               }
-                              className="hover:text-primary/70"
-                            >
-                              ×
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="signup-categories">Categories</Label>
-                    <Select
-                      onValueChange={(value) => {
-                        if (!formData.categories.includes(value)) {
-                          setFormData({
-                            ...formData,
-                            categories: [...formData.categories, value]
-                          });
-                        }
-                      }}
-                    >
-                      <SelectTrigger className="bg-background">
-                        <SelectValue placeholder="Select categories" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-background z-50">
-                        {categoriesOptions.map((category) => (
-                          <SelectItem key={category} value={category}>
+                            }}
+                          />
+                          <label
+                            htmlFor={`category-${category}`}
+                            className="text-sm cursor-pointer"
+                          >
                             {category}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {formData.categories.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {formData.categories.map((cat) => (
-                          <span
-                            key={cat}
-                            className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary text-xs rounded"
-                          >
-                            {cat}
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setFormData({
-                                  ...formData,
-                                  categories: formData.categories.filter((c) => c !== cat)
-                                })
-                              }
-                              className="hover:text-primary/70"
-                            >
-                              ×
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                    )}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </>
               )}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" className="w-full mt-4" disabled={isLoading}>
                 {isLoading ? "Creating account..." : "Sign Up"}
               </Button>
               <div className="relative my-4">
