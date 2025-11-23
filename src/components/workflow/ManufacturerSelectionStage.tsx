@@ -195,9 +195,9 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
   return (
     <div>
       <StageHeader
-        icon={MessageSquare}
-        title="Manage Manufacturer Requests"
-        description="View all manufacturers you've sent requests to, chat with them, and select your preferred manufacturer."
+        icon={Clock}
+        title="Waiting for Manufacturer Approval"
+        description="View all manufacturers you've sent requests to, chat with them, and select your preferred manufacturer once they accept."
       />
 
       <div className="max-w-4xl mx-auto mt-8">
@@ -275,10 +275,23 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
                             )}
                             
                             {match.status === 'pending' && (
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Clock className="w-4 h-4" />
-                                Waiting for manufacturer response...
-                              </div>
+                              <>
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                  <Clock className="w-4 h-4" />
+                                  Waiting for manufacturer response...
+                                </div>
+                                {match.orders && match.orders.length > 0 && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="gap-2 ml-2"
+                                    onClick={() => handleOpenChat(match.orders[0].id)}
+                                  >
+                                    <MessageSquare className="w-4 h-4" />
+                                    Chat
+                                  </Button>
+                                )}
+                              </>
                             )}
                             
                             {match.status === 'rejected' && (
@@ -315,7 +328,7 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
         </Card>
 
         <StageNavigation
-          nextLabel="Continue to Waiting for Approval"
+          nextLabel="Continue to Review Timeline"
           onNext={handleProceed}
           showBack={true}
         />
