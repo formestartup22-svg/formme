@@ -198,17 +198,16 @@ const ProductionStage = ({ design }: ProductionStageProps) => {
           </section>
 
           <section>
-            <h3 className="text-sm font-semibold text-foreground mb-3">First Batch Photos</h3>
+            <h3 className="text-sm font-semibold text-foreground mb-3">Lab Dip Photos</h3>
             <Card className="border-border">
               <CardContent className="p-6">
-                {orderData.production_timeline_data?.first_batch_photos && 
-                 orderData.production_timeline_data.first_batch_photos.length > 0 ? (
+                {orderData.lab_dip_photos && orderData.lab_dip_photos.length > 0 ? (
                   <div className="grid grid-cols-3 gap-3">
-                    {orderData.production_timeline_data.first_batch_photos.map((url: string, idx: number) => (
+                    {orderData.lab_dip_photos.map((url: string, idx: number) => (
                       <div key={idx} className="aspect-square rounded-lg overflow-hidden">
                         <img 
                           src={url} 
-                          alt={`First batch ${idx + 1}`}
+                          alt={`Lab dip ${idx + 1}`}
                           className="w-full h-full object-cover"
                         />
                       </div>

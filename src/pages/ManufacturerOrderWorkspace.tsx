@@ -29,9 +29,9 @@ const ManufacturerOrderWorkspace = () => {
   const [shrinkage, setShrinkage] = useState('');
   const [colorFastness, setColorFastness] = useState('');
   const [labDipFiles, setLabDipFiles] = useState<FileList | null>(null);
-  const [firstBatchFiles, setFirstBatchFiles] = useState<FileList | null>(null);
   const [samplePhotos, setSamplePhotos] = useState<FileList | null>(null);
   const [sampleNotes, setSampleNotes] = useState('');
+  const [productionPhotos, setProductionPhotos] = useState<FileList | null>(null);
 
   useEffect(() => {
   const fetchOrder = async () => {
@@ -174,30 +174,6 @@ const ManufacturerOrderWorkspace = () => {
         labDipUrls = await Promise.all(uploadPromises);
       }
 
-      // Upload first batch photos if any
-      let firstBatchUrls: string[] = [];
-      if (firstBatchFiles && firstBatchFiles.length > 0) {
-        const uploadPromises = Array.from(firstBatchFiles).map(async (file) => {
-          const fileExt = file.name.split('.').pop();
-          const fileName = `${order.id}-batch-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-          const filePath = `${order.designer_id}/${fileName}`;
-
-          const { error: uploadError, data } = await supabase.storage
-            .from('design-files')
-            .upload(filePath, file);
-
-          if (uploadError) throw uploadError;
-
-          const { data: { publicUrl } } = supabase.storage
-            .from('design-files')
-            .getPublicUrl(filePath);
-
-          return publicUrl;
-        });
-
-        firstBatchUrls = await Promise.all(uploadPromises);
-      }
-
       const { error } = await supabase
         .from('orders')
         .update({
@@ -208,7 +184,6 @@ const ManufacturerOrderWorkspace = () => {
           shrinkage: shrinkage || null,
           color_fastness: colorFastness || null,
           lab_dip_photos: labDipUrls.length > 0 ? labDipUrls : null,
-          production_timeline_data: firstBatchUrls.length > 0 ? { first_batch_photos: firstBatchUrls } : null,
           production_params_submitted_at: new Date().toISOString(),
           status: 'production_approval'
         })
@@ -461,7 +436,7 @@ const ManufacturerOrderWorkspace = () => {
             </Card>
             )}
 
-            {/* Production Approval Content */}
+            {/* Sample Development Content */}
             {activeTab === 'production' && (
             <Card>
               <CardHeader>
@@ -536,7 +511,7 @@ const ManufacturerOrderWorkspace = () => {
             </Card>
             )}
 
-            {/* Sample Development Content */}
+            {/* Production Approval Content */}
             {activeTab === 'sample' && (
             <Card>
               <CardHeader>
@@ -622,28 +597,6 @@ const ManufacturerOrderWorkspace = () => {
                         onChange={(e) => setColorFastness(e.target.value)}
                       />
                     </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-3">
-                  <Label>First Batch Photos</Label>
-                  <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
-                    <Input 
-                      type="file" 
-                      className="hidden" 
-                      id="batch-photos" 
-                      multiple 
-                      accept="image/*"
-                      onChange={(e) => setFirstBatchFiles(e.target.files)}
-                    />
-                    <Label htmlFor="batch-photos" className="cursor-pointer">
-                      <Button variant="outline" className="gap-2" asChild>
-                        <span>
-                          <Upload className="w-4 h-4" />
-                          Upload Photos {firstBatchFiles && firstBatchFiles.length > 0 && `(${firstBatchFiles.length})`}
-                        </span>
-                      </Button>
-                    </Label>
                   </div>
                 </div>
                 

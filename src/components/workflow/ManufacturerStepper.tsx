@@ -9,8 +9,8 @@ interface ManufacturerStepperProps {
 
 const manufacturerStages = [
   { id: 'techpack', label: 'Tech Pack Review', completionKey: 'status' },
-  { id: 'production', label: 'Production Approval', completionKey: 'production_params_submitted_at' },
-  { id: 'sample', label: 'Sample Development', completionKey: 'sample_photos' },
+  { id: 'sample', label: 'Production Approval', completionKey: 'production_params_submitted_at' },
+  { id: 'production', label: 'Sample Development', completionKey: 'sample_photos' },
   { id: 'quality', label: 'Quality Check', completionKey: 'quality_check_completed' },
   { id: 'shipping', label: 'Shipping & Logistics', completionKey: 'shipping_completed' },
 ];
@@ -24,9 +24,9 @@ export const ManufacturerStepper = ({ activeStep, onStepChange, orderData }: Man
     switch (stage.id) {
       case 'techpack':
         return orderData.status !== 'sent_to_manufacturer';
-      case 'production':
-        return !!orderData.production_params_submitted_at;
       case 'sample':
+        return !!orderData.production_params_submitted_at;
+      case 'production':
       case 'quality':
       case 'shipping':
         return false; // These will be implemented later
