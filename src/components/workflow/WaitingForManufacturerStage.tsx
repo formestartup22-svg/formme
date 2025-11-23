@@ -48,7 +48,7 @@ const WaitingForManufacturerStage = ({ design }: WaitingForManufacturerStageProp
         // Auto-proceed after 2 seconds
         setTimeout(() => {
           markStageComplete('waiting');
-          navigate(`/workflow?designId=${design.id}&stage=payment`);
+          navigate(`/workflow?designId=${design.id}&stage=send-tech-pack`);
         }, 2000);
       }
     };
@@ -81,10 +81,10 @@ const WaitingForManufacturerStage = ({ design }: WaitingForManufacturerStageProp
             setAcceptedManufacturer(manufacturer?.name || 'Manufacturer');
             toast.success(`${manufacturer?.name || 'A manufacturer'} has accepted your order!`);
             
-            // Auto-proceed to payment after 2 seconds
+            // Auto-proceed to manufacturer selection after 2 seconds
             setTimeout(() => {
               markStageComplete('waiting');
-              navigate(`/workflow?designId=${design.id}&stage=payment`);
+              navigate(`/workflow?designId=${design.id}&stage=send-tech-pack`);
             }, 2000);
           }
         }

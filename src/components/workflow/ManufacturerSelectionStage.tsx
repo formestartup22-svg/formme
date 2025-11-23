@@ -178,10 +178,18 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
       setConfirmDialogOpen(false);
       setManufacturerToFinalize(null);
       
-      toast.success('Contract finalized! Click "Continue to Review Timeline" when ready to proceed.');
+      toast.success('Contract finalized! Proceeding to production parameters.');
       
       // Refresh matches to update UI
       await fetchMatches();
+
+      // Automatically proceed to production parameters
+      setTimeout(() => {
+        markStageComplete('tech-pack');
+        markStageComplete('factory-match');
+        markStageComplete('send-tech-pack');
+        setCurrentStage('production');
+      }, 1000);
     } catch (error: any) {
       console.error('Error finalizing manufacturer:', error);
       toast.error('Failed to finalize manufacturer');
@@ -246,8 +254,8 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
     markStageComplete('factory-match');
     markStageComplete('send-tech-pack');
     
-    // Navigate to next stage
-    setCurrentStage('payment');
+    // Navigate to production parameters page
+    setCurrentStage('production');
     
     return true;
   };
@@ -386,7 +394,7 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
 
         {selectedManufacturer && (
           <StageNavigation
-            nextLabel="Continue to Payment"
+            nextLabel="Continue to Production Parameters"
             onNext={handleProceed}
             showBack={true}
           />
@@ -415,8 +423,8 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
           <DialogHeader>
             <DialogTitle>Finalize Contract</DialogTitle>
             <DialogDescription>
-              Do you want to finalize the contract with {manufacturerToFinalize?.manufacturers.name}? 
-              Once finalized, you'll proceed to review the production timeline with this manufacturer.
+              Are you sure you want to finalize the contract with {manufacturerToFinalize?.manufacturers.name}? 
+              Once confirmed, you'll proceed to review production parameters with this manufacturer.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0">

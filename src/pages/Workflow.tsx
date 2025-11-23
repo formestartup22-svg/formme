@@ -162,8 +162,8 @@ const Workflow = () => {
         .maybeSingle();
       
       if (finalizedOrder) {
-        console.log('[Workflow] Contract finalized, going to payment');
-        setInitialStage('payment');
+        console.log('[Workflow] Contract finalized, going to production parameters');
+        setInitialStage('production');
         return;
       }
       
@@ -186,7 +186,7 @@ const Workflow = () => {
         'draft': 'tech-pack',
         'tech_pack_pending': 'tech-pack',
         'sent_to_manufacturer': 'send-tech-pack',
-        'manufacturer_review': 'payment',
+        'manufacturer_review': 'production',
         'production_approval': 'production',
         'sample_development': 'waiting-sample',
         'quality_check': 'quality',
