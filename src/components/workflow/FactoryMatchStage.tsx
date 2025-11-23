@@ -14,6 +14,7 @@ import { FactoryDocuments } from './FactoryDocuments';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { calculateMatchScore } from '@/utils/matchingAlgorithm';
+import { useNavigate } from 'react-router-dom';
 
 interface Design {
   id: string;
@@ -43,7 +44,8 @@ interface FactoryMatchStageProps {
 }
 
 const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
-  const { workflowData, updateWorkflowData } = useWorkflow();
+  const { workflowData, updateWorkflowData, markStageComplete } = useWorkflow();
+  const navigate = useNavigate();
   const [showFactories, setShowFactories] = useState(false);
   const [manufacturers, setManufacturers] = useState<ManufacturerWithScore[]>([]);
   const [loading, setLoading] = useState(false);
@@ -257,6 +259,13 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
       await Promise.all(matchPromises);
 
       toast.success(`Sent requests to ${selectedManufacturers.size} manufacturer(s)`);
+      
+      // Mark stage as complete and navigate
+      markStageComplete('factory-match');
+      setTimeout(() => {
+        navigate(`/workflow?designId=${design.id}&stage=send-tech-pack`);
+      }, 500);
+      
       return true;
     } catch (error: any) {
       console.error('Error sending requests:', error);
