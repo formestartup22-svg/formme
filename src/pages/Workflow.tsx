@@ -152,16 +152,30 @@ const Workflow = () => {
         return;
       }
       
-      // Check if manufacturer has been finalized (contract signed)
-      const { data: finalizedOrder } = await supabase
-        .from('orders')
-        .select('status, manufacturer_id')
+      // Check manufacturer match status instead of order status
+      const { data: acceptedMatches } = await supabase
+        .from('manufacturer_matches')
+        .select('status')
         .eq('design_id', designId)
-        .eq('status', 'manufacturer_review')
-        .not('manufacturer_id', 'is', null)
-        .maybeSingle();
+        .eq('status', 'accepted');
       
-      if (finalizedOrder) {
+      // If there are accepted matches but no finalized contract, go to manufacturer selection
+      if (acceptedMatches && acceptedMatches.length > 0) {
+        const { data: finalizedOrder } = await supabase
+          .from('orders')
+          .select('status, manufacturer_id')
+          .eq('design_id', designId)
+          .eq('status', 'manufacturer_review')
+          .not('manufacturer_id', 'is', null)
+          .maybeSingle();
+        
+        if (!finalizedOrder) {
+          console.log('[Workflow] Manufacturers accepted, waiting for contract finalization');
+          setInitialStage('send-tech-pack');
+          return;
+        }
+        
+        // If contract is finalized, go to production
         console.log('[Workflow] Contract finalized, going to production parameters');
         setInitialStage('production');
         return;
