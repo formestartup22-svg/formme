@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
 type UserRole = "designer" | "manufacturer";
@@ -28,6 +29,28 @@ const Auth = () => {
     capabilities: [] as string[],
     categories: [] as string[],
   });
+
+  const capabilitiesOptions = [
+    "Cut & Sew",
+    "Printing",
+    "Embroidery",
+    "Dyeing",
+    "Pattern Making",
+    "Sampling",
+    "Quality Control",
+    "Packaging"
+  ];
+
+  const categoriesOptions = [
+    "T-Shirts",
+    "Hoodies",
+    "Pants",
+    "Dresses",
+    "Jackets",
+    "Activewear",
+    "Underwear",
+    "Accessories"
+  ];
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -283,6 +306,27 @@ const Auth = () => {
                   onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                 />
               </div>
+
+              <div>
+                <Label htmlFor="signup-email">Email</Label>
+                <Input
+                  id="signup-email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="signup-password">Password</Label>
+                <Input
+                  id="signup-password"
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  required
+                />
+              </div>
               
               {userRole === "manufacturer" && (
                 <>
@@ -329,52 +373,103 @@ const Auth = () => {
                     </div>
                   </div>
                   <div>
-                    <Label htmlFor="signup-capabilities">Capabilities (comma-separated)</Label>
-                    <Input
-                      id="signup-capabilities"
-                      type="text"
-                      placeholder="Cut & Sew, Printing, Embroidery"
-                      onChange={(e) => setFormData({ 
-                        ...formData, 
-                        capabilities: e.target.value.split(',').map(s => s.trim()).filter(Boolean) 
-                      })}
-                    />
+                    <Label htmlFor="signup-capabilities">Capabilities</Label>
+                    <Select
+                      onValueChange={(value) => {
+                        if (!formData.capabilities.includes(value)) {
+                          setFormData({
+                            ...formData,
+                            capabilities: [...formData.capabilities, value]
+                          });
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="bg-background">
+                        <SelectValue placeholder="Select capabilities" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background z-50">
+                        {capabilitiesOptions.map((capability) => (
+                          <SelectItem key={capability} value={capability}>
+                            {capability}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {formData.capabilities.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {formData.capabilities.map((cap) => (
+                          <span
+                            key={cap}
+                            className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary text-xs rounded"
+                          >
+                            {cap}
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setFormData({
+                                  ...formData,
+                                  capabilities: formData.capabilities.filter((c) => c !== cap)
+                                })
+                              }
+                              className="hover:text-primary/70"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div>
-                    <Label htmlFor="signup-categories">Categories (comma-separated)</Label>
-                    <Input
-                      id="signup-categories"
-                      type="text"
-                      placeholder="T-Shirts, Hoodies, Pants"
-                      onChange={(e) => setFormData({ 
-                        ...formData, 
-                        categories: e.target.value.split(',').map(s => s.trim()).filter(Boolean) 
-                      })}
-                    />
+                    <Label htmlFor="signup-categories">Categories</Label>
+                    <Select
+                      onValueChange={(value) => {
+                        if (!formData.categories.includes(value)) {
+                          setFormData({
+                            ...formData,
+                            categories: [...formData.categories, value]
+                          });
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="bg-background">
+                        <SelectValue placeholder="Select categories" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background z-50">
+                        {categoriesOptions.map((category) => (
+                          <SelectItem key={category} value={category}>
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {formData.categories.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {formData.categories.map((cat) => (
+                          <span
+                            key={cat}
+                            className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary text-xs rounded"
+                          >
+                            {cat}
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setFormData({
+                                  ...formData,
+                                  categories: formData.categories.filter((c) => c !== cat)
+                                })
+                              }
+                              className="hover:text-primary/70"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </>
               )}
-              
-              <div>
-                <Label htmlFor="signup-email">Email</Label>
-                <Input
-                  id="signup-email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="signup-password">Password</Label>
-                <Input
-                  id="signup-password"
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  required
-                />
-              </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Creating account..." : "Sign Up"}
               </Button>
