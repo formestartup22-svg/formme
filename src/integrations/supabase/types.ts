@@ -247,6 +247,7 @@ export type Database = {
       }
       manufacturers: {
         Row: {
+          categories: string[] | null
           certifications: string[] | null
           country: string | null
           created_at: string | null
@@ -266,6 +267,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          categories?: string[] | null
           certifications?: string[] | null
           country?: string | null
           created_at?: string | null
@@ -285,6 +287,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          categories?: string[] | null
           certifications?: string[] | null
           country?: string | null
           created_at?: string | null

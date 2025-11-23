@@ -101,7 +101,7 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
           location: manufacturer.location || '',
           priceTier: manufacturer.price_range || 'mid',
           rating: manufacturer.rating || undefined,
-          categories: manufacturer.specialties || []
+          categories: (manufacturer as any).categories || []
         }
       );
 
