@@ -277,7 +277,7 @@ const ManufacturerDashboard = () => {
                     ) : (
                       orders.map((order) => (
                         <TableRow key={order.id} className="hover:bg-muted/50">
-                          <TableCell className="font-medium">{order.designs.name}</TableCell>
+                          <TableCell className="font-medium">{order.designs?.name || 'Unknown Design'}</TableCell>
                           <TableCell>{order.profiles?.full_name || 'Unknown'}</TableCell>
                           <TableCell>
                             <span className="group relative">
