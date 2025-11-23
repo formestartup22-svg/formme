@@ -17,6 +17,15 @@ import { toast } from 'sonner';
 const ManufacturerOrderWorkspace = () => {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState('techpack');
+  
+  const handleTabChange = (newTab: string) => {
+    // Check if trying to access Sample Development without approval
+    if (newTab === 'production' && order?.production_params_approved !== true) {
+      toast.error('You cannot access Sample Development until the designer approves your production parameters');
+      return;
+    }
+    setActiveTab(newTab);
+  };
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [matchStatus, setMatchStatus] = useState<'pending' | 'accepted' | 'rejected' | null>(null);
@@ -107,6 +116,31 @@ const ManufacturerOrderWorkspace = () => {
     };
 
     fetchOrder();
+
+    // Real-time subscription for production approval updates
+    const channel = supabase
+      .channel('order-approval-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'orders',
+          filter: `id=eq.${id}`
+        },
+        (payload) => {
+          setOrder((prev: any) => prev ? { ...prev, ...payload.new } : payload.new);
+          // Show toast when designer approves
+          if (payload.new.production_params_approved === true && !order?.production_params_approved) {
+            toast.success('Designer approved your production parameters! You can now proceed to Sample Development.');
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [id]);
 
   const handleAcceptMatch = async () => {
@@ -370,7 +404,7 @@ const ManufacturerOrderWorkspace = () => {
                 <CardTitle className="text-lg">Order Pipeline</CardTitle>
               </CardHeader>
               <CardContent>
-                <ManufacturerStepper activeStep={activeTab} onStepChange={setActiveTab} orderData={order} />
+                <ManufacturerStepper activeStep={activeTab} onStepChange={handleTabChange} orderData={order} />
               </CardContent>
             </Card>
           </div>
