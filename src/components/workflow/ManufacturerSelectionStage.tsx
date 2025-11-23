@@ -156,7 +156,12 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
       if (updateError) throw updateError;
 
       setSelectedManufacturer(manufacturerId);
+      
+      // Mark all previous stages as complete
+      markStageComplete('tech-pack');
+      markStageComplete('factory-match');
       markStageComplete('send-tech-pack');
+      
       toast.success('Manufacturer finalized! Proceeding to timeline review...');
       
       // Navigate to next stage
