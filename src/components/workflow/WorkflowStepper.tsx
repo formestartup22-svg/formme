@@ -6,8 +6,7 @@ import { stageNames } from '@/data/workflowData';
 const stages = [
   'tech-pack',
   'factory-match',
-  'sending',
-  'waiting',
+  'send-tech-pack',
   'review-timeline',
   'payment',
   'production',
