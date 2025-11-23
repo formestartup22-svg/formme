@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 interface WorkflowData {
   // Tech Pack
@@ -115,9 +116,27 @@ const initialData: WorkflowData = {
 };
 
 export const WorkflowProvider = ({ children, initialStage }: { children: ReactNode; initialStage?: string }) => {
+  const [searchParams] = useSearchParams();
   const [workflowData, setWorkflowData] = useState<WorkflowData>(initialData);
   const [currentStage, setCurrentStageState] = useState(initialStage || 'tech-pack');
   const [completedStages, setCompletedStages] = useState<string[]>([]);
+
+  // Sync currentStage with URL parameter
+  useEffect(() => {
+    const stageFromUrl = searchParams.get('stage');
+    if (stageFromUrl && stageFromUrl !== currentStage) {
+      console.log('[WorkflowContext] URL stage changed to:', stageFromUrl);
+      setCurrentStageState(stageFromUrl);
+    }
+  }, [searchParams]);
+
+  // Update initialStage when it changes
+  useEffect(() => {
+    if (initialStage) {
+      console.log('[WorkflowContext] Initial stage set to:', initialStage);
+      setCurrentStageState(initialStage);
+    }
+  }, [initialStage]);
 
   const stages = [
     'tech-pack',
