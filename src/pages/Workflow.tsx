@@ -172,7 +172,7 @@ const Workflow = () => {
       const stageMap: Record<string, string> = {
         'draft': 'tech-pack',
         'tech_pack_pending': 'tech-pack',
-        'sent_to_manufacturer': 'waiting',
+        'sent_to_manufacturer': 'send-tech-pack',
         'manufacturer_review': 'review-timeline',
         'production_approval': 'production',
         'sample_development': 'waiting-sample',
