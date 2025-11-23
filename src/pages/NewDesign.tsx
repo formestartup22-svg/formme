@@ -51,6 +51,28 @@ const NewDesign = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      console.log("Current user:", user.id);
+
+      // Check if user has designer role
+      const { data: roleCheck, error: roleError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .single();
+
+      console.log("User role check:", roleCheck, roleError);
+
+      if (roleError || !roleCheck) {
+        toast.error("User role not found. Please try signing out and back in.");
+        console.error("Role check failed:", roleError);
+        return;
+      }
+
+      if (roleCheck.role !== 'designer') {
+        toast.error("Only designers can create designs");
+        return;
+      }
+
       // Insert design record
       const { data: design, error: designError } = await supabase
         .from("designs")
@@ -63,7 +85,12 @@ const NewDesign = () => {
         .select()
         .single();
 
-      if (designError) throw designError;
+      if (designError) {
+        console.error("Design insert error:", designError);
+        throw designError;
+      }
+
+      console.log("Design created:", design);
 
       // Create design_specs for this design
       const { error: specsError } = await supabase
@@ -72,7 +99,10 @@ const NewDesign = () => {
           design_id: design.id,
         });
 
-      if (specsError) throw specsError;
+      if (specsError) {
+        console.error("Design specs error:", specsError);
+        throw specsError;
+      }
 
       // Create an order for this design to enter the workflow
       const { data: order, error: orderError } = await supabase
@@ -85,12 +115,16 @@ const NewDesign = () => {
         .select()
         .single();
 
-      if (orderError) throw orderError;
+      if (orderError) {
+        console.error("Order creation error:", orderError);
+        throw orderError;
+      }
 
       toast.success("Design created successfully!");
       // Navigate directly to tech pack stage
       navigate(`/workflow?designId=${design.id}`);
     } catch (error: any) {
+      console.error("Full error details:", error);
       toast.error(error.message || "Failed to create design");
     } finally {
       setIsLoading(false);
