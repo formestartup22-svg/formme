@@ -198,39 +198,13 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
       return false;
     }
 
+
     setSending(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      // Get or create order for this design
-      let { data: order, error: orderError } = await supabase
-        .from('orders')
-        .select('id')
-        .eq('design_id', design.id)
-        .eq('designer_id', user.id)
-        .maybeSingle();
-
-      if (orderError) throw orderError;
-
-      // Create order if it doesn't exist
-      if (!order) {
-        const { data: newOrder, error: createError } = await supabase
-          .from('orders')
-          .insert({
-            design_id: design.id,
-            designer_id: user.id,
-            quantity: parseInt(workflowData.quantity || '100'),
-            status: 'sent_to_manufacturer'
-          })
-          .select()
-          .single();
-
-        if (createError) throw createError;
-        order = newOrder;
-      }
-
-      // Create manufacturer matches for all selected manufacturers
+      // Create manufacturer matches and orders for all selected manufacturers
       const matchPromises = Array.from(selectedManufacturers).map(async (manufacturerId) => {
         const manufacturer = manufacturers.find(m => m.id === manufacturerId);
         
@@ -243,10 +217,12 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
           .maybeSingle();
 
         if (existing) {
+          console.log(`[handleSendRequests] Match already exists for manufacturer ${manufacturerId}`);
           return; // Already exists
         }
 
-        return supabase
+        // Create manufacturer match
+        const { error: matchError } = await supabase
           .from('manufacturer_matches')
           .insert({
             design_id: design.id,
@@ -254,6 +230,32 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
             score: manufacturer?.matchScore || 0,
             status: 'pending'
           });
+
+        if (matchError) {
+          console.error(`[handleSendRequests] Error creating match:`, matchError);
+          throw matchError;
+        }
+
+        // Create order for this manufacturer
+        const { data: orderData, error: orderError } = await supabase
+          .from('orders')
+          .insert({
+            design_id: design.id,
+            designer_id: user.id,
+            manufacturer_id: manufacturerId,
+            quantity: parseInt(workflowData.quantity || '100'),
+            status: 'sent_to_manufacturer',
+            notes: `Delivery date: ${workflowData.deliveryDate || 'TBD'}`
+          })
+          .select()
+          .single();
+
+        if (orderError) {
+          console.error(`[handleSendRequests] Error creating order:`, orderError);
+          throw orderError;
+        }
+
+        console.log(`[handleSendRequests] Created order ${orderData.id} for manufacturer ${manufacturerId}`);
       });
 
       await Promise.all(matchPromises);
@@ -266,7 +268,7 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
       
       return false; // Return false to prevent StageNavigation from also navigating
     } catch (error: any) {
-      console.error('Error sending requests:', error);
+      console.error('[handleSendRequests] Error sending requests:', error);
       toast.error(error.message || 'Failed to send requests');
       return false;
     } finally {
