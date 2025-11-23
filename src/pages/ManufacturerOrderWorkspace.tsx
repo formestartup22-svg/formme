@@ -11,6 +11,7 @@ import { MessageSquare, FileDown, Upload, CheckCircle, XCircle, ArrowLeft, Clock
 import { ManufacturerStepper } from '@/components/workflow/ManufacturerStepper';
 import { FactoryMessaging } from '@/components/workflow/FactoryMessaging';
 import { FloatingMessagesWidget } from '@/components/workflow/FloatingMessagesWidget';
+import { ManufacturerMessaging } from '@/components/manufacturer/ManufacturerMessaging';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -484,31 +485,6 @@ const ManufacturerOrderWorkspace = () => {
                     </p>
                   </div>
                 )}
-                <div>
-                  <h3 className="font-semibold mb-3">Sample Status</h3>
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
-                        1
-                      </div>
-                      <span className="text-sm">Cutting</span>
-                    </div>
-                    <div className="flex-1 h-0.5 bg-border" />
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
-                        2
-                      </div>
-                      <span className="text-sm">Sewing</span>
-                    </div>
-                    <div className="flex-1 h-0.5 bg-border" />
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-sm font-medium">
-                        3
-                      </div>
-                      <span className="text-sm">Finishing</span>
-                    </div>
-                  </div>
-                </div>
                 
                 <div className="space-y-3">
                   <Label>Upload Sample Progress Photos</Label>
@@ -541,12 +517,21 @@ const ManufacturerOrderWorkspace = () => {
                     value={sampleNotes}
                     onChange={(e) => setSampleNotes(e.target.value)}
                   />
-                  <Button 
-                    onClick={handleSubmitSampleUpdate}
-                    disabled={submitting || (!samplePhotos && !sampleNotes) || !order.production_params_approved}
-                  >
-                    {submitting ? 'Submitting...' : 'Submit Update'}
-                  </Button>
+                  <div className="flex items-center gap-3">
+                    <Button 
+                      onClick={handleSubmitSampleUpdate}
+                      disabled={submitting || (!samplePhotos && !sampleNotes) || !order.production_params_approved}
+                    >
+                      {submitting ? 'Submitting...' : 'Submit Update'}
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={() => handleTabChange('quality')}
+                      disabled={!order.production_params_approved}
+                    >
+                      Next Step
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -864,8 +849,8 @@ const ManufacturerOrderWorkspace = () => {
         )}
       </div>
 
-      {/* Floating Messages Widget */}
-      {order?.design_id && <FloatingMessagesWidget designId={order.design_id} />}
+      {/* Floating Messages Widget for Manufacturers */}
+      <ManufacturerMessaging />
     </div>
   );
 };
