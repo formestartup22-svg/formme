@@ -6,7 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
-import { toast } from "sonner";
+import { LockedFeatureDialog } from "@/components/LockedFeatureDialog";
 
 interface NavBarProps {
   initialDark?: boolean;
@@ -15,6 +15,10 @@ interface NavBarProps {
 const NavBar: React.FC<NavBarProps> = ({ initialDark = false }) => {
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [lockedFeature, setLockedFeature] = useState<{
+    name: string;
+    description: string;
+  } | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -71,13 +75,22 @@ const NavBar: React.FC<NavBarProps> = ({ initialDark = false }) => {
           const handleClick = (e: React.MouseEvent) => {
             if (isAuthRequired && !user) {
               e.preventDefault();
-              toast.error("Please sign up to access this feature", {
-                description: "Create an account to start designing and managing your collection.",
-                action: {
-                  label: "Sign up",
-                  onClick: () => navigate("/auth")
-                }
-              });
+              if (item === "collection") {
+                setLockedFeature({
+                  name: "Dashboard",
+                  description: "Create an account to access your personal dashboard and manage all your designs.",
+                });
+              } else if (item === "create") {
+                setLockedFeature({
+                  name: "Create",
+                  description: "Create an account to start designing custom garments and bring your vision to life.",
+                });
+              } else {
+                setLockedFeature({
+                  name: "Dashboard",
+                  description: "Create an account to access the full dashboard and manage your projects.",
+                });
+              }
             }
           };
           
@@ -139,6 +152,13 @@ const NavBar: React.FC<NavBarProps> = ({ initialDark = false }) => {
           </svg>
         </button>
       </div>
+      
+      <LockedFeatureDialog
+        open={!!lockedFeature}
+        onOpenChange={(open) => !open && setLockedFeature(null)}
+        featureName={lockedFeature?.name || ""}
+        description={lockedFeature?.description || ""}
+      />
     </header>
   );
 };
