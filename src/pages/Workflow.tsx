@@ -114,6 +114,7 @@ const Workflow = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const { designs, loading } = useDesigns();
   const { role, loading: roleLoading } = useUserRole();
+  const [initialStage, setInitialStage] = useState<string | null>(null);
   
   const designId = searchParams.get('designId');
   const selectedDesign = designId ? designs.find(d => d.id === designId) : null;
@@ -133,6 +134,55 @@ const Workflow = () => {
       navigate('/manufacturer');
     }
   }, [role, roleLoading, navigate]);
+
+  // Determine initial stage based on design selection
+  useEffect(() => {
+    if (!designId || !selectedDesign) {
+      setInitialStage(null);
+      return;
+    }
+
+    const determineStage = async () => {
+      const urlStage = searchParams.get('stage');
+      
+      // If URL has a stage, use it
+      if (urlStage) {
+        setInitialStage(urlStage);
+        return;
+      }
+      
+      // Otherwise, determine stage from order status
+      const { data: order } = await supabase
+        .from('orders')
+        .select('status')
+        .eq('design_id', designId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (!order) {
+        setInitialStage('tech-pack');
+        return;
+      }
+      
+      // Map order status to workflow stage
+      const stageMap: Record<string, string> = {
+        'draft': 'tech-pack',
+        'tech_pack_pending': 'tech-pack',
+        'sent_to_manufacturer': 'waiting',
+        'manufacturer_review': 'review-timeline',
+        'production_approval': 'production',
+        'sample_development': 'waiting-sample',
+        'quality_check': 'quality',
+        'shipping': 'shipping',
+        'delivered': 'shipping'
+      };
+      
+      setInitialStage(stageMap[order.status] || 'tech-pack');
+    };
+    
+    determineStage();
+  }, [designId, searchParams, selectedDesign]);
 
   if (isAuthenticated === null || roleLoading || loading) {
     return (
@@ -219,51 +269,6 @@ const Workflow = () => {
 
   // If a design is selected, show the workflow for that design
   if (designId && selectedDesign) {
-    // Determine initial stage based on URL or order status
-    const [initialStage, setInitialStage] = useState<string | null>(null);
-    
-    useEffect(() => {
-      const determineStage = async () => {
-        const urlStage = searchParams.get('stage');
-        
-        // If URL has a stage, use it
-        if (urlStage) {
-          setInitialStage(urlStage);
-          return;
-        }
-        
-        // Otherwise, determine stage from order status
-        const { data: order } = await supabase
-          .from('orders')
-          .select('status')
-          .eq('design_id', designId)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        
-        if (!order) {
-          setInitialStage('tech-pack');
-          return;
-        }
-        
-        // Map order status to workflow stage
-        const stageMap: Record<string, string> = {
-          'draft': 'tech-pack',
-          'tech_pack_pending': 'tech-pack',
-          'sent_to_manufacturer': 'waiting',
-          'manufacturer_review': 'review-timeline',
-          'production_approval': 'production',
-          'sample_development': 'waiting-sample',
-          'quality_check': 'quality',
-          'shipping': 'shipping',
-          'delivered': 'shipping'
-        };
-        
-        setInitialStage(stageMap[order.status] || 'tech-pack');
-      };
-      
-      determineStage();
-    }, [designId, searchParams]);
     
     if (!initialStage) {
       return (
