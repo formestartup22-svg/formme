@@ -71,6 +71,8 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
 
   const fetchMatches = async () => {
     try {
+      console.log('[ManufacturerSelectionStage] Fetching matches for design:', design.id);
+      
       const { data, error } = await supabase
         .from('manufacturer_matches')
         .select(`
@@ -88,6 +90,8 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
         .eq('design_id', design.id)
         .order('created_at', { ascending: false });
 
+      console.log('[ManufacturerSelectionStage] Matches query result:', { data, error });
+
       if (error) throw error;
 
       setMatches((data as any) || []);
@@ -99,11 +103,13 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
         .eq('design_id', design.id)
         .maybeSingle();
 
+      console.log('[ManufacturerSelectionStage] Order query result:', order);
+
       if (order?.manufacturer_id) {
         setSelectedManufacturer(order.manufacturer_id);
       }
     } catch (error: any) {
-      console.error('Error fetching matches:', error);
+      console.error('[ManufacturerSelectionStage] Error fetching matches:', error);
       toast.error('Failed to load manufacturer matches');
     } finally {
       setLoading(false);
