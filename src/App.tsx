@@ -33,6 +33,7 @@ function App() {
           <Route path="/auth" element={<Auth />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/new-design" element={<NewDesign />} />
+          <Route path="/about" element={<About />} />
           <Route path="/designer-dashboard" element={<DesignerDashboard />} />
           <Route path="/workflow/:orderId" element={<Workflow />} />
           <Route path="/studio-selection" element={<StudioSelection />} />

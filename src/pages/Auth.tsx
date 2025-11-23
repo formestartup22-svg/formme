@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar";
 
 type UserRole = "designer" | "manufacturer";
 
@@ -136,14 +137,23 @@ const Auth = () => {
       if (error) throw error;
       if (!data.user) throw new Error("Signup failed");
 
-      // Assign role
-      await supabase.from("user_roles").insert({
+      console.log("User created:", data.user.id);
+
+      // Assign role - CRITICAL: This must succeed for the user to create designs
+      const { error: roleError } = await supabase.from("user_roles").insert({
         user_id: data.user.id,
         role: userRole,
       });
 
+      if (roleError) {
+        console.error("Role assignment failed:", roleError);
+        throw new Error(`Failed to assign role: ${roleError.message}`);
+      }
+
+      console.log("Role assigned:", userRole);
+
       // Update profile with common data
-      await supabase.from("profiles").update({
+      const { error: profileError } = await supabase.from("profiles").update({
         full_name: formData.fullName,
         company_name: formData.companyName,
         location: formData.location || null,
@@ -153,9 +163,13 @@ const Auth = () => {
         moq: formData.moq ? parseInt(formData.moq) : null,
       }).eq("user_id", data.user.id);
 
+      if (profileError) {
+        console.error("Profile update failed:", profileError);
+      }
+
       // If manufacturer, create manufacturer record
       if (userRole === "manufacturer") {
-        await supabase.from("manufacturers").insert({
+        const { error: mfgError } = await supabase.from("manufacturers").insert({
           user_id: data.user.id,
           name: formData.companyName || formData.fullName,
           description: `${formData.companyName || formData.fullName} - Professional manufacturing services`,
@@ -167,11 +181,16 @@ const Auth = () => {
           lead_time_days: 30, // Default lead time
           is_active: true,
         });
+
+        if (mfgError) {
+          console.error("Manufacturer record creation failed:", mfgError);
+        }
       }
 
-      toast.success("Account created! Please check your email to verify.");
+      toast.success("Account created successfully! You can now sign in.");
       setMode("signin");
     } catch (error: any) {
+      console.error("Signup error:", error);
       toast.error(error.message || "Failed to sign up");
     } finally {
       setIsLoading(false);
@@ -180,7 +199,8 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <div className="flex-1 flex items-center justify-center p-4">
+      <Navbar />
+      <div className="flex-1 flex items-center justify-center p-4 pt-24">
         <Card className="w-full max-w-2xl p-8 bg-white/70 backdrop-blur-md border border-border/40 shadow-lg rounded-2xl">
         <div className="text-center mb-6">
           <h1 className="text-4xl font-bold mb-2">formme</h1>
