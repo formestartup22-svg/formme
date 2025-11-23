@@ -1,7 +1,7 @@
 export interface Design {
   id: string;
   name: string;
-  stage: 'tech-pack' | 'factory-match' | 'send-tech-pack' | 'sending' | 'waiting' | 'review-timeline' | 'payment' | 'production' | 'waiting-sample' | 'sample' | 'quality' | 'shipping';
+  stage: 'tech-pack' | 'factory-match' | 'send-tech-pack' | 'sending' | 'waiting' | 'production' | 'payment' | 'waiting-sample' | 'sample' | 'quality' | 'shipping';
   status: 'on-track' | 'delayed' | 'action-required' | 'completed';
   nextAction: string;
   eta: string;
@@ -160,12 +160,11 @@ export const mockTasks: Task[] = [
 export const stageNames = {
   'tech-pack': 'Create your tech pack',
   'factory-match': 'Find your manufacturer',
-  'send-tech-pack': 'Review production timeline',
+  'send-tech-pack': 'Select manufacturer',
   'sending': 'Confirm your order',
   'waiting': 'Waiting for manufacturer',
-  'review-timeline': 'Review production timeline',
-  'payment': 'Make payment',
   'production': 'Review production parameters',
+  'payment': 'Make payment',
   'waiting-sample': 'Sample in production',
   'sample': 'View your design sample',
   'quality': 'Quality Check',
@@ -178,9 +177,8 @@ export const stageOrder = [
   'send-tech-pack',
   'sending',
   'waiting',
-  'review-timeline',
-  'payment',
   'production',
+  'payment',
   'waiting-sample',
   'sample',
   'quality',

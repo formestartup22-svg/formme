@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Factory, CheckCircle, XCircle, Upload, Image as ImageIcon, Clock, Calendar } from 'lucide-react';
+import { Factory, CheckCircle, XCircle, Upload, Image as ImageIcon, Clock, Calendar, ArrowRight } from 'lucide-react';
 import { Design } from '@/data/workflowData';
 import { useWorkflow } from '@/context/WorkflowContext';
 import { StageHeader } from './StageHeader';
@@ -15,7 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 interface ProductionStageProps { design: Design; }
 
 const ProductionStage = ({ design }: ProductionStageProps) => {
-  const { workflowData, updateWorkflowData } = useWorkflow();
+  const { workflowData, updateWorkflowData, currentStage, setCurrentStage, markStageComplete } = useWorkflow();
   const [orderData, setOrderData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -241,7 +241,31 @@ const ProductionStage = ({ design }: ProductionStageProps) => {
             </Card>
           </section>
 
-          <StageNavigation onNext={() => true} nextLabel="Continue to Sample Production" showBack={true} />
+          <div className="flex items-center justify-between pt-6 border-t mt-8">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                markStageComplete(currentStage);
+                setCurrentStage('waiting-sample');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="gap-2"
+            >
+              Skip Payment
+            </Button>
+
+            <Button 
+              onClick={() => {
+                markStageComplete(currentStage);
+                setCurrentStage('payment');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
+            >
+              Continue to Payment
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
         <div className="space-y-4">
           <FactoryDocuments />
