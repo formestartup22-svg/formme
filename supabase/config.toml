@@ -1,1 +1,7 @@
 project_id = "rypykphmagvbdpedvuyn"
+
+[functions.generate-techpack]
+verify_jwt = false
+
+[functions.start-techpack-agents]
+verify_jwt = false

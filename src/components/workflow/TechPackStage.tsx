@@ -145,6 +145,49 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
 
       if (upsertError) throw upsertError;
 
+      // Build garment brief from form data
+      const garmentBrief = `
+Design Name: ${design.name}
+Garment Type: T-Shirt
+
+Measurements:
+${measurements.filter(m => m.name && m.value).map(m => `- ${m.name}: ${m.value} inches`).join('\n')}
+
+Fabric Specifications:
+${fabricSpecs.filter(f => f.type && f.details).map(f => `- ${f.type}: ${f.details}${f.gsm ? ` (${f.gsm} GSM)` : ''}`).join('\n')}
+
+Construction Notes:
+${workflowData.constructionNotes || 'None provided'}
+      `.trim();
+
+      // Convert design image to base64 if available
+      let templateImageB64 = '';
+      if (designFileUrl) {
+        try {
+          const response = await fetch(designFileUrl);
+          const blob = await response.blob();
+          const buffer = await blob.arrayBuffer();
+          const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+          templateImageB64 = base64;
+        } catch (err) {
+          console.warn('Could not convert image to base64:', err);
+        }
+      }
+
+      // Start the agent orchestration
+      const { data: agentData, error: agentError } = await supabase.functions.invoke('start-techpack-agents', {
+        body: {
+          garmentBrief,
+          templateImageB64,
+          designId: design.id,
+        }
+      });
+
+      if (agentError) throw agentError;
+
+      toast.success('Agent-based tech pack generation started! This will take a few moments.');
+
+      // Also call the existing generate-techpack as fallback/backup
       const { data, error } = await supabase.functions.invoke('generate-techpack', {
         body: {
           designData: {
