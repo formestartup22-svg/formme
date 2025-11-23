@@ -96,7 +96,7 @@ Required JSON keys:
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'google/gemini-2.0-flash-exp',
+      model: 'google/gemini-2.5-flash-lite',
       messages: [
         { role: 'system', content: 'You are a fashion techpack assistant. Output only valid JSON.' },
         { role: 'user', content: prompt }
@@ -144,7 +144,7 @@ Required JSON keys:
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'google/gemini-2.0-flash-exp',
+      model: 'google/gemini-2.5-flash-lite',
       messages: [
         { role: 'system', content: 'You are a fashion techpack materials specialist. Output only valid JSON.' },
         { role: 'user', content: prompt }
@@ -239,7 +239,7 @@ Now compile the complete tech pack.`;
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.0-flash-exp',
+        model: 'google/gemini-2.5-flash',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }

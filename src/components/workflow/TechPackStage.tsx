@@ -40,6 +40,12 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
   const [fabricSpecs, setFabricSpecs] = useState<Array<{ type: string; details: string; gsm?: string }>>([
     { type: '', details: '', gsm: '' }
   ]);
+  const [agentResults, setAgentResults] = useState<{
+    svgAnalysis?: any;
+    designSection?: any;
+    materialsSection?: any;
+  } | null>(null);
+  const [showAgentResults, setShowAgentResults] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const designFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -198,6 +204,12 @@ ${workflowData.constructionNotes || 'None provided'}
       if (error) throw error;
 
       if (data?.pdfData) {
+        // Store agent results if available
+        if (data?.agentResults) {
+          setAgentResults(data.agentResults);
+          setShowAgentResults(true);
+        }
+        
         // Convert base64 to blob
         const byteCharacters = atob(data.pdfData);
         const byteNumbers = new Array(byteCharacters.length);
@@ -615,6 +627,22 @@ ${workflowData.constructionNotes || 'None provided'}
                   </a>
                 </div>
               )}
+
+              {agentResults && (
+                <div className="rounded-lg bg-primary/10 p-3 space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-medium text-primary">
+                    <Sparkles className="w-4 h-4" />
+                    AI Agent Analysis Available
+                  </div>
+                  <Button
+                    variant="link"
+                    onClick={() => setShowAgentResults(true)}
+                    className="h-auto p-0 text-xs text-primary hover:text-primary/80 underline"
+                  >
+                    View detailed agent results
+                  </Button>
+                </div>
+              )}
             </div>
           </section>
 
@@ -646,6 +674,165 @@ ${workflowData.constructionNotes || 'None provided'}
             <Button onClick={handleConfirmTechPack}>
               Yes, Save Tech Pack
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Agent Results Dialog */}
+      <Dialog open={showAgentResults} onOpenChange={setShowAgentResults}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>AI Agent Analysis Results</DialogTitle>
+            <DialogDescription>
+              View detailed analysis from each AI agent that contributed to your tech pack
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {/* SVG Analysis Section */}
+            {agentResults?.svgAnalysis && (
+              <details className="group border border-border rounded-lg">
+                <summary className="cursor-pointer p-4 hover:bg-muted/50 font-semibold flex items-center gap-2">
+                  <span className="text-primary">📐</span>
+                  SVG Design Analysis
+                </summary>
+                <div className="p-4 pt-0 space-y-2 text-sm">
+                  <div>
+                    <span className="font-medium">Estimated Silhouette:</span>{' '}
+                    <span className="text-muted-foreground">{agentResults.svgAnalysis.estimated_silhouette}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium">Canvas Size:</span>{' '}
+                    <span className="text-muted-foreground">
+                      {agentResults.svgAnalysis.canvas.width} × {agentResults.svgAnalysis.canvas.height}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="font-medium">Elements Detected:</span>
+                    <ul className="ml-4 mt-1 space-y-1 text-muted-foreground">
+                      <li>• Paths: {agentResults.svgAnalysis.object_counts.paths}</li>
+                      <li>• Rectangles: {agentResults.svgAnalysis.object_counts.rectangles}</li>
+                      <li>• Groups: {agentResults.svgAnalysis.object_counts.groups}</li>
+                      <li>• Text elements: {agentResults.svgAnalysis.object_counts.texts}</li>
+                    </ul>
+                  </div>
+                </div>
+              </details>
+            )}
+
+            {/* Design Agent Section */}
+            {agentResults?.designSection && (
+              <details className="group border border-border rounded-lg">
+                <summary className="cursor-pointer p-4 hover:bg-muted/50 font-semibold flex items-center gap-2">
+                  <span className="text-primary">✨</span>
+                  Design Overview (Design Agent)
+                </summary>
+                <div className="p-4 pt-0 space-y-3 text-sm">
+                  {!agentResults.designSection.error ? (
+                    <>
+                      {agentResults.designSection.style_description && (
+                        <div>
+                          <span className="font-medium">Style Description:</span>
+                          <p className="text-muted-foreground mt-1">{agentResults.designSection.style_description}</p>
+                        </div>
+                      )}
+                      {agentResults.designSection.silhouette && (
+                        <div>
+                          <span className="font-medium">Silhouette:</span>{' '}
+                          <span className="text-muted-foreground">{agentResults.designSection.silhouette}</span>
+                        </div>
+                      )}
+                      {agentResults.designSection.fit && (
+                        <div>
+                          <span className="font-medium">Fit:</span>{' '}
+                          <span className="text-muted-foreground">{agentResults.designSection.fit}</span>
+                        </div>
+                      )}
+                      {agentResults.designSection.intended_use && (
+                        <div>
+                          <span className="font-medium">Intended Use:</span>{' '}
+                          <span className="text-muted-foreground">{agentResults.designSection.intended_use}</span>
+                        </div>
+                      )}
+                      {agentResults.designSection.key_features && (
+                        <div>
+                          <span className="font-medium">Key Features:</span>
+                          <ul className="ml-4 mt-1 space-y-1 text-muted-foreground">
+                            {agentResults.designSection.key_features.map((feature: string, idx: number) => (
+                              <li key={idx}>• {feature}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-destructive">
+                      <p className="font-medium">Agent encountered an error:</p>
+                      <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-auto">
+                        {JSON.stringify(agentResults.designSection, null, 2)}
+                      </pre>
+                    </div>
+                  )}
+                </div>
+              </details>
+            )}
+
+            {/* Materials Agent Section */}
+            {agentResults?.materialsSection && (
+              <details className="group border border-border rounded-lg">
+                <summary className="cursor-pointer p-4 hover:bg-muted/50 font-semibold flex items-center gap-2">
+                  <span className="text-primary">🧵</span>
+                  Materials Specifications (Materials Agent)
+                </summary>
+                <div className="p-4 pt-0 space-y-3 text-sm">
+                  {!agentResults.materialsSection.error ? (
+                    <>
+                      {agentResults.materialsSection.shell_fabric && (
+                        <div>
+                          <span className="font-medium">Shell Fabric:</span>
+                          <p className="text-muted-foreground mt-1">{agentResults.materialsSection.shell_fabric}</p>
+                        </div>
+                      )}
+                      {agentResults.materialsSection.lining_fabric && (
+                        <div>
+                          <span className="font-medium">Lining Fabric:</span>
+                          <p className="text-muted-foreground mt-1">{agentResults.materialsSection.lining_fabric}</p>
+                        </div>
+                      )}
+                      {agentResults.materialsSection.trims && (
+                        <div>
+                          <span className="font-medium">Trims:</span>
+                          <ul className="ml-4 mt-1 space-y-1 text-muted-foreground">
+                            {agentResults.materialsSection.trims.map((trim: string, idx: number) => (
+                              <li key={idx}>• {trim}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {agentResults.materialsSection.hardware && (
+                        <div>
+                          <span className="font-medium">Hardware:</span>
+                          <ul className="ml-4 mt-1 space-y-1 text-muted-foreground">
+                            {agentResults.materialsSection.hardware.map((hw: string, idx: number) => (
+                              <li key={idx}>• {hw}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-destructive">
+                      <p className="font-medium">Agent encountered an error:</p>
+                      <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-auto">
+                        {JSON.stringify(agentResults.materialsSection, null, 2)}
+                      </pre>
+                    </div>
+                  )}
+                </div>
+              </details>
+            )}
+          </div>
+          <div className="flex justify-end pt-4">
+            <Button onClick={() => setShowAgentResults(false)}>Close</Button>
           </div>
         </DialogContent>
       </Dialog>
