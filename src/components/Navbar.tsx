@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { UserIcon, CartIcon } from "./ui/Icons";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import ThemeToggle from "./ThemeToggle";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 

@@ -12,7 +12,6 @@ import VectorMeasurementsPanel from './VectorMeasurementsPanel';
 import QuickColorBar from './QuickColorBar';
 import { useVectorDrawing } from '@/hooks/useVectorDrawing';
 import { toast } from 'sonner';
-import { useTheme } from 'next-themes';
 
 interface VectorStudioProps {
   className?: string;
@@ -37,11 +36,9 @@ const VectorStudio = ({ className = '' }: VectorStudioProps) => {
     setActiveLayerId,
   } = vectorDrawingContext;
 
-  const { theme, resolvedTheme } = useTheme();
   useEffect(() => {
-    const t = resolvedTheme || theme;
-    setStrokeColor(t === 'dark' ? '#ffffff' : '#000000');
-  }, [theme, resolvedTheme, setStrokeColor]);
+    setStrokeColor('#000000');
+  }, [setStrokeColor]);
 
   const handleZoomChange = (delta: number) => {
     setZoomLevel(prev => Math.max(25, Math.min(400, prev + delta)));

@@ -23,7 +23,6 @@ import FloatingElementsToolbar from './FloatingElementsToolbar';
 import DrawingOptionsPanel from './DrawingOptionsPanel';
 import TopToolbar from './TopToolbar';
 import VectorStudio from './VectorStudio';
-import { useTheme } from 'next-themes';
 
 interface ProStudioLayoutProps {
   isProfessional?: boolean;
