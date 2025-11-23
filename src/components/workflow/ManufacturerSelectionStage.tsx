@@ -320,13 +320,17 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
 
       {/* Chat Dialog */}
       <Dialog open={chatDialogOpen} onOpenChange={setChatDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Chat with Manufacturer</DialogTitle>
+        <DialogContent className="max-w-2xl max-h-[80vh] p-0 gap-0">
+          <DialogHeader className="p-6 pb-4 border-b">
+            <DialogTitle>
+              {matches.find(m => m.orders?.[0]?.id === currentChatOrderId)?.manufacturers.name || 'Chat with Manufacturer'}
+            </DialogTitle>
           </DialogHeader>
-          {currentChatOrderId && (
-            <FactoryMessaging designId={design.id} orderId={currentChatOrderId} />
-          )}
+          <div className="overflow-y-auto">
+            {currentChatOrderId && (
+              <FactoryMessaging designId={design.id} orderId={currentChatOrderId} />
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
