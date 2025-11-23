@@ -176,7 +176,8 @@ const Auth = () => {
           location: formData.location || null,
           country: formData.location || null,
           specialties: formData.capabilities.length > 0 ? formData.capabilities : null,
-          certifications: formData.categories.length > 0 ? formData.categories : null,
+          categories: formData.categories.length > 0 ? formData.categories : null,
+          certifications: null, // For industry certifications like GOTS, OEKO-TEX, etc.
           min_order_quantity: formData.moq ? parseInt(formData.moq) : 100,
           lead_time_days: formData.leadTime ? parseInt(formData.leadTime) : 30,
           price_range: "$20-$40 per unit", // Default price range
