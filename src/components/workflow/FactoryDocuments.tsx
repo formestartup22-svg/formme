@@ -7,12 +7,13 @@ import { FileText, Download, Image as ImageIcon, Video } from 'lucide-react';
 export const FactoryDocuments = () => {
   const { workflowData } = useWorkflow();
 
-  const documents = [
-    { name: 'Tech Pack.pdf', type: 'pdf', size: '2.4 MB', date: 'Nov 18, 2025' },
-    { name: 'Material Specs.pdf', type: 'pdf', size: '1.1 MB', date: 'Nov 19, 2025' },
-  ];
-
   const media = workflowData.manufacturerSamples || [];
+  const invoices = workflowData.invoices || [];
+
+  // Only render if there's actual data
+  if (media.length === 0 && invoices.length === 0) {
+    return null;
+  }
 
   return (
     <Card className="border-border">
@@ -23,29 +24,11 @@ export const FactoryDocuments = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Documents */}
-        <div>
+        {/* Documents - removed dummy data */}
+        <div className="hidden">
           <p className="text-xs font-medium text-muted-foreground mb-2">Documents</p>
           <div className="space-y-2">
-            {documents.map((doc, idx) => (
-              <div
-                key={idx}
-                className="flex items-center justify-between p-2.5 bg-muted/50 rounded-lg"
-              >
-                <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm font-medium">{doc.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {doc.size} • {doc.date}
-                    </p>
-                  </div>
-                </div>
-                <Button variant="ghost" size="sm">
-                  <Download className="w-4 h-4" />
-                </Button>
-              </div>
-            ))}
+            {/* Documents will be shown here when uploaded */}
           </div>
         </div>
 
@@ -68,11 +51,11 @@ export const FactoryDocuments = () => {
           </div>
         )}
 
-        {workflowData.invoices.length > 0 && (
+        {invoices.length > 0 && (
           <div>
             <p className="text-xs font-medium text-muted-foreground mb-2">Invoices</p>
             <div className="space-y-2">
-              {workflowData.invoices.map((invoice, idx) => (
+              {invoices.map((invoice, idx) => (
                 <div
                   key={idx}
                   className="flex items-center justify-between p-2.5 bg-muted/50 rounded-lg"

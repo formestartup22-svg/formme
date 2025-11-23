@@ -9,7 +9,6 @@ import { MapPin, Clock, DollarSign, Check, Factory as FactoryIcon, Star } from '
 import { useWorkflow } from '@/context/WorkflowContext';
 import { StageHeader } from './StageHeader';
 import { StageNavigation } from './StageNavigation';
-import { FactoryCommunication } from './FactoryCommunication';
 import { FactoryDocuments } from './FactoryDocuments';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';

@@ -8,7 +8,6 @@ import { Design } from '@/data/workflowData';
 import { useWorkflow } from '@/context/WorkflowContext';
 import { StageHeader } from './StageHeader';
 import { StageNavigation } from './StageNavigation';
-import { FactoryCommunication } from './FactoryCommunication';
 import { FactoryDocuments } from './FactoryDocuments';
 import { toast } from 'sonner';
 
@@ -99,7 +98,6 @@ const ProductionStage = ({ design }: ProductionStageProps) => {
           <StageNavigation onNext={() => true} nextLabel="Continue to Sample Production" showBack={true} />
         </div>
         <div className="space-y-4">
-          <FactoryCommunication />
           <FactoryDocuments />
         </div>
       </div>
