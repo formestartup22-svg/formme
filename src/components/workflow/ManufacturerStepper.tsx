@@ -4,22 +4,40 @@ import { Check } from 'lucide-react';
 interface ManufacturerStepperProps {
   activeStep: string;
   onStepChange: (step: string) => void;
+  orderData?: any;
 }
 
 const manufacturerStages = [
-  { id: 'techpack', label: 'Tech Pack Review' },
-  { id: 'clarifications', label: 'Clarifications' },
-  { id: 'sample', label: 'Sample Development' },
-  { id: 'production', label: 'Production Approval' },
-  { id: 'quality', label: 'Quality Check' },
-  { id: 'shipping', label: 'Shipping & Logistics' },
+  { id: 'techpack', label: 'Tech Pack Review', completionKey: 'status' },
+  { id: 'sample', label: 'Sample Development', completionKey: 'sample_photos' },
+  { id: 'production', label: 'Production Approval', completionKey: 'production_params_submitted_at' },
+  { id: 'quality', label: 'Quality Check', completionKey: 'quality_check_completed' },
+  { id: 'shipping', label: 'Shipping & Logistics', completionKey: 'shipping_completed' },
 ];
 
-export const ManufacturerStepper = ({ activeStep, onStepChange }: ManufacturerStepperProps) => {
+export const ManufacturerStepper = ({ activeStep, onStepChange, orderData }: ManufacturerStepperProps) => {
   const currentIndex = manufacturerStages.findIndex(s => s.id === activeStep);
 
+  const isStageCompleted = (stage: typeof manufacturerStages[0]) => {
+    if (!orderData) return false;
+    
+    switch (stage.id) {
+      case 'techpack':
+        return orderData.status !== 'sent_to_manufacturer';
+      case 'production':
+        return !!orderData.production_params_submitted_at;
+      case 'sample':
+      case 'quality':
+      case 'shipping':
+        return false; // These will be implemented later
+      default:
+        return false;
+    }
+  };
+
   const getStageStatus = (index: number) => {
-    if (index < currentIndex) return 'completed';
+    const stage = manufacturerStages[index];
+    if (isStageCompleted(stage)) return 'completed';
     if (index === currentIndex) return 'current';
     return 'accessible';
   };

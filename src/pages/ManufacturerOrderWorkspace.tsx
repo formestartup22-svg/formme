@@ -328,7 +328,7 @@ const ManufacturerOrderWorkspace = () => {
                 <CardTitle className="text-lg">Order Pipeline</CardTitle>
               </CardHeader>
               <CardContent>
-                <ManufacturerStepper activeStep={activeTab} onStepChange={setActiveTab} />
+                <ManufacturerStepper activeStep={activeTab} onStepChange={setActiveTab} orderData={order} />
               </CardContent>
             </Card>
           </div>
@@ -392,11 +392,6 @@ const ManufacturerOrderWorkspace = () => {
                 </div>
               </CardContent>
             </Card>
-            )}
-
-            {/* Clarifications Content */}
-            {activeTab === 'clarifications' && (
-              <FactoryMessaging designId={order.designs?.id} orderId={order.id} />
             )}
 
             {/* Production Approval Content */}
