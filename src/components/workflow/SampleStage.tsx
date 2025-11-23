@@ -9,7 +9,6 @@ import { Design } from '@/data/workflowData';
 import { useWorkflow } from '@/context/WorkflowContext';
 import { StageHeader } from './StageHeader';
 import { StageNavigation } from './StageNavigation';
-import { FactoryCommunication } from './FactoryCommunication';
 import { FactoryDocuments } from './FactoryDocuments';
 
 interface SampleStageProps { design: Design; }
@@ -74,7 +73,6 @@ const SampleStage = ({ design }: SampleStageProps) => {
           <StageNavigation onNext={() => { if (!allApproved) return false; updateWorkflowData({ sampleApproved: true }); return true; }} nextLabel={allApproved ? "Approve & Continue to Quality Check" : "Complete checklist to continue"} showBack={true} />
         </div>
         <div className="space-y-4">
-          <FactoryCommunication />
           <FactoryDocuments />
         </div>
       </div>

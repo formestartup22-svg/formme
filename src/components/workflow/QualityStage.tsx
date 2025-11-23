@@ -7,7 +7,6 @@ import { CheckCircle } from 'lucide-react';
 import { Design } from '@/data/workflowData';
 import { StageHeader } from './StageHeader';
 import { StageNavigation } from './StageNavigation';
-import { FactoryCommunication } from './FactoryCommunication';
 import { FactoryDocuments } from './FactoryDocuments';
 
 interface QualityStageProps { design: Design; }
@@ -71,7 +70,7 @@ const QualityStage = ({ design }: QualityStageProps) => {
 
           <StageNavigation onNext={() => true} nextLabel="Continue to Shipping" showBack={true} />
         </div>
-        <div className="space-y-4"><FactoryCommunication /><FactoryDocuments /></div>
+        <div className="space-y-4"><FactoryDocuments /></div>
       </div>
     </div>
   );

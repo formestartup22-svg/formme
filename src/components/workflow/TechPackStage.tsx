@@ -8,7 +8,6 @@ import { Upload, FileCheck, Download, Sparkles, Loader2, FileUp, Plus, X } from 
 import { useWorkflow } from '@/context/WorkflowContext';
 import { StageHeader } from './StageHeader';
 import { StageNavigation } from './StageNavigation';
-import { FactoryCommunication } from './FactoryCommunication';
 import { FactoryDocuments } from './FactoryDocuments';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -654,7 +653,6 @@ ${workflowData.constructionNotes || 'None provided'}
         </div>
 
         <div className="space-y-4">
-          <FactoryCommunication />
           <FactoryDocuments />
         </div>
       </div>

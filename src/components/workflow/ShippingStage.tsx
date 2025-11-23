@@ -9,7 +9,6 @@ import { Design } from '@/data/workflowData';
 import { useWorkflow } from '@/context/WorkflowContext';
 import { StageHeader } from './StageHeader';
 import { StageNavigation } from './StageNavigation';
-import { FactoryCommunication } from './FactoryCommunication';
 import { FactoryDocuments } from './FactoryDocuments';
 
 interface ShippingStageProps { design: Design; }
@@ -159,7 +158,6 @@ const ShippingStage = ({ design }: ShippingStageProps) => {
           />
         </div>
         <div className="space-y-4">
-          <FactoryCommunication />
           <FactoryDocuments />
         </div>
       </div>
