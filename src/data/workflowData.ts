@@ -160,9 +160,9 @@ export const mockTasks: Task[] = [
 export const stageNames = {
   'tech-pack': 'Create your tech pack',
   'factory-match': 'Find your manufacturer',
-  'send-tech-pack': 'Manage manufacturer requests',
+  'send-tech-pack': 'Confirm your order',
   'sending': 'Confirm your order',
-  'waiting': 'Waiting for manufacturer',
+  'waiting': 'Manage manufacturer requests',
   'review-timeline': 'Review production timeline',
   'payment': 'Make payment',
   'production': 'Review production parameters',

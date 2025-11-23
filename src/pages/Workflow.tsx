@@ -59,11 +59,11 @@ const WorkspaceContent = ({ design }: { design: any }) => {
       case 'factory-match':
         return <FactoryMatchStage design={design} />;
       case 'send-tech-pack':
-        return <ManufacturerSelectionStage design={design} />;
+        return <SendingStage design={design} />;
       case 'sending':
         return <SendingStage design={design} />;
       case 'waiting':
-        return <WaitingForManufacturerStage design={design} />;
+        return <ManufacturerSelectionStage design={design} />;
       case 'review-timeline':
         return <ReviewProductionTimelineStage design={design} />;
       case 'payment':
