@@ -127,6 +127,18 @@ const ManufacturerDashboard = () => {
 
   const handleApprove = async (matchId: string, designId: string) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // Get manufacturer ID
+      const { data: manufacturer } = await supabase
+        .from('manufacturers')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!manufacturer) throw new Error('Manufacturer profile not found');
+
       // Update match status to accepted
       const { error: matchError } = await supabase
         .from('manufacturer_matches')
@@ -135,19 +147,24 @@ const ManufacturerDashboard = () => {
 
       if (matchError) throw matchError;
 
-      // Update order status
+      // Update order status AND manufacturer_id
       const { error: orderError } = await supabase
         .from('orders')
-        .update({ status: 'manufacturer_review' })
+        .update({ 
+          status: 'manufacturer_review',
+          manufacturer_id: manufacturer.id 
+        })
         .eq('design_id', designId);
 
       if (orderError) throw orderError;
 
       toast.success('Order approved successfully!');
       
-      // Refresh pending requests
+      // Refresh pending requests and refetch orders
       setPendingRequests(prev => prev.filter(req => req.id !== matchId));
+      window.location.reload(); // Refresh to show new order in current orders tab
     } catch (error: any) {
+      console.error('Error approving order:', error);
       toast.error(error.message || 'Failed to approve order');
     }
   };

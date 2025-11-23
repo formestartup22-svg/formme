@@ -23,22 +23,35 @@ const ManufacturerOrderWorkspace = () => {
       if (!id) return;
       
       try {
-        const { data, error } = await supabase
-          .from('orders')
-          .select(`
-            *,
-            designs (
-              id,
-              name,
-              category,
-              user_id
-            ),
-            profiles!orders_designer_id_fkey (
-              full_name
-            )
-          `)
-          .eq('id', id)
-          .single();
+      const { data, error } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          designs (
+            id,
+            name,
+            category,
+            user_id
+          )
+        `)
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+
+      // Fetch designer profile separately
+      if (data) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('user_id', data.designer_id)
+          .maybeSingle();
+        
+        setOrder({
+          ...data,
+          profiles: profile
+        });
+      }
 
         if (error) throw error;
         setOrder(data);
