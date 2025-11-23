@@ -152,8 +152,9 @@ const Auth = () => {
 
       console.log("Role assigned:", userRole);
 
-      // Update profile with common data
-      const { error: profileError } = await supabase.from("profiles").update({
+      // Upsert profile with common data
+      const { error: profileError } = await supabase.from("profiles").upsert({
+        user_id: data.user.id,
         full_name: formData.fullName,
         company_name: formData.companyName,
         location: formData.location || null,
@@ -161,10 +162,14 @@ const Auth = () => {
         capabilities: formData.capabilities.length > 0 ? formData.capabilities : null,
         categories: formData.categories.length > 0 ? formData.categories : null,
         moq: formData.moq ? parseInt(formData.moq) : null,
-      }).eq("user_id", data.user.id);
+        lead_time: formData.leadTime ? parseInt(formData.leadTime) : null,
+      }, {
+        onConflict: 'user_id'
+      });
 
       if (profileError) {
-        console.error("Profile update failed:", profileError);
+        console.error("Profile upsert failed:", profileError);
+        throw new Error(`Failed to create profile: ${profileError.message}`);
       }
 
       // If manufacturer, create manufacturer record
