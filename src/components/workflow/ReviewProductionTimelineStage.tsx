@@ -19,8 +19,8 @@ const ReviewProductionTimelineStage = ({ design }: ReviewProductionTimelineStage
   
   const handleSkipPayment = () => {
     markStageComplete('review-timeline');
-    setCurrentStage('production-approval');
-    navigate(`/workflow?designId=${design.id}&stage=production-approval`);
+    setCurrentStage('production');
+    navigate(`/workflow?designId=${design.id}&stage=production`);
   };
   
   const handleProceedToPayment = () => {
