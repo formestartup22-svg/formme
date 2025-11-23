@@ -9,6 +9,162 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// SVG Parser Agent - extracts features from SVG using text parsing
+async function parseSVG(svgUrl: string) {
+  try {
+    const response = await fetch(svgUrl);
+    const svgText = await response.text();
+    
+    // Count elements using regex
+    const paths = (svgText.match(/<path/g) || []).length;
+    const rects = (svgText.match(/<rect/g) || []).length;
+    const groups = (svgText.match(/<g/g) || []).length;
+    const texts = (svgText.match(/<text/g) || []).length;
+    
+    // Extract width and height
+    const widthMatch = svgText.match(/width="([^"]+)"|width='([^']+)'/);
+    const heightMatch = svgText.match(/height="([^"]+)"|height='([^']+)'/);
+    const viewBoxMatch = svgText.match(/viewBox="([^"]+)"|viewBox='([^']+)'/);
+    
+    let width = widthMatch ? (widthMatch[1] || widthMatch[2]) : 'unknown';
+    let height = heightMatch ? (heightMatch[1] || heightMatch[2]) : 'unknown';
+    
+    // Fallback to viewBox if width/height not found
+    if (width === 'unknown' && viewBoxMatch) {
+      const viewBoxValues = (viewBoxMatch[1] || viewBoxMatch[2]).split(/\s+/);
+      if (viewBoxValues.length === 4) {
+        width = viewBoxValues[2];
+        height = viewBoxValues[3];
+      }
+    }
+    
+    // Estimate silhouette based on aspect ratio
+    let silhouette = 'unknown';
+    if (width !== 'unknown' && height !== 'unknown') {
+      const w = parseFloat(width);
+      const h = parseFloat(height);
+      if (!isNaN(w) && !isNaN(h) && w > 0) {
+        const aspectRatio = h / w;
+        if (aspectRatio > 1.8) silhouette = 'dress-like';
+        else if (aspectRatio > 1.2) silhouette = 'top';
+        else silhouette = 'boxy top';
+      }
+    }
+    
+    return {
+      object_counts: { paths, rectangles: rects, groups, texts },
+      canvas: { width, height },
+      estimated_silhouette: silhouette,
+      svg_text: svgText.substring(0, 500) // First 500 chars for context
+    };
+  } catch (error) {
+    console.error('SVG parsing error:', error);
+    return {
+      object_counts: { paths: 0, rectangles: 0, groups: 0, texts: 0 },
+      canvas: { width: 'unknown', height: 'unknown' },
+      estimated_silhouette: 'unknown',
+      svg_text: ''
+    };
+  }
+}
+
+// Design Agent - generates design overview section
+async function generateDesignSection(garmentBrief: string, svgFeatures: any) {
+  const prompt = `You are a fashion techpack design specialist.
+Output ONLY valid JSON.
+
+Generate the DESIGN OVERVIEW section for this garment:
+
+"${garmentBrief}"
+
+SVG Design Analysis:
+- Silhouette: ${svgFeatures.estimated_silhouette}
+- Canvas size: ${svgFeatures.canvas.width} x ${svgFeatures.canvas.height}
+- Elements: ${svgFeatures.object_counts.paths} paths, ${svgFeatures.object_counts.rectangles} shapes
+
+Required JSON keys:
+- style_description
+- silhouette
+- fit
+- intended_use
+- key_features (list)`;
+
+  const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${lovableApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'google/gemini-2.0-flash-exp',
+      messages: [
+        { role: 'system', content: 'You are a fashion techpack assistant. Output only valid JSON.' },
+        { role: 'user', content: prompt }
+      ]
+    })
+  });
+
+  if (!response.ok) throw new Error(`Design agent failed: ${response.status}`);
+  
+  const data = await response.json();
+  const content = data.choices[0].message.content;
+  
+  try {
+    // Try to parse JSON from markdown code blocks if present
+    const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/) || content.match(/```\n([\s\S]*?)\n```/);
+    return jsonMatch ? JSON.parse(jsonMatch[1]) : JSON.parse(content);
+  } catch {
+    return { error: "Invalid JSON", raw: content };
+  }
+}
+
+// Materials Agent - generates materials section
+async function generateMaterialsSection(garmentBrief: string, svgFeatures: any) {
+  const prompt = `You are a fashion techpack materials specialist.
+Output ONLY valid JSON.
+
+Create the MATERIALS section for this garment:
+
+"${garmentBrief}"
+
+Design context from SVG:
+- Type: ${svgFeatures.estimated_silhouette}
+- Complexity: ${svgFeatures.object_counts.paths + svgFeatures.object_counts.rectangles} elements
+
+Required JSON keys:
+- shell_fabric
+- lining_fabric
+- trims (list)
+- hardware (list)`;
+
+  const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${lovableApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'google/gemini-2.0-flash-exp',
+      messages: [
+        { role: 'system', content: 'You are a fashion techpack materials specialist. Output only valid JSON.' },
+        { role: 'user', content: prompt }
+      ]
+    })
+  });
+
+  if (!response.ok) throw new Error(`Materials agent failed: ${response.status}`);
+  
+  const data = await response.json();
+  const content = data.choices[0].message.content;
+  
+  try {
+    const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/) || content.match(/```\n([\s\S]*?)\n```/);
+    return jsonMatch ? JSON.parse(jsonMatch[1]) : JSON.parse(content);
+  } catch {
+    return { error: "Invalid JSON", raw: content };
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -17,110 +173,64 @@ serve(async (req) => {
   try {
     const { designData } = await req.json();
     
-    console.log('Generating tech pack for:', designData);
+    console.log('Generating tech pack with AI agents for:', designData);
 
-    const systemPrompt = `You are a senior apparel technical designer creating a factory-ready TECH PACK.
+    // Step 1: Parse SVG design
+    console.log('Step 1: Parsing SVG design...');
+    const svgFeatures = designData.designImageUrl 
+      ? await parseSVG(designData.designImageUrl)
+      : { object_counts: {}, canvas: {}, estimated_silhouette: 'unknown', svg_text: '' };
 
-You will be given structured design data for a garment (or set, e.g., top + pants). 
-Using that data, generate a complete tech pack document in clear, structured MARKDOWN, 
-so it can later be converted into a PDF.
+    // Step 2: Generate design section
+    console.log('Step 2: Design agent processing...');
+    const garmentBrief = `Design Name: ${designData.name}
+Garment Type: ${designData.garmentType}
 
-The tech pack should follow this structure and tone:
+Measurements:
+${designData.measurements?.map((m: any) => `- ${m.type}: ${m.value}`).join('\n') || 'None provided'}
 
-1. HEADER
-   - Brand
-   - Style Name / Number
-   - Category (e.g., Pajama Set, Hoodie, Dress)
-   - Gender / Fit (e.g., WOMEN, MEN, UNISEX)
-   - Season (e.g., AW25, SS26)
-   - Created By
-   - Created Date
+Fabric Specifications:
+${designData.fabricSpecs?.map((f: any) => `- ${f.fabricType} (${f.fiberPercent}%, ${f.gsm} GSM)`).join('\n') || 'None provided'}
 
-2. GARMENT OVERVIEW
-   - Short description of the style and intended use.
-   - Components included (e.g., "TOP + PANTS (AOP)").
-   - Base color(s) and main fabric.
-   - Overall quality and composition:
-     - QUALITY: marketing name (e.g., "Cotton with Elastane")
-     - COMPOSITION: exact percentages (e.g., "95% COTTON 5% ELASTANE")
-     - GSM or weight.
+Construction Notes:
+${designData.constructionNotes || 'None provided'}`;
 
-3. CONSTRUCTION / DESIGN DETAILS
-   - Describe the garment in terms a factory understands.
-   - Include FRONT and BACK descriptions where applicable.
-   - Call out key details in ALL CAPS labels with short explanations, e.g.:
-     - V-NECK NECKLINE – clean finish, double topstitch.
-     - SECURE TAPE – inside neckline for reinforcement.
-     - SATIN DRAWCORD – flat ribbon at waistband with metal tips.
-     - POCKETS – side seam pockets with clean finish.
-     - DOUBLE STITCHING – hem and sleeve hems.
-   - Use bullet points and keep each call-out clear and concise.
+    const designSection = await generateDesignSection(garmentBrief, svgFeatures);
+    
+    // Step 3: Generate materials section
+    console.log('Step 3: Materials agent processing...');
+    const materialsSection = await generateMaterialsSection(garmentBrief, svgFeatures);
 
-4. FABRIC, MATERIALS & TRIMS TABLE
-   - Provide a table with rows such as:
-     - QUALITY
-     - COMPOSITION
-     - COLOR
-     - GSM
-     - THREADS COLOR
-     - DRAWCORD
-     - EYELETS
-     - DRAWCORD ENDINGS
-     - LABEL
-     - HANGTAG
-   - Fill each cell using the given data where possible.
-   - Where information is missing, write: "TBD – to be confirmed by designer."
+    // Step 4: Combine into comprehensive tech pack
+    console.log('Step 4: Compiling final tech pack...');
+    const systemPrompt = `You are a senior apparel technical designer. Compile a complete factory-ready TECH PACK in MARKDOWN format.
 
-5. ARTWORK & COLORS
-   - If there is an all-over print or graphic:
-     - Name/ID of the artwork.
-     - Print technique (if known; otherwise mark as TBD).
-     - Print size (e.g., "Print size: 400 x 435 mm") when provided or estimated.
-   - Provide a table of COLOR CHIPS with:
-     - Color Name
-     - Color Code (e.g., Pantone TCX, HEX, or internal code)
-     - Where it is used (e.g., SHELL, RIB, PRINT ACCENT).
-   - Clearly state if artwork should match a provided reference file or image.
+Use the provided DESIGN OVERVIEW and MATERIALS sections, plus the raw design data, to create a comprehensive tech pack following this structure:
 
-6. MEASUREMENT SPEC (SIZE CHART)
-   - Include a short note: "All measurements in cm unless otherwise specified."
-   - Define main measurement points for each component (TOP, BOTTOM, etc.), e.g.:
-     - A – Chest width
-     - B – Body length
-     - C – Bottom opening
-     - D – Sleeve length
-     - E – Waist width
-     - F – Inseam
-     - etc.
-   - Provide a measurement table with sizes as columns (e.g., XS, S, M, L, XL, XXL)
-     and measurement codes as rows (A, B, C, …). 
-   - If exact numbers are not provided in the input, propose reasonable base values 
-     and grade them logically across sizes, but clearly label them as:
-     "(INITIAL SPEC – TO BE VALIDATED IN SAMPLING)".
-
+1. HEADER - Brand, Style Name/Number, Category, Gender/Fit, Season, Created By, Created Date
+2. GARMENT OVERVIEW - from provided design overview
+3. CONSTRUCTION / DESIGN DETAILS - from design overview key features
+4. FABRIC, MATERIALS & TRIMS TABLE - from provided materials section
+5. ARTWORK & COLORS - reference design image
+6. MEASUREMENT SPEC (SIZE CHART) - from provided measurements
 7. LABEL & BRANDING
-   - Describe the main neck label / stamp (size, position, color) and any additional labels.
-   - Include dimensions for brand stamps or waterprint labels if known 
-     (e.g., "Waterprint stamp: 38 x 31 mm at center back neck").
-   - Specify size label system (e.g., S, M, L, XL, XXL).
+8. NOTES - mark TBD items
 
-8. PACKAGING / NOTES (optional section)
-   - Any general comments to the factory (folding, packing, special care, etc.).
-   - Add a short "NOTES" bullet list, including items that are still TBD or need review.
+Use clear MARKDOWN formatting with tables and bullet points.`;
 
-GENERAL RULES:
-- Always answer in English.
-- Use **clear headings** and MARKDOWN tables so the document is easy to convert into a PDF.
-- Prefer concise bullet points over long paragraphs.
-- When data is missing, DO NOT invent arbitrary details without warning. 
-  Instead:
-  - Either leave as "TBD – to be confirmed by designer"
-  - Or if you suggest a default, mark it clearly as an assumption.
+    const userPrompt = `DESIGN OVERVIEW SECTION:
+${JSON.stringify(designSection, null, 2)}
 
-Now generate a complete tech pack using the provided DESIGN DATA.`;
+MATERIALS SECTION:
+${JSON.stringify(materialsSection, null, 2)}
 
-    const userPrompt = `DESIGN DATA:
-${JSON.stringify(designData, null, 2)}`;
+RAW DESIGN DATA:
+${garmentBrief}
+
+SVG ANALYSIS:
+${JSON.stringify(svgFeatures, null, 2)}
+
+Now compile the complete tech pack.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -129,7 +239,7 @@ ${JSON.stringify(designData, null, 2)}`;
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'google/gemini-2.0-flash-exp',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
@@ -139,14 +249,16 @@ ${JSON.stringify(designData, null, 2)}`;
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('AI Gateway error:', response.status, errorText);
-      return new Response(
-        JSON.stringify({ error: 'Failed to generate tech pack', details: errorText }), 
-        { 
-          status: response.status,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
+      console.error('Final compilation error:', response.status, errorText);
+      
+      if (response.status === 429) {
+        throw new Error('Rate limits exceeded. Please try again in a moment.');
+      }
+      if (response.status === 402) {
+        throw new Error('Payment required. Please add credits to your Lovable workspace.');
+      }
+      
+      throw new Error(`AI compilation error: ${response.status}`);
     }
 
     const data = await response.json();
@@ -164,12 +276,12 @@ ${JSON.stringify(designData, null, 2)}`;
         const imageResponse = await fetch(designData.designImageUrl);
         const imageBuffer = await imageResponse.arrayBuffer();
         const base64Image = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)));
-        const imageType = designData.designImageUrl.toLowerCase().endsWith('.png') ? 'PNG' : 'JPEG';
         
-        doc.addImage(`data:image/${imageType.toLowerCase()};base64,${base64Image}`, imageType, 15, yPosition, 180, 100);
-        yPosition += 110;
+        // SVG will be rendered as is - jsPDF handles SVG
+        doc.addImage(`data:image/svg+xml;base64,${base64Image}`, 'SVG', 15, yPosition, 80, 80);
+        yPosition += 90;
       } catch (error) {
-        console.error('Error adding image to PDF:', error);
+        console.error('Error adding SVG to PDF:', error);
       }
     }
 
@@ -220,7 +332,12 @@ ${JSON.stringify(designData, null, 2)}`;
         success: true,
         techPackContent,
         pdfData,
-        message: 'Tech pack generated successfully'
+        message: 'Tech pack generated successfully with AI agents',
+        agentResults: {
+          svgAnalysis: svgFeatures,
+          designSection,
+          materialsSection
+        }
       }), 
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

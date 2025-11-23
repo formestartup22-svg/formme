@@ -43,7 +43,7 @@ async def handle_materials(ctx: Context, sender: str, msg: SectionTask):
     # Call Gemini 2.5 Flash
     # -----------------------------
     response = client.models.generate_content(
-        model="models/gemini-2.0-flash-lite",
+        model="gemini-2.0-flash-exp",
         contents=prompt,
     )
 
