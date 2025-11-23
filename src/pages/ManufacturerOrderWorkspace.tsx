@@ -30,6 +30,8 @@ const ManufacturerOrderWorkspace = () => {
   const [colorFastness, setColorFastness] = useState('');
   const [labDipFiles, setLabDipFiles] = useState<FileList | null>(null);
   const [firstBatchFiles, setFirstBatchFiles] = useState<FileList | null>(null);
+  const [samplePhotos, setSamplePhotos] = useState<FileList | null>(null);
+  const [sampleNotes, setSampleNotes] = useState('');
 
   useEffect(() => {
   const fetchOrder = async () => {
@@ -253,6 +255,76 @@ const ManufacturerOrderWorkspace = () => {
     }
   };
 
+  const handleSubmitSampleUpdate = async () => {
+    if (!order?.id) return;
+    
+    setSubmitting(true);
+    try {
+      // Upload sample photos if any
+      let sampleUrls: string[] = [];
+      if (samplePhotos && samplePhotos.length > 0) {
+        const uploadPromises = Array.from(samplePhotos).map(async (file) => {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${order.id}-sample-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+          const filePath = `${order.designer_id}/${fileName}`;
+
+          const { error: uploadError } = await supabase.storage
+            .from('design-files')
+            .upload(filePath, file);
+
+          if (uploadError) throw uploadError;
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('design-files')
+            .getPublicUrl(filePath);
+
+          return publicUrl;
+        });
+
+        sampleUrls = await Promise.all(uploadPromises);
+      }
+
+      // Get existing sample URLs from database
+      const existingSampleUrls = order.production_timeline_data?.sample_photos || [];
+      const allSampleUrls = [...existingSampleUrls, ...sampleUrls];
+
+      const { error } = await supabase
+        .from('orders')
+        .update({
+          production_timeline_data: {
+            ...order.production_timeline_data,
+            sample_photos: allSampleUrls,
+            sample_notes: sampleNotes || order.production_timeline_data?.sample_notes,
+            sample_last_updated: new Date().toISOString()
+          },
+          status: 'sample_development'
+        })
+        .eq('id', order.id);
+
+      if (error) throw error;
+
+      toast.success('Sample update submitted successfully!');
+      
+      // Refresh order data
+      const { data: updatedOrder } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', order.id)
+        .single();
+      
+      if (updatedOrder) {
+        setOrder({ ...order, ...updatedOrder });
+        setSamplePhotos(null);
+        setSampleNotes('');
+      }
+    } catch (error: any) {
+      console.error('Error submitting sample update:', error);
+      toast.error('Failed to submit. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -429,10 +501,17 @@ const ManufacturerOrderWorkspace = () => {
                     <p className="text-sm text-muted-foreground mb-2">
                       Click to upload or drag and drop
                     </p>
-                    <Input type="file" className="hidden" id="sample-photos" multiple />
+                    <Input 
+                      type="file" 
+                      className="hidden" 
+                      id="sample-photos" 
+                      multiple 
+                      accept="image/*"
+                      onChange={(e) => setSamplePhotos(e.target.files)}
+                    />
                     <Label htmlFor="sample-photos" className="cursor-pointer">
                       <Button variant="outline" size="sm" asChild>
-                        <span>Select Files</span>
+                        <span>Select Files {samplePhotos && samplePhotos.length > 0 && `(${samplePhotos.length})`}</span>
                       </Button>
                     </Label>
                   </div>
@@ -443,8 +522,15 @@ const ManufacturerOrderWorkspace = () => {
                   <Textarea
                     placeholder="Add any notes or questions about the sample..."
                     rows={3}
+                    value={sampleNotes}
+                    onChange={(e) => setSampleNotes(e.target.value)}
                   />
-                  <Button>Submit Update</Button>
+                  <Button 
+                    onClick={handleSubmitSampleUpdate}
+                    disabled={submitting || (!samplePhotos && !sampleNotes)}
+                  >
+                    {submitting ? 'Submitting...' : 'Submit Update'}
+                  </Button>
                 </div>
               </CardContent>
             </Card>
