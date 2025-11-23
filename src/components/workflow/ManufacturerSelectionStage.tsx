@@ -163,6 +163,13 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
   };
 
   const handleProceed = async () => {
+    // Check if at least one manufacturer has accepted
+    const hasAcceptedManufacturer = matches.some(m => m.status === 'accepted');
+    if (!hasAcceptedManufacturer) {
+      toast.error('Please wait for at least one manufacturer to accept your request');
+      return false;
+    }
+
     if (!selectedManufacturer) {
       toast.error('Please select a manufacturer before proceeding');
       return false;
@@ -175,7 +182,7 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
       return false;
     }
 
-    markStageComplete('send-tech-pack');
+    markStageComplete('waiting-for-manufacturer');
     return true;
   };
 
@@ -218,7 +225,15 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
             ) : (
               <div className="space-y-4">
                 {matches.map((match) => (
-                  <Card key={match.id} className={`${selectedManufacturer === match.manufacturer_id ? 'border-primary border-2' : ''}`}>
+                  <Card 
+                    key={match.id} 
+                    className={`${selectedManufacturer === match.manufacturer_id ? 'border-primary border-2' : ''} cursor-pointer hover:shadow-md transition-shadow`}
+                    onClick={() => {
+                      if (match.orders && match.orders.length > 0) {
+                        handleOpenChat(match.orders[0].id);
+                      }
+                    }}
+                  >
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -248,30 +263,14 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
                             )}
                           </div>
 
-                          <div className="flex gap-2">
-                            {match.status === 'accepted' && (
-                              <>
-                                {selectedManufacturer !== match.manufacturer_id && (
-                                  <Button
-                                    size="sm"
-                                    onClick={() => handleSelectManufacturer(match.manufacturer_id)}
-                                  >
-                                    Select This Manufacturer
-                                  </Button>
-                                )}
-                                
-                                {match.orders && match.orders.length > 0 && (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="gap-2"
-                                    onClick={() => handleOpenChat(match.orders[0].id)}
-                                  >
-                                    <MessageSquare className="w-4 h-4" />
-                                    Chat
-                                  </Button>
-                                )}
-                              </>
+                          <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                            {match.status === 'accepted' && selectedManufacturer !== match.manufacturer_id && (
+                              <Button
+                                size="sm"
+                                onClick={() => handleSelectManufacturer(match.manufacturer_id)}
+                              >
+                                Select This Manufacturer
+                              </Button>
                             )}
                             
                             {match.status === 'pending' && (
