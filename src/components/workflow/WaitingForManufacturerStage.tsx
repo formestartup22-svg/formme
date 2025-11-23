@@ -159,7 +159,7 @@ const WaitingForManufacturerStage = ({ design }: WaitingForManufacturerStageProp
 
                 <div className="pt-4">
                   <p className="text-sm text-muted-foreground">
-                    Proceeding to payment...
+                    Proceeding to manufacturer selection...
                   </p>
                 </div>
               </div>
@@ -176,7 +176,7 @@ const WaitingForManufacturerStage = ({ design }: WaitingForManufacturerStageProp
         )}
 
         <StageNavigation 
-          nextLabel="Continue to Review Timeline"
+          nextLabel="View Accepted Manufacturers"
           showBack={true}
           onNext={async () => {
             // Only allow proceeding if manufacturer has accepted
