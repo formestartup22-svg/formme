@@ -24,6 +24,30 @@ import SampleStage from '@/components/workflow/SampleStage';
 import QualityStage from '@/components/workflow/QualityStage';
 import ShippingStage from '@/components/workflow/ShippingStage';
 
+const ProgressBar = () => {
+  const { getProgress, completedStages } = useWorkflow();
+  const progress = getProgress();
+  
+  return (
+    <Card className="border-border">
+      <div className="p-4">
+        <div className="flex items-center gap-4">
+          <div className="flex-1">
+            <div className="flex justify-between text-xs mb-1.5">
+              <span className="text-muted-foreground">Overall Progress</span>
+              <span className="font-medium text-foreground">{progress}%</span>
+            </div>
+            <Progress value={progress} className="h-1.5" />
+          </div>
+          <div className="text-xs text-muted-foreground">
+            {progress === 0 ? 'Get started with Tech Pack' : `${completedStages.length} stages completed`}
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+};
+
 const WorkspaceContent = ({ design }: { design: any }) => {
   const { currentStage } = useWorkflow();
 
@@ -224,21 +248,7 @@ const Workflow = () => {
                 </div>
               </div>
 
-              {/* Compact Progress Bar */}
-              <Card className="border-border">
-                <div className="p-4">
-                  <div className="flex items-center gap-4">
-                    <div className="flex-1">
-                      <div className="flex justify-between text-xs mb-1.5">
-                        <span className="text-muted-foreground">Overall Progress</span>
-                        <span className="font-medium text-foreground">0%</span>
-                      </div>
-                      <Progress value={0} className="h-1.5" />
-                    </div>
-                    <div className="text-xs text-muted-foreground">Get started with Tech Pack</div>
-                  </div>
-                </div>
-              </Card>
+              <ProgressBar />
             </div>
 
             <WorkspaceContent design={selectedDesign} />

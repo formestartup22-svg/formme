@@ -150,7 +150,6 @@ const Auth = () => {
         capabilities: formData.capabilities.length > 0 ? formData.capabilities : null,
         categories: formData.categories.length > 0 ? formData.categories : null,
         moq: formData.moq ? parseInt(formData.moq) : null,
-        lead_time: formData.leadTime ? parseInt(formData.leadTime) : null,
       }).eq("user_id", data.user.id);
 
       // If manufacturer, create manufacturer record
@@ -164,7 +163,7 @@ const Auth = () => {
           specialties: formData.capabilities.length > 0 ? formData.capabilities : null,
           certifications: formData.categories.length > 0 ? formData.categories : null,
           min_order_quantity: formData.moq ? parseInt(formData.moq) : null,
-          lead_time_days: formData.leadTime ? parseInt(formData.leadTime) : null,
+          lead_time_days: 30, // Default lead time
           is_active: true,
         });
       }
@@ -406,29 +405,16 @@ const Auth = () => {
                   <div className="pt-2">
                     <h3 className="text-sm font-semibold text-muted-foreground mb-3">Production Details</h3>
                     <div className="space-y-3">
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <Label htmlFor="signup-moq" className="text-sm">Min Order Qty</Label>
-                          <Input
-                            id="signup-moq"
-                            type="number"
-                            placeholder="100"
-                            value={formData.moq}
-                            onChange={(e) => setFormData({ ...formData, moq: e.target.value })}
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="signup-leadTime" className="text-sm">Lead Time (days)</Label>
-                          <Input
-                            id="signup-leadTime"
-                            type="number"
-                            placeholder="30"
-                            value={formData.leadTime}
-                            onChange={(e) => setFormData({ ...formData, leadTime: e.target.value })}
-                            className="mt-1"
-                          />
-                        </div>
+                      <div>
+                        <Label htmlFor="signup-moq" className="text-sm">Min Order Qty</Label>
+                        <Input
+                          id="signup-moq"
+                          type="number"
+                          placeholder="100"
+                          value={formData.moq}
+                          onChange={(e) => setFormData({ ...formData, moq: e.target.value })}
+                          className="mt-1"
+                        />
                       </div>
                       
                       <div>
