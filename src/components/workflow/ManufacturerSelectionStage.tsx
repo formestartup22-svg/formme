@@ -2,7 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from '@/components/ui/dialog';
 import { CheckCircle2, Clock, XCircle, MessageSquare, ArrowRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -43,6 +50,8 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
   const [selectedManufacturer, setSelectedManufacturer] = useState<string | null>(null);
   const [chatDialogOpen, setChatDialogOpen] = useState(false);
   const [currentChatOrderId, setCurrentChatOrderId] = useState<string | null>(null);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [manufacturerToFinalize, setManufacturerToFinalize] = useState<ManufacturerMatch | null>(null);
   const navigate = useNavigate();
   const { markStageComplete, setCurrentStage } = useWorkflow();
 
@@ -135,11 +144,19 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
     }
   };
 
-  const handleFinalizeManufacturer = async (manufacturerId: string) => {
+  const handleOpenConfirmDialog = (match: ManufacturerMatch) => {
+    setManufacturerToFinalize(match);
+    setConfirmDialogOpen(true);
+  };
+
+  const handleConfirmFinalize = async () => {
+    if (!manufacturerToFinalize) return;
+
     try {
+      const manufacturerId = manufacturerToFinalize.manufacturer_id;
+      
       // Find the order for this specific manufacturer
-      const match = matches.find(m => m.manufacturer_id === manufacturerId);
-      if (!match?.orders?.[0]?.id) {
+      if (!manufacturerToFinalize.orders?.[0]?.id) {
         toast.error('No order found for this manufacturer');
         return;
       }
@@ -151,13 +168,18 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
           manufacturer_id: manufacturerId,
           status: 'manufacturer_review'
         })
-        .eq('id', match.orders[0].id);
+        .eq('id', manufacturerToFinalize.orders[0].id);
 
       if (updateError) throw updateError;
 
       setSelectedManufacturer(manufacturerId);
+      setConfirmDialogOpen(false);
+      setManufacturerToFinalize(null);
       
       toast.success('Contract finalized! Click "Continue to Review Timeline" when ready to proceed.');
+      
+      // Refresh matches to update UI
+      await fetchMatches();
     } catch (error: any) {
       console.error('Error finalizing manufacturer:', error);
       toast.error('Failed to finalize manufacturer');
@@ -305,7 +327,7 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
                             {match.status === 'accepted' && !match.isFinalized && (
                               <Button
                                 size="sm"
-                                onClick={() => handleFinalizeManufacturer(match.manufacturer_id)}
+                                onClick={() => handleOpenConfirmDialog(match)}
                                 className="gap-2"
                               >
                                 <CheckCircle2 className="w-4 h-4" />
@@ -382,6 +404,33 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
               <FactoryMessaging designId={design.id} orderId={currentChatOrderId} />
             )}
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Finalize Contract</DialogTitle>
+            <DialogDescription>
+              Do you want to finalize the contract with {manufacturerToFinalize?.manufacturers.name}? 
+              Once finalized, you'll proceed to review the production timeline with this manufacturer.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setConfirmDialogOpen(false);
+                setManufacturerToFinalize(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmFinalize}>
+              Yes, Finalize Contract
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
