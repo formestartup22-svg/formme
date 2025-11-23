@@ -158,6 +158,7 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
   };
 
   const handleOpenChat = (orderId: string) => {
+    console.log('[ManufacturerSelectionStage] Opening chat with order ID:', orderId);
     setCurrentChatOrderId(orderId);
     setChatDialogOpen(true);
   };
@@ -222,8 +223,12 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
                     key={match.id} 
                     className={`${selectedManufacturer === match.manufacturer_id ? 'border-primary border-2' : ''} cursor-pointer hover:shadow-md transition-shadow`}
                     onClick={() => {
+                      console.log('[Card Click] Match:', match);
+                      console.log('[Card Click] Orders:', match.orders);
                       if (match.orders && match.orders.length > 0) {
                         handleOpenChat(match.orders[0].id);
+                      } else {
+                        console.warn('[Card Click] No orders found for this match');
                       }
                     }}
                   >
