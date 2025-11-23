@@ -219,7 +219,62 @@ const Workflow = () => {
 
   // If a design is selected, show the workflow for that design
   if (designId && selectedDesign) {
-    const initialStage = searchParams.get('stage') || 'tech-pack';
+    // Determine initial stage based on URL or order status
+    const [initialStage, setInitialStage] = useState<string | null>(null);
+    
+    useEffect(() => {
+      const determineStage = async () => {
+        const urlStage = searchParams.get('stage');
+        
+        // If URL has a stage, use it
+        if (urlStage) {
+          setInitialStage(urlStage);
+          return;
+        }
+        
+        // Otherwise, determine stage from order status
+        const { data: order } = await supabase
+          .from('orders')
+          .select('status')
+          .eq('design_id', designId)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        if (!order) {
+          setInitialStage('tech-pack');
+          return;
+        }
+        
+        // Map order status to workflow stage
+        const stageMap: Record<string, string> = {
+          'draft': 'tech-pack',
+          'tech_pack_pending': 'tech-pack',
+          'sent_to_manufacturer': 'waiting',
+          'manufacturer_review': 'review-timeline',
+          'production_approval': 'production',
+          'sample_development': 'waiting-sample',
+          'quality_check': 'quality',
+          'shipping': 'shipping',
+          'delivered': 'shipping'
+        };
+        
+        setInitialStage(stageMap[order.status] || 'tech-pack');
+      };
+      
+      determineStage();
+    }, [designId, searchParams]);
+    
+    if (!initialStage) {
+      return (
+        <div className="min-h-screen bg-background">
+          <Navbar />
+          <main className="container mx-auto px-6 py-6 mt-20 max-w-7xl">
+            <p className="text-muted-foreground">Loading workflow...</p>
+          </main>
+        </div>
+      );
+    }
     
     return (
       <WorkflowProvider initialStage={initialStage}>
