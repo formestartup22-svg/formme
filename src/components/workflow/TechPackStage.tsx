@@ -787,9 +787,12 @@ ${workflowData.constructionNotes || 'None provided'}
                         <div>
                           <span className="font-medium">Key Features:</span>
                           <ul className="ml-4 mt-1 space-y-1 text-muted-foreground">
-                            {agentResults.designSection.key_features.map((feature: string, idx: number) => (
-                              <li key={idx}>• {feature}</li>
-                            ))}
+                            {Array.isArray(agentResults.designSection.key_features) 
+                              ? agentResults.designSection.key_features.map((feature: string, idx: number) => (
+                                  <li key={idx}>• {feature}</li>
+                                ))
+                              : <li>• {String(agentResults.designSection.key_features)}</li>
+                            }
                           </ul>
                         </div>
                       )}
@@ -832,9 +835,12 @@ ${workflowData.constructionNotes || 'None provided'}
                         <div>
                           <span className="font-medium">Trims:</span>
                           <ul className="ml-4 mt-1 space-y-1 text-muted-foreground">
-                            {agentResults.materialsSection.trims.map((trim: string, idx: number) => (
-                              <li key={idx}>• {trim}</li>
-                            ))}
+                            {Array.isArray(agentResults.materialsSection.trims)
+                              ? agentResults.materialsSection.trims.map((trim: string, idx: number) => (
+                                  <li key={idx}>• {String(trim)}</li>
+                                ))
+                              : <li>• {String(agentResults.materialsSection.trims)}</li>
+                            }
                           </ul>
                         </div>
                       )}
@@ -842,9 +848,12 @@ ${workflowData.constructionNotes || 'None provided'}
                         <div>
                           <span className="font-medium">Hardware:</span>
                           <ul className="ml-4 mt-1 space-y-1 text-muted-foreground">
-                            {agentResults.materialsSection.hardware.map((hw: string, idx: number) => (
-                              <li key={idx}>• {hw}</li>
-                            ))}
+                            {Array.isArray(agentResults.materialsSection.hardware)
+                              ? agentResults.materialsSection.hardware.map((hw: string, idx: number) => (
+                                  <li key={idx}>• {String(hw)}</li>
+                                ))
+                              : <li>• {String(agentResults.materialsSection.hardware)}</li>
+                            }
                           </ul>
                         </div>
                       )}
