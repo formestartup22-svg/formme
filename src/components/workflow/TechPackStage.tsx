@@ -46,6 +46,7 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
     materialsSection?: any;
   } | null>(null);
   const [showAgentResults, setShowAgentResults] = useState(false);
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const designFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -218,6 +219,10 @@ ${workflowData.constructionNotes || 'None provided'}
         }
         const byteArray = new Uint8Array(byteNumbers);
         const blob = new Blob([byteArray], { type: 'application/pdf' });
+        
+        // Create preview URL
+        const previewUrl = URL.createObjectURL(blob);
+        setPdfPreviewUrl(previewUrl);
         
         // Store blob for later upload
         setGeneratedTechPackBlob(blob);
@@ -659,16 +664,41 @@ ${workflowData.constructionNotes || 'None provided'}
         </div>
       </div>
 
-      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <DialogContent>
+      <Dialog open={showConfirmDialog} onOpenChange={(open) => {
+        setShowConfirmDialog(open);
+        // Clean up preview URL when dialog closes
+        if (!open && pdfPreviewUrl) {
+          URL.revokeObjectURL(pdfPreviewUrl);
+          setPdfPreviewUrl(null);
+        }
+      }}>
+        <DialogContent className="max-w-4xl max-h-[90vh]">
           <DialogHeader>
             <DialogTitle>Save Tech Pack?</DialogTitle>
             <DialogDescription>
-              Your AI-generated tech pack is ready. Would you like to use this tech pack and link it to your design?
+              Your AI-generated tech pack is ready. Preview it below and save to link it to your design.
             </DialogDescription>
           </DialogHeader>
+          
+          {/* PDF Preview */}
+          {pdfPreviewUrl && (
+            <div className="border border-border rounded-lg overflow-hidden bg-muted" style={{ height: '500px' }}>
+              <iframe
+                src={pdfPreviewUrl}
+                className="w-full h-full"
+                title="Tech Pack Preview"
+              />
+            </div>
+          )}
+          
           <div className="flex gap-3 justify-end pt-4">
-            <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>
+            <Button variant="outline" onClick={() => {
+              setShowConfirmDialog(false);
+              if (pdfPreviewUrl) {
+                URL.revokeObjectURL(pdfPreviewUrl);
+                setPdfPreviewUrl(null);
+              }
+            }}>
               Cancel
             </Button>
             <Button onClick={handleConfirmTechPack}>
