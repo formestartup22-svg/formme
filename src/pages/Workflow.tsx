@@ -24,6 +24,7 @@ import WaitingForSampleStage from '@/components/workflow/WaitingForSampleStage';
 import SampleStage from '@/components/workflow/SampleStage';
 import QualityStage from '@/components/workflow/QualityStage';
 import ShippingStage from '@/components/workflow/ShippingStage';
+import { FloatingMessagesWidget } from '@/components/workflow/FloatingMessagesWidget';
 
 const ProgressBar = () => {
   const { getProgress, completedStages } = useWorkflow();
@@ -315,6 +316,9 @@ const Workflow = () => {
             </div>
 
             <WorkspaceContent design={selectedDesign} />
+            
+            {/* Floating Messages Widget */}
+            <FloatingMessagesWidget designId={designId} />
           </main>
         </div>
       </WorkflowProvider>
