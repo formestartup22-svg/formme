@@ -76,17 +76,27 @@ const SendingStage = ({ design }: SendingStageProps) => {
 
       if (orderError) throw orderError;
 
-      // Create manufacturer match
-      const { error: matchError } = await supabase
+      // Check if manufacturer match already exists
+      const { data: existingMatch } = await supabase
         .from('manufacturer_matches')
-        .insert({
-          design_id: design.id,
-          manufacturer_id: workflowData.selectedFactory.id,
-          status: 'pending',
-          score: 0
-        });
+        .select('id')
+        .eq('design_id', design.id)
+        .eq('manufacturer_id', workflowData.selectedFactory.id)
+        .single();
 
-      if (matchError) throw matchError;
+      // Only create match if it doesn't exist
+      if (!existingMatch) {
+        const { error: matchError } = await supabase
+          .from('manufacturer_matches')
+          .insert({
+            design_id: design.id,
+            manufacturer_id: workflowData.selectedFactory.id,
+            status: 'pending',
+            score: 0
+          });
+
+        if (matchError) throw matchError;
+      }
 
       setOrderId(order.id);
       toast.success('Order sent to manufacturer successfully!');
