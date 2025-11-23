@@ -63,36 +63,52 @@ const NavBar: React.FC<NavBarProps> = ({ initialDark = false }) => {
         </div>
       </Link>
       <nav className="hidden md:flex gap-8 mr-10 ml-auto">
-        {["collection", "create", "dashboard", "reviews"].map((item) => (
-          <Link
-            key={item}
-            to={
-              item === "create"
-                ? "/new-design"
-                : item === "dashboard"
-                  ? "/dashboard"
-                  : item === "reviews"
-                    ? "/reviews"
-                    : item === "collection"
-                      ? "/marketplace"
-                      : "#"
-            }
-            className={cn(
-              "text-lg relative py-1 group transition-colors",
-              initialDark && !scrolled
-                ? "text-[#111827] hover:text-[#111827]/80"
-                : "text-foreground hover:text-foreground/80",
-            )}
-          >
-            {item}
-            <span
+        {["collection", "create", "dashboard", "reviews"].map((item) => {
+          const isAuthRequired = item === "collection" || item === "create" || item === "dashboard";
+          const isDisabled = isAuthRequired && !user;
+          
+          return (
+            <Link
+              key={item}
+              to={
+                isDisabled
+                  ? "#"
+                  : item === "create"
+                    ? "/dashboard"
+                    : item === "dashboard"
+                      ? "/dashboard"
+                      : item === "reviews"
+                        ? "/reviews"
+                        : item === "collection"
+                          ? "/new-design"
+                          : "#"
+              }
+              onClick={(e) => {
+                if (isDisabled) {
+                  e.preventDefault();
+                }
+              }}
               className={cn(
-                "absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full",
-                initialDark && !scrolled ? "bg-[#111827]" : "bg-foreground",
+                "text-lg relative py-1 group transition-colors",
+                isDisabled 
+                  ? "opacity-40 cursor-not-allowed"
+                  : initialDark && !scrolled
+                    ? "text-[#111827] hover:text-[#111827]/80"
+                    : "text-foreground hover:text-foreground/80",
               )}
-            ></span>
-          </Link>
-        ))}
+            >
+              {item}
+              {!isDisabled && (
+                <span
+                  className={cn(
+                    "absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full",
+                    initialDark && !scrolled ? "bg-[#111827]" : "bg-foreground",
+                  )}
+                ></span>
+              )}
+            </Link>
+          );
+        })}
       </nav>
       <div className="flex gap-6 items-center">
         {user && (
