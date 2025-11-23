@@ -63,7 +63,7 @@ export const ManufacturerMessaging = () => {
             orders.map(async (order) => {
               const { data: profile } = await supabase
                 .from('profiles')
-                .select('full_name')
+                .select('full_name, company_name')
                 .eq('user_id', order.designer_id)
                 .maybeSingle();
 
@@ -77,7 +77,7 @@ export const ManufacturerMessaging = () => {
 
               return {
                 id: order.designer_id,
-                name: profile?.full_name || 'Unknown Designer',
+                name: profile?.full_name || profile?.company_name || 'Designer',
                 designName: order.designs?.name || 'Unknown Design',
                 orderId: order.id,
                 unreadCount: count || 0,
