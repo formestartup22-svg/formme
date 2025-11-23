@@ -188,7 +188,7 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
         markStageComplete('tech-pack');
         markStageComplete('factory-match');
         markStageComplete('send-tech-pack');
-        setCurrentStage('review-timeline');
+        setCurrentStage('production');
       }, 1000);
     } catch (error: any) {
       console.error('Error finalizing manufacturer:', error);
@@ -255,7 +255,7 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
     markStageComplete('send-tech-pack');
     
     // Navigate to production parameters page
-    setCurrentStage('review-timeline');
+    setCurrentStage('production');
     
     return true;
   };
