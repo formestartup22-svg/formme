@@ -1,7 +1,8 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { CheckCircle, Calendar } from 'lucide-react';
+import { CheckCircle, Calendar, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Design } from '@/data/workflowData';
 import { useWorkflow } from '@/context/WorkflowContext';
 import { StageHeader } from './StageHeader';
@@ -86,7 +87,31 @@ const ReviewProductionTimelineStage = ({ design }: ReviewProductionTimelineStage
           </Card>
         </section>
 
-        <StageNavigation onNext={() => true} nextLabel="Proceed to Payment" showBack={true} />
+        <div className="flex items-center justify-between pt-6 border-t mt-8">
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              const urlParams = new URLSearchParams(window.location.search);
+              const designId = urlParams.get('designId');
+              window.location.href = `/workflow?designId=${designId}&stage=production-approval`;
+            }}
+            className="gap-2"
+          >
+            Skip Payment for Now
+          </Button>
+          
+          <Button 
+            onClick={() => {
+              const urlParams = new URLSearchParams(window.location.search);
+              const designId = urlParams.get('designId');
+              window.location.href = `/workflow?designId=${designId}&stage=payment`;
+            }}
+            className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
+          >
+            Proceed to Payment
+            <ArrowRight className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
     </div>
   );
