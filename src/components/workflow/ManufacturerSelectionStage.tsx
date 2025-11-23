@@ -131,29 +131,37 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
     }
   };
 
-  const handleSelectManufacturer = async (manufacturerId: string) => {
+  const handleFinalizeManufacturer = async (manufacturerId: string) => {
     try {
-      // Update order with selected manufacturer
-      const { data: order } = await supabase
-        .from('orders')
-        .select('id')
-        .eq('design_id', design.id)
-        .maybeSingle();
-
-      if (order) {
-        const { error } = await supabase
-          .from('orders')
-          .update({ manufacturer_id: manufacturerId })
-          .eq('id', order.id);
-
-        if (error) throw error;
+      // Find the order for this specific manufacturer
+      const match = matches.find(m => m.manufacturer_id === manufacturerId);
+      if (!match?.orders?.[0]?.id) {
+        toast.error('No order found for this manufacturer');
+        return;
       }
 
+      // Update the order to mark this manufacturer as finalized
+      const { error: updateError } = await supabase
+        .from('orders')
+        .update({ 
+          manufacturer_id: manufacturerId,
+          status: 'manufacturer_review'
+        })
+        .eq('id', match.orders[0].id);
+
+      if (updateError) throw updateError;
+
       setSelectedManufacturer(manufacturerId);
-      toast.success('Manufacturer selected successfully!');
+      markStageComplete('send-tech-pack');
+      toast.success('Manufacturer finalized! Proceeding to timeline review...');
+      
+      // Navigate to next stage
+      setTimeout(() => {
+        navigate(`/workflow?designId=${design.id}&stage=review-timeline`);
+      }, 1000);
     } catch (error: any) {
-      console.error('Error selecting manufacturer:', error);
-      toast.error('Failed to select manufacturer');
+      console.error('Error finalizing manufacturer:', error);
+      toast.error('Failed to finalize manufacturer');
     }
   };
 
@@ -206,18 +214,10 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
 
   const handleProceed = async () => {
     if (!selectedManufacturer) {
-      toast.error('Please select a manufacturer before proceeding');
+      toast.error('Please finalize a contract with an accepted manufacturer before proceeding');
       return false;
     }
 
-    // Check if selected manufacturer has accepted
-    const selectedMatch = matches.find(m => m.manufacturer_id === selectedManufacturer);
-    if (selectedMatch?.status !== 'accepted') {
-      toast.error('Please wait for the selected manufacturer to accept your request');
-      return false;
-    }
-
-    markStageComplete('send-tech-pack');
     return true;
   };
 
@@ -298,10 +298,19 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
                             {match.status === 'accepted' && selectedManufacturer !== match.manufacturer_id && (
                               <Button
                                 size="sm"
-                                onClick={() => handleSelectManufacturer(match.manufacturer_id)}
+                                onClick={() => handleFinalizeManufacturer(match.manufacturer_id)}
+                                className="gap-2"
                               >
-                                Select This Manufacturer
+                                <CheckCircle2 className="w-4 h-4" />
+                                Finalize Contract
                               </Button>
+                            )}
+
+                            {match.status === 'accepted' && selectedManufacturer === match.manufacturer_id && (
+                              <div className="flex items-center gap-2 text-sm font-medium text-primary">
+                                <CheckCircle2 className="w-4 h-4" />
+                                Contract Finalized
+                              </div>
                             )}
                             
                             {match.status === 'pending' && (
@@ -344,11 +353,13 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
           </CardContent>
         </Card>
 
-        <StageNavigation
-          nextLabel="Continue to Review Timeline"
-          onNext={handleProceed}
-          showBack={true}
-        />
+        {selectedManufacturer && (
+          <StageNavigation
+            nextLabel="Continue to Review Timeline"
+            onNext={handleProceed}
+            showBack={true}
+          />
+        )}
       </div>
 
       {/* Chat Dialog */}
