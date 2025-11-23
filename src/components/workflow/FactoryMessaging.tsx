@@ -184,15 +184,9 @@ export const FactoryMessaging = ({ designId, orderId }: FactoryMessagingProps) =
   }
 
   return (
-    <Card className="border-border">
-      <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2">
-          <Send className="w-4 h-4" />
-          Factory Communication
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-        <ScrollArea className="h-80 px-4">
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-hidden">
+        <ScrollArea className="h-[500px] px-6">
           {loading ? (
             <p className="text-sm text-muted-foreground text-center py-8">Loading messages...</p>
           ) : messages.length === 0 ? (
@@ -200,35 +194,36 @@ export const FactoryMessaging = ({ designId, orderId }: FactoryMessagingProps) =
               No messages yet. Start the conversation!
             </p>
           ) : (
-            <div className="space-y-3 py-4">
+            <div className="space-y-4 py-4">
               {messages.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`flex gap-2 ${msg.is_designer ? 'justify-end' : 'justify-start'}`}
+                  className={`flex gap-3 ${msg.sender_id === currentUserId ? 'justify-end' : 'justify-start'}`}
                 >
-                  {!msg.is_designer && (
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                      <Factory className="w-4 h-4 text-primary" />
+                  {msg.sender_id !== currentUserId && (
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <Factory className="w-5 h-5 text-primary" />
                     </div>
                   )}
                   <div
-                    className={`max-w-[75%] rounded-lg p-3 ${
-                      msg.is_designer
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-foreground'
+                    className={`max-w-[70%] rounded-2xl px-4 py-3 ${
+                      msg.sender_id === currentUserId
+                        ? 'bg-primary text-primary-foreground rounded-br-sm'
+                        : 'bg-muted text-foreground rounded-bl-sm'
                     }`}
                   >
                     <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                     <p className="text-xs opacity-70 mt-1">
-                      {new Date(msg.created_at).toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit'
+                      {new Date(msg.created_at).toLocaleDateString([], {
+                        month: '2-digit',
+                        day: '2-digit',
+                        year: 'numeric'
                       })}
                     </p>
                   </div>
-                  {msg.is_designer && (
-                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
-                      <User className="w-4 h-4 text-primary-foreground" />
+                  {msg.sender_id === currentUserId && (
+                    <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center shrink-0">
+                      <User className="w-5 h-5 text-primary-foreground" />
                     </div>
                   )}
                 </div>
@@ -237,34 +232,32 @@ export const FactoryMessaging = ({ designId, orderId }: FactoryMessagingProps) =
             </div>
           )}
         </ScrollArea>
-        <div className="p-4 border-t">
-          <div className="flex gap-2">
-            <Textarea
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Type your message..."
-              className="resize-none"
-              rows={2}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSendMessage();
-                }
-              }}
-            />
-            <Button
-              onClick={handleSendMessage}
-              disabled={!newMessage.trim() || sending}
-              className="shrink-0"
-            >
-              <Send className="w-4 h-4" />
-            </Button>
-          </div>
-          <p className="text-xs text-muted-foreground mt-2">
-            Press Enter to send, Shift+Enter for new line
-          </p>
+      </div>
+      <div className="p-6 pt-4 border-t bg-background">
+        <div className="flex gap-3 items-end">
+          <Textarea
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            placeholder="Type a message..."
+            className="resize-none min-h-[60px]"
+            rows={2}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage();
+              }
+            }}
+          />
+          <Button
+            onClick={handleSendMessage}
+            disabled={!newMessage.trim() || sending}
+            size="lg"
+            className="shrink-0 h-[60px] w-[60px] rounded-full"
+          >
+            <Send className="w-5 h-5" />
+          </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
