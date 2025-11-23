@@ -412,6 +412,9 @@ export type Database = {
           notes: string | null
           preferred_location: string | null
           price: number | null
+          production_completion_date: string | null
+          production_start_date: string | null
+          production_timeline_data: Json | null
           quantity: number | null
           shipping_address: string | null
           status: Database["public"]["Enums"]["order_status"] | null
@@ -432,6 +435,9 @@ export type Database = {
           notes?: string | null
           preferred_location?: string | null
           price?: number | null
+          production_completion_date?: string | null
+          production_start_date?: string | null
+          production_timeline_data?: Json | null
           quantity?: number | null
           shipping_address?: string | null
           status?: Database["public"]["Enums"]["order_status"] | null
@@ -452,6 +458,9 @@ export type Database = {
           notes?: string | null
           preferred_location?: string | null
           price?: number | null
+          production_completion_date?: string | null
+          production_start_date?: string | null
+          production_timeline_data?: Json | null
           quantity?: number | null
           shipping_address?: string | null
           status?: Database["public"]["Enums"]["order_status"] | null

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { CheckCircle, Calendar, ArrowRight } from 'lucide-react';
@@ -8,6 +8,8 @@ import { useWorkflow } from '@/context/WorkflowContext';
 import { StageHeader } from './StageHeader';
 import { StageNavigation } from './StageNavigation';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface ReviewProductionTimelineStageProps {
   design: Design;
@@ -16,6 +18,69 @@ interface ReviewProductionTimelineStageProps {
 const ReviewProductionTimelineStage = ({ design }: ReviewProductionTimelineStageProps) => {
   const { workflowData, setCurrentStage, markStageComplete } = useWorkflow();
   const navigate = useNavigate();
+  const [orderData, setOrderData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchOrderData = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Fetch order with finalized manufacturer
+        const { data: order, error } = await supabase
+          .from('orders')
+          .select(`
+            *,
+            manufacturers (
+              name,
+              location
+            )
+          `)
+          .eq('design_id', design.id)
+          .eq('designer_id', user.id)
+          .not('manufacturer_id', 'is', null)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (error) {
+          console.error('Error fetching order:', error);
+          toast.error('Failed to load production timeline');
+          return;
+        }
+
+        setOrderData(order);
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrderData();
+
+    // Set up realtime subscription for order updates
+    const channel = supabase
+      .channel('order-timeline-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'orders',
+          filter: `design_id=eq.${design.id}`
+        },
+        (payload) => {
+          setOrderData((prev: any) => prev ? { ...prev, ...payload.new } : payload.new);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [design.id]);
   
   const handleSkipPayment = () => {
     markStageComplete('review-timeline');
@@ -28,6 +93,22 @@ const ReviewProductionTimelineStage = ({ design }: ReviewProductionTimelineStage
     setCurrentStage('payment');
     navigate(`/workflow?designId=${design.id}&stage=payment`);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <p className="text-muted-foreground">Loading timeline...</p>
+      </div>
+    );
+  }
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'Not set';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  const manufacturerName = orderData?.manufacturers?.name || workflowData.selectedFactory?.name || 'The manufacturer';
 
   return (
     <div>
@@ -52,7 +133,7 @@ const ReviewProductionTimelineStage = ({ design }: ReviewProductionTimelineStage
               <div>
                 <h3 className="text-lg font-semibold text-foreground">Order Approved!</h3>
                 <p className="text-sm text-muted-foreground">
-                  {workflowData.selectedFactory?.name || 'The manufacturer'} has approved your order and provided the production timeline below.
+                  {manufacturerName} has approved your order and provided the production timeline below.
                 </p>
               </div>
             </div>
@@ -71,31 +152,28 @@ const ReviewProductionTimelineStage = ({ design }: ReviewProductionTimelineStage
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label className="text-xs text-muted-foreground mb-1 block">Start Date</Label>
-                    <p className="text-sm font-medium">Nov 25, 2025</p>
+                    <p className="text-sm font-medium">{formatDate(orderData?.production_start_date)}</p>
                   </div>
                   <div>
                     <Label className="text-xs text-muted-foreground mb-1 block">Expected Completion</Label>
-                    <p className="text-sm font-medium">Dec 20, 2025</p>
+                    <p className="text-sm font-medium">{formatDate(orderData?.production_completion_date)}</p>
                   </div>
                 </div>
+                {orderData?.production_start_date && orderData?.production_completion_date && (
                 <div className="mt-6">
                   <div className="relative pt-1">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-medium text-muted-foreground">Nov 25</span>
-                      <span className="text-xs font-medium text-muted-foreground">Dec 20</span>
+                      <span className="text-xs font-medium text-muted-foreground">{formatDate(orderData.production_start_date)}</span>
+                      <span className="text-xs font-medium text-muted-foreground">{formatDate(orderData.production_completion_date)}</span>
                     </div>
                     <div className="overflow-hidden h-3 text-xs flex rounded-full bg-muted">
                       <div className="bg-primary w-1/3 flex items-center justify-center text-white text-[10px] font-semibold">Cutting</div>
                       <div className="bg-primary/60 w-1/3 flex items-center justify-center text-white text-[10px] font-semibold">Sewing</div>
                       <div className="bg-primary/30 w-1/3 flex items-center justify-center text-white text-[10px] font-semibold">Finishing</div>
                     </div>
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="text-xs text-muted-foreground">5 days</span>
-                      <span className="text-xs text-muted-foreground">12 days</span>
-                      <span className="text-xs text-muted-foreground">8 days</span>
-                    </div>
                   </div>
                 </div>
+                )}
               </div>
             </CardContent>
           </Card>

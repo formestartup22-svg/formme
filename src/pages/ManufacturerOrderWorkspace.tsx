@@ -11,6 +11,7 @@ import { MessageSquare, FileDown, Upload, CheckCircle, XCircle, ArrowLeft } from
 import { ManufacturerStepper } from '@/components/workflow/ManufacturerStepper';
 import { FactoryMessaging } from '@/components/workflow/FactoryMessaging';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const ManufacturerOrderWorkspace = () => {
   const { id } = useParams();
@@ -19,6 +20,9 @@ const ManufacturerOrderWorkspace = () => {
   const [loading, setLoading] = useState(true);
   const [matchStatus, setMatchStatus] = useState<'pending' | 'accepted' | 'rejected' | null>(null);
   const [accepting, setAccepting] = useState(false);
+  const [productionStartDate, setProductionStartDate] = useState('');
+  const [productionCompletionDate, setProductionCompletionDate] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
   const fetchOrder = async () => {
@@ -72,6 +76,14 @@ const ManufacturerOrderWorkspace = () => {
           profiles: profile || { full_name: 'Unknown' }
         });
 
+        // Set timeline dates if they exist
+        if (orderData.production_start_date) {
+          setProductionStartDate(orderData.production_start_date);
+        }
+        if (orderData.production_completion_date) {
+          setProductionCompletionDate(orderData.production_completion_date);
+        }
+
         setMatchStatus((matchData?.status as 'pending' | 'accepted' | 'rejected') || null);
       } catch (err: any) {
         console.error('Error fetching order:', err);
@@ -112,6 +124,46 @@ const ManufacturerOrderWorkspace = () => {
       alert('Failed to accept match. Please try again.');
     } finally {
       setAccepting(false);
+    }
+  };
+
+  const handleSubmitProductionApproval = async () => {
+    if (!order?.id) return;
+    
+    if (!productionStartDate || !productionCompletionDate) {
+      toast.error('Please provide both start and completion dates');
+      return;
+    }
+    
+    setSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({
+          production_start_date: productionStartDate,
+          production_completion_date: productionCompletionDate,
+          status: 'production_approval'
+        })
+        .eq('id', order.id);
+
+      if (error) throw error;
+
+      toast.success('Production timeline submitted successfully!');
+      // Refresh order data
+      const { data: updatedOrder } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', order.id)
+        .single();
+      
+      if (updatedOrder) {
+        setOrder({ ...order, ...updatedOrder });
+      }
+    } catch (error: any) {
+      console.error('Error submitting production approval:', error);
+      toast.error('Failed to submit. Please try again.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -345,6 +397,28 @@ const ManufacturerOrderWorkspace = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-3">
+                  <h3 className="font-semibold mb-3">Production Timeline</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Production Start Date</Label>
+                      <Input 
+                        type="date" 
+                        value={productionStartDate}
+                        onChange={(e) => setProductionStartDate(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Expected Completion Date</Label>
+                      <Input 
+                        type="date" 
+                        value={productionCompletionDate}
+                        onChange={(e) => setProductionCompletionDate(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-3">
                   <Label>Upload Lab Dip Photos</Label>
                   <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
                     <Input type="file" className="hidden" id="lab-dip" multiple />
@@ -395,7 +469,13 @@ const ManufacturerOrderWorkspace = () => {
                     <span className="font-medium">Status:</span>
                     <Badge variant="outline">Waiting for Approval</Badge>
                   </div>
-                  <Button className="w-full">Submit for Designer Approval</Button>
+                  <Button 
+                    className="w-full" 
+                    onClick={handleSubmitProductionApproval}
+                    disabled={submitting || !productionStartDate || !productionCompletionDate}
+                  >
+                    {submitting ? 'Submitting...' : 'Submit for Designer Approval'}
+                  </Button>
                 </div>
               </CardContent>
             </Card>
