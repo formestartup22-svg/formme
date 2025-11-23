@@ -9,8 +9,8 @@ interface ManufacturerStepperProps {
 
 const manufacturerStages = [
   { id: 'techpack', label: 'Tech Pack Review', completionKey: 'status' },
-  { id: 'sample', label: 'Sample Development', completionKey: 'sample_photos' },
   { id: 'production', label: 'Production Approval', completionKey: 'production_params_submitted_at' },
+  { id: 'sample', label: 'Sample Development', completionKey: 'sample_photos' },
   { id: 'quality', label: 'Quality Check', completionKey: 'quality_check_completed' },
   { id: 'shipping', label: 'Shipping & Logistics', completionKey: 'shipping_completed' },
 ];
