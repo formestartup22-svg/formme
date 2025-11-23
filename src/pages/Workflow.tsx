@@ -155,6 +155,21 @@ const Workflow = () => {
         return;
       }
       
+      // Check if manufacturer has been finalized (contract signed)
+      const { data: finalizedOrder } = await supabase
+        .from('orders')
+        .select('status, manufacturer_id')
+        .eq('design_id', designId)
+        .eq('status', 'manufacturer_review')
+        .not('manufacturer_id', 'is', null)
+        .maybeSingle();
+      
+      if (finalizedOrder) {
+        console.log('[Workflow] Contract finalized, going to review-timeline');
+        setInitialStage('review-timeline');
+        return;
+      }
+      
       // Otherwise, determine stage from order status
       const { data: order } = await supabase
         .from('orders')
@@ -182,6 +197,7 @@ const Workflow = () => {
         'delivered': 'shipping'
       };
       
+      console.log('[Workflow] Order status:', order.status, 'Mapped stage:', stageMap[order.status]);
       setInitialStage(stageMap[order.status] || 'tech-pack');
     };
     
