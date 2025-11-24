@@ -566,11 +566,40 @@ const ManufacturerOrderWorkspace = () => {
                 <CardTitle>Sample Development</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {!order.production_params_approved && (
+                {order.production_params_submitted_at && !order.production_params_approved && order.production_params_approved !== false ? (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                        <Clock className="w-5 h-5 text-blue-600 animate-pulse" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-blue-900">Waiting for Designer Approval</p>
+                        <p className="text-xs text-blue-700 mt-0.5">
+                          Your production parameters have been submitted. Sample development will be available once the designer approves.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : !order.production_params_approved ? (
                   <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
-                    <p className="text-sm text-amber-800">
-                      ⚠️ You cannot proceed to sample development until the designer approves your production parameters.
-                    </p>
+                    <div className="flex items-center gap-3">
+                      <Clock className="w-5 h-5 text-amber-600" />
+                      <p className="text-sm text-amber-800">
+                        Please submit production parameters in the Production Approval stage first.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                      <div>
+                        <p className="text-sm font-medium text-green-900">Production Parameters Approved</p>
+                        <p className="text-xs text-green-700 mt-0.5">
+                          You can now proceed with sample development
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 )}
                 
@@ -588,9 +617,10 @@ const ManufacturerOrderWorkspace = () => {
                       multiple 
                       accept="image/*"
                       onChange={(e) => setSamplePhotos(e.target.files)}
+                      disabled={!order.production_params_approved}
                     />
                     <Label htmlFor="sample-photos" className="cursor-pointer">
-                      <Button variant="outline" size="sm" asChild>
+                      <Button variant="outline" size="sm" asChild disabled={!order.production_params_approved}>
                         <span>Select Files {samplePhotos && samplePhotos.length > 0 && `(${samplePhotos.length})`}</span>
                       </Button>
                     </Label>
@@ -604,6 +634,7 @@ const ManufacturerOrderWorkspace = () => {
                     rows={3}
                     value={sampleNotes}
                     onChange={(e) => setSampleNotes(e.target.value)}
+                    disabled={!order.production_params_approved}
                   />
                   <div className="flex items-center gap-3">
                     <Button 
