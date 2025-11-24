@@ -150,9 +150,20 @@ const ManufacturerOrderWorkspace = () => {
         },
         (payload) => {
           setOrder((prev: any) => prev ? { ...prev, ...payload.new } : payload.new);
-          // Show toast when designer approves
+          
+          // Show toast when designer approves production parameters
           if (payload.new.production_params_approved === true && !order?.production_params_approved) {
             toast.success('Designer approved your production parameters! You can now proceed to Sample Development.');
+          }
+          
+          // Show toast when designer approves sample
+          if (payload.new.sample_approved === true && !order?.sample_approved) {
+            toast.success('Designer has approved the sample! You can now proceed to Quality Check.');
+          }
+          
+          // Show toast when designer approves QC
+          if (payload.new.qc_approved === true && !order?.qc_approved) {
+            toast.success('Designer has approved the quality check! You can now proceed to Shipping.');
           }
         }
       )

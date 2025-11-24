@@ -159,7 +159,29 @@ const SampleStage = ({ design }: SampleStageProps) => {
             </Card>
           </section>
 
-          <StageNavigation onNext={() => { if (!allApproved) return false; updateWorkflowData({ sampleApproved: true }); return true; }} nextLabel={allApproved ? "Approve & Continue to Quality Check" : "Complete checklist to continue"} showBack={true} />
+          <StageNavigation 
+            onNext={async () => { 
+              if (!allApproved) return false; 
+              
+              // Update database to approve sample
+              if (orderData?.id) {
+                const { error } = await supabase
+                  .from('orders')
+                  .update({ sample_approved: true })
+                  .eq('id', orderData.id);
+                
+                if (error) {
+                  console.error('Error approving sample:', error);
+                  return false;
+                }
+              }
+              
+              updateWorkflowData({ sampleApproved: true }); 
+              return true; 
+            }} 
+            nextLabel={allApproved ? "Approve & Continue to Quality Check" : "Complete checklist to continue"} 
+            showBack={true} 
+          />
         </div>
         <div className="space-y-4">
           <FactoryDocuments />
