@@ -662,12 +662,14 @@ const ManufacturerOrderWorkspace = () => {
                       onChange={(e) => setSamplePhotos(e.target.files)}
                       disabled={!order.production_params_approved || (order.sample_submitted_at && order.sample_approved !== false)}
                     />
-                    <Label htmlFor="sample-photos" className="cursor-pointer">
+                    <Label 
+                      htmlFor="sample-photos" 
+                      className={`cursor-pointer ${(!order.production_params_approved || (order.sample_submitted_at && order.sample_approved !== false)) ? 'pointer-events-none opacity-50' : ''}`}
+                    >
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        asChild 
-                        disabled={!order.production_params_approved || (order.sample_submitted_at && order.sample_approved !== false)}
+                        asChild
                       >
                         <span>Select Files {samplePhotos && samplePhotos.length > 0 && `(${samplePhotos.length})`}</span>
                       </Button>
@@ -744,12 +746,10 @@ const ManufacturerOrderWorkspace = () => {
                       accept="image/*"
                       onChange={(e) => setLabDipFiles(e.target.files)}
                     />
-                    <Label htmlFor="lab-dip" className="cursor-pointer">
-                      <Button variant="outline" className="gap-2" asChild>
-                        <span>
-                          <Upload className="w-4 h-4" />
-                          Upload Photos {labDipFiles && labDipFiles.length > 0 && `(${labDipFiles.length})`}
-                        </span>
+                    <Label htmlFor="lab-dip" className="cursor-pointer inline-block">
+                      <Button variant="outline" className="gap-2" type="button">
+                        <Upload className="w-4 h-4" />
+                        Upload Photos {labDipFiles && labDipFiles.length > 0 && `(${labDipFiles.length})`}
                       </Button>
                     </Label>
                   </div>
