@@ -26,6 +26,12 @@ const ManufacturerOrderWorkspace = () => {
       return;
     }
     
+    // Check if trying to access Quality Check without sample approval
+    if (newTab === 'quality' && order?.sample_approved !== true) {
+      toast.error('You cannot access Quality Check until the designer approves your sample');
+      return;
+    }
+    
     // Check if trying to access Shipping without QC approval
     if (newTab === 'shipping' && order?.qc_approved !== true) {
       toast.error('You cannot access Shipping & Logistics until the designer approves your quality check');
@@ -320,13 +326,15 @@ const ManufacturerOrderWorkspace = () => {
             sample_notes: sampleNotes || order.production_timeline_data?.sample_notes,
             sample_last_updated: new Date().toISOString()
           },
+          sample_submitted_at: new Date().toISOString(),
+          sample_approved: null, // Reset approval status
           status: 'sample_development'
         })
         .eq('id', order.id);
 
       if (error) throw error;
 
-      toast.success('Sample update submitted successfully!');
+      toast.success('Sample update submitted to designer for approval');
       
       // Refresh order data
       const { data: updatedOrder } = await supabase
@@ -589,19 +597,43 @@ const ManufacturerOrderWorkspace = () => {
                       </p>
                     </div>
                   </div>
-                ) : (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                ) : order.sample_submitted_at && !order.sample_approved && order.sample_approved !== false ? (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                     <div className="flex items-center gap-3">
-                      <CheckCircle className="w-5 h-5 text-green-600" />
+                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                        <Clock className="w-5 h-5 text-blue-600 animate-pulse" />
+                      </div>
                       <div>
-                        <p className="text-sm font-medium text-green-900">Production Parameters Approved</p>
-                        <p className="text-xs text-green-700 mt-0.5">
-                          You can now proceed with sample development
+                        <p className="text-sm font-medium text-blue-900">Waiting for Designer Sample Approval</p>
+                        <p className="text-xs text-blue-700 mt-0.5">
+                          Sample submitted on {new Date(order.sample_submitted_at).toLocaleDateString()}. Waiting for designer review.
                         </p>
                       </div>
                     </div>
                   </div>
-                )}
+                ) : order.sample_approved === false ? (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                    <div className="flex items-center gap-3">
+                      <XCircle className="w-5 h-5 text-red-600" />
+                      <div>
+                        <p className="text-sm font-medium text-red-900">Sample Rejected</p>
+                        <p className="text-xs text-red-700 mt-0.5">Please review feedback and resubmit</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : order.sample_approved === true ? (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                      <div>
+                        <p className="text-sm font-medium text-green-900">Sample Approved</p>
+                        <p className="text-xs text-green-700 mt-0.5">
+                          You can now proceed to Quality Check
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
                 
                 <div className="space-y-3">
                   <Label>Upload Sample Progress Photos</Label>
@@ -617,10 +649,15 @@ const ManufacturerOrderWorkspace = () => {
                       multiple 
                       accept="image/*"
                       onChange={(e) => setSamplePhotos(e.target.files)}
-                      disabled={!order.production_params_approved}
+                      disabled={!order.production_params_approved || (order.sample_submitted_at && order.sample_approved !== false)}
                     />
                     <Label htmlFor="sample-photos" className="cursor-pointer">
-                      <Button variant="outline" size="sm" asChild disabled={!order.production_params_approved}>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        asChild 
+                        disabled={!order.production_params_approved || (order.sample_submitted_at && order.sample_approved !== false)}
+                      >
                         <span>Select Files {samplePhotos && samplePhotos.length > 0 && `(${samplePhotos.length})`}</span>
                       </Button>
                     </Label>
@@ -634,19 +671,19 @@ const ManufacturerOrderWorkspace = () => {
                     rows={3}
                     value={sampleNotes}
                     onChange={(e) => setSampleNotes(e.target.value)}
-                    disabled={!order.production_params_approved}
+                    disabled={!order.production_params_approved || (order.sample_submitted_at && order.sample_approved !== false)}
                   />
                   <div className="flex items-center gap-3">
                     <Button 
                       onClick={handleSubmitSampleUpdate}
-                      disabled={submitting || (!samplePhotos && !sampleNotes) || !order.production_params_approved}
+                      disabled={submitting || (!samplePhotos && !sampleNotes) || !order.production_params_approved || (order.sample_submitted_at && order.sample_approved !== false)}
                     >
-                      {submitting ? 'Submitting...' : 'Submit Update'}
+                      {submitting ? 'Submitting...' : order.sample_submitted_at && order.sample_approved !== false ? 'Awaiting Approval' : 'Submit for Approval'}
                     </Button>
                     <Button 
                       variant="outline"
                       onClick={() => handleTabChange('quality')}
-                      disabled={!order.production_params_approved}
+                      disabled={!order.sample_approved}
                     >
                       Next Step
                     </Button>
