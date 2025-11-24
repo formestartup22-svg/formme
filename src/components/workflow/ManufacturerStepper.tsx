@@ -12,7 +12,7 @@ const manufacturerStages = [
   { id: 'techpack', label: 'Tech Pack Review', completionKey: 'status' },
   { id: 'sample', label: 'Production Approval', completionKey: 'production_params_submitted_at' },
   { id: 'production', label: 'Sample Development', completionKey: 'sample_photos', requiresApproval: true },
-  { id: 'quality', label: 'Quality Check', completionKey: 'quality_check_completed' },
+  { id: 'quality', label: 'Quality Check', completionKey: 'quality_check_completed', requiresApproval: true },
   { id: 'shipping', label: 'Shipping & Logistics', completionKey: 'shipping_completed', requiresApproval: true },
 ];
 
@@ -48,6 +48,11 @@ export const ManufacturerStepper = ({ activeStep, onStepChange, orderData }: Man
     // Sample Development requires designer approval of production params
     if (stage.id === 'production') {
       return orderData.production_params_approved === true;
+    }
+    
+    // Quality Check requires sample approval
+    if (stage.id === 'quality') {
+      return orderData.sample_approved === true;
     }
     
     // Shipping requires QC approval
@@ -93,6 +98,8 @@ export const ManufacturerStepper = ({ activeStep, onStepChange, orderData }: Man
                 if (isLocked) {
                   if (stage.id === 'production') {
                     toast.error('This stage is locked until the designer approves your production parameters');
+                  } else if (stage.id === 'quality') {
+                    toast.error('This stage is locked until the designer approves your sample');
                   } else if (stage.id === 'shipping') {
                     toast.error('This stage is locked until the designer approves your quality check');
                   }
