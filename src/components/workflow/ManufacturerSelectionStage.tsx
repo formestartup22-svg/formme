@@ -145,6 +145,11 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
   };
 
   const handleOpenConfirmDialog = (match: ManufacturerMatch) => {
+    // Don't open dialog if already finalized
+    if (match.isFinalized) {
+      toast.info('Contract already finalized with this manufacturer');
+      return;
+    }
     console.log('[handleOpenConfirmDialog] Opening dialog for manufacturer:', match.manufacturers.name);
     setManufacturerToFinalize(match);
     setConfirmDialogOpen(true);
