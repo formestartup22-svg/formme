@@ -421,6 +421,14 @@ export type Database = {
           production_params_submitted_at: string | null
           production_start_date: string | null
           production_timeline_data: Json | null
+          qc_approved: boolean | null
+          qc_notes: string | null
+          qc_photos_l: string | null
+          qc_photos_m: string | null
+          qc_photos_s: string | null
+          qc_photos_xl: string | null
+          qc_result: string | null
+          qc_submitted_at: string | null
           quantity: number | null
           shipping_address: string | null
           shrinkage: string | null
@@ -451,6 +459,14 @@ export type Database = {
           production_params_submitted_at?: string | null
           production_start_date?: string | null
           production_timeline_data?: Json | null
+          qc_approved?: boolean | null
+          qc_notes?: string | null
+          qc_photos_l?: string | null
+          qc_photos_m?: string | null
+          qc_photos_s?: string | null
+          qc_photos_xl?: string | null
+          qc_result?: string | null
+          qc_submitted_at?: string | null
           quantity?: number | null
           shipping_address?: string | null
           shrinkage?: string | null
@@ -481,6 +497,14 @@ export type Database = {
           production_params_submitted_at?: string | null
           production_start_date?: string | null
           production_timeline_data?: Json | null
+          qc_approved?: boolean | null
+          qc_notes?: string | null
+          qc_photos_l?: string | null
+          qc_photos_m?: string | null
+          qc_photos_s?: string | null
+          qc_photos_xl?: string | null
+          qc_result?: string | null
+          qc_submitted_at?: string | null
           quantity?: number | null
           shipping_address?: string | null
           shrinkage?: string | null

@@ -13,7 +13,7 @@ const manufacturerStages = [
   { id: 'sample', label: 'Production Approval', completionKey: 'production_params_submitted_at' },
   { id: 'production', label: 'Sample Development', completionKey: 'sample_photos', requiresApproval: true },
   { id: 'quality', label: 'Quality Check', completionKey: 'quality_check_completed' },
-  { id: 'shipping', label: 'Shipping & Logistics', completionKey: 'shipping_completed' },
+  { id: 'shipping', label: 'Shipping & Logistics', completionKey: 'shipping_completed', requiresApproval: true },
 ];
 
 export const ManufacturerStepper = ({ activeStep, onStepChange, orderData }: ManufacturerStepperProps) => {
@@ -48,6 +48,11 @@ export const ManufacturerStepper = ({ activeStep, onStepChange, orderData }: Man
     // Sample Development requires designer approval of production params
     if (stage.id === 'production') {
       return orderData.production_params_approved === true;
+    }
+    
+    // Shipping requires QC approval
+    if (stage.id === 'shipping') {
+      return orderData.qc_approved === true;
     }
     
     // Other stages - check if previous stage is completed
@@ -86,7 +91,11 @@ export const ManufacturerStepper = ({ activeStep, onStepChange, orderData }: Man
             <button
               onClick={() => {
                 if (isLocked) {
-                  toast.error('This stage is locked until the designer approves your production parameters');
+                  if (stage.id === 'production') {
+                    toast.error('This stage is locked until the designer approves your production parameters');
+                  } else if (stage.id === 'shipping') {
+                    toast.error('This stage is locked until the designer approves your quality check');
+                  }
                   return;
                 }
                 if (isAccessible) {

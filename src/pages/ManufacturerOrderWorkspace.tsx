@@ -25,6 +25,13 @@ const ManufacturerOrderWorkspace = () => {
       toast.error('You cannot access Sample Development until the designer approves your production parameters');
       return;
     }
+    
+    // Check if trying to access Shipping without QC approval
+    if (newTab === 'shipping' && order?.qc_approved !== true) {
+      toast.error('You cannot access Shipping & Logistics until the designer approves your quality check');
+      return;
+    }
+    
     setActiveTab(newTab);
   };
   const [order, setOrder] = useState<any>(null);
@@ -42,6 +49,12 @@ const ManufacturerOrderWorkspace = () => {
   const [samplePhotos, setSamplePhotos] = useState<FileList | null>(null);
   const [sampleNotes, setSampleNotes] = useState('');
   const [productionPhotos, setProductionPhotos] = useState<FileList | null>(null);
+  const [qcPhotosS, setQcPhotosS] = useState<string>('');
+  const [qcPhotosM, setQcPhotosM] = useState<string>('');
+  const [qcPhotosL, setQcPhotosL] = useState<string>('');
+  const [qcPhotosXL, setQcPhotosXL] = useState<string>('');
+  const [qcNotes, setQcNotes] = useState('');
+  const [qcResult, setQcResult] = useState<string>('');
 
   useEffect(() => {
   const fetchOrder = async () => {
@@ -330,6 +343,81 @@ const ManufacturerOrderWorkspace = () => {
     } catch (error: any) {
       console.error('Error submitting sample update:', error);
       toast.error('Failed to submit. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleQCPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>, size: string) => {
+    const file = e.target.files?.[0];
+    if (!file || !order?.id) return;
+
+    setSubmitting(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${order.id}/qc-${size.toLowerCase()}-${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError, data } = await supabase.storage
+        .from('design-files')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('design-files')
+        .getPublicUrl(fileName);
+
+      // Update state based on size
+      if (size === 'S') setQcPhotosS(publicUrl);
+      else if (size === 'M') setQcPhotosM(publicUrl);
+      else if (size === 'L') setQcPhotosL(publicUrl);
+      else if (size === 'XL') setQcPhotosXL(publicUrl);
+
+      toast.success(`Size ${size} photo uploaded`);
+    } catch (error) {
+      console.error('Error uploading QC photo:', error);
+      toast.error('Failed to upload photo');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSubmitQC = async () => {
+    if (!order?.id || !qcResult) return;
+
+    setSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({
+          qc_photos_s: qcPhotosS || null,
+          qc_photos_m: qcPhotosM || null,
+          qc_photos_l: qcPhotosL || null,
+          qc_photos_xl: qcPhotosXL || null,
+          qc_notes: qcNotes || null,
+          qc_result: qcResult,
+          qc_submitted_at: new Date().toISOString(),
+          qc_approved: null // Reset approval status
+        })
+        .eq('id', order.id);
+
+      if (error) throw error;
+
+      toast.success('Quality check submitted to designer');
+      
+      // Refetch order data  
+      const { data: updatedOrder } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', order.id)
+        .single();
+      
+      if (updatedOrder) {
+        setOrder({ ...order, ...updatedOrder });
+      }
+    } catch (error) {
+      console.error('Error submitting QC:', error);
+      toast.error('Failed to submit quality check');
     } finally {
       setSubmitting(false);
     }
@@ -682,22 +770,55 @@ const ManufacturerOrderWorkspace = () => {
                 <CardTitle>Quality Check</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
+                {order?.qc_submitted_at && !order.qc_approved && order.qc_approved !== false && (
+                  <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
+                    <Clock className="w-5 h-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">Waiting for Designer Approval</p>
+                      <p className="text-sm text-muted-foreground">
+                        QC submitted on {new Date(order.qc_submitted_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                
+                {order?.qc_approved === false && (
+                  <div className="flex items-center gap-3 p-4 bg-destructive/10 rounded-lg">
+                    <XCircle className="w-5 h-5 text-destructive" />
+                    <div>
+                      <p className="font-medium text-destructive">QC Rejected</p>
+                      <p className="text-sm text-muted-foreground">
+                        Please review and resubmit quality check
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {order?.qc_approved === true && (
+                  <div className="flex items-center gap-3 p-4 bg-primary/10 rounded-lg">
+                    <CheckCircle className="w-5 h-5 text-primary" />
+                    <div>
+                      <p className="font-medium text-primary">QC Approved</p>
+                      <p className="text-sm text-muted-foreground">
+                        Quality check approved by designer
+                      </p>
+                    </div>
+                  </div>
+                )}
+                
                 <div className="space-y-3">
                   <Label>Upload QC Photos (by size)</Label>
                   <div className="grid grid-cols-2 gap-4">
                     {['S', 'M', 'L', 'XL'].map((size) => (
                       <div key={size} className="space-y-2">
                         <Label className="text-sm">Size {size}</Label>
-                        <div className="border border-border rounded-lg p-4 text-center">
-                          <Input type="file" className="hidden" id={`qc-${size}`} multiple />
-                          <Label htmlFor={`qc-${size}`} className="cursor-pointer">
-                            <Button variant="outline" size="sm" className="gap-2" asChild>
-                              <span>
-                                <Upload className="w-3 h-3" />
-                                Upload
-                              </span>
-                            </Button>
-                          </Label>
+                        <div className="space-y-2">
+                          <Input 
+                            type="file" 
+                            accept="image/*"
+                            onChange={(e) => handleQCPhotoUpload(e, size)}
+                            disabled={submitting || order?.qc_approved === true}
+                          />
                         </div>
                       </div>
                     ))}
@@ -709,21 +830,51 @@ const ManufacturerOrderWorkspace = () => {
                   <Textarea
                     placeholder="Document any defects or quality concerns..."
                     rows={4}
+                    value={qcNotes}
+                    onChange={(e) => setQcNotes(e.target.value)}
+                    disabled={order?.qc_approved === true}
                   />
                 </div>
                 
                 <div className="space-y-3">
                   <Label>Overall QC Result</Label>
                   <div className="flex gap-3">
-                    <Button variant="outline" className="flex-1 gap-2">
+                    <Button 
+                      variant={qcResult === 'passed' ? 'default' : 'outline'} 
+                      className="flex-1 gap-2"
+                      onClick={() => setQcResult('passed')}
+                      disabled={order?.qc_approved === true}
+                    >
                       <CheckCircle className="w-4 h-4" />
                       Passed
                     </Button>
-                    <Button variant="outline" className="flex-1 gap-2">
+                    <Button 
+                      variant={qcResult === 'needs_fixes' ? 'default' : 'outline'} 
+                      className="flex-1 gap-2"
+                      onClick={() => setQcResult('needs_fixes')}
+                      disabled={order?.qc_approved === true}
+                    >
                       <XCircle className="w-4 h-4" />
                       Needs Fixes
                     </Button>
                   </div>
+                </div>
+                
+                <div className="flex items-center gap-3 pt-4 border-t">
+                  <Button 
+                    className="flex-1"
+                    onClick={handleSubmitQC}
+                    disabled={submitting || !qcResult || order?.qc_approved === true}
+                  >
+                    {submitting ? 'Submitting...' : 'Submit QC to Designer'}
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => handleTabChange('shipping')}
+                    disabled={!order?.qc_approved}
+                  >
+                    Next Step
+                  </Button>
                 </div>
               </CardContent>
             </Card>
