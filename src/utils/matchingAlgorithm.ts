@@ -133,7 +133,7 @@ export function calculateMatchScore(
   console.log('  Designer criteria:', designer);
   console.log('  Manufacturer profile:', manufacturer);
   
-  // 1. Category Score (HIGHEST PRIORITY - 40%)
+  // 1. Category Score (HIGHEST PRIORITY - 35%)
   let categoryScore = 0;
   if (designer.categories && designer.categories.length > 0 && 
       manufacturer.categories && manufacturer.categories.length > 0) {
@@ -173,18 +173,18 @@ export function calculateMatchScore(
     console.log(`  Quantity Score: 100 (perfect fit: ${designer.quantity} between ${manufacturer.moq} and ${manufacturer.maxCapacity || 'unlimited'})`);
   }
 
-  // 3. Location Score - 20%
+  // 3. Location Score (CRITICAL PRIORITY - 30%)
   let locationScore = 40; // default for no match
   let locationPenalty = false;
   
   if (isLocationMatch(designer.location || 'any', manufacturer.location || '')) {
     locationScore = 100;
   } else {
-    // In strict mode, non-matching location gets very low score
-    locationScore = designer.applyStrictFilters ? 5 : 40;
+    // In strict mode, non-matching location gets 0 score to ensure total stays under 50
+    locationScore = designer.applyStrictFilters ? 0 : 40;
     locationPenalty = designer.applyStrictFilters;
   }
-  console.log(`  Location Score: ${locationScore}${locationPenalty ? ' - STRICT PENALTY' : ''}`);
+  console.log(`  Location Score: ${locationScore}${locationPenalty ? ' - CRITICAL PENALTY (0)' : ''}`);
 
   // 4. Price Score - 10%
   let priceScore = 50; // default
@@ -227,7 +227,7 @@ export function calculateMatchScore(
     console.log(`  Price Score: ${priceScore} (default)`);
   }
 
-  // 5. Lead Time Score - 5%
+  // 5. Lead Time Score - 3%
   const leadRanges: Record<string, [number, number]> = {
     "1-3": [7, 21],
     "4-6": [28, 42],
@@ -245,22 +245,22 @@ export function calculateMatchScore(
   }
   console.log(`  Lead Time Score: ${leadTimeScore.toFixed(1)}`);
 
-  // 6. Reliability Score - 5%
+  // 6. Reliability Score - 2%
   const reliabilityScore = manufacturer.rating
     ? (manufacturer.rating / 5) * 100
     : 50;
   console.log(`  Reliability Score: ${reliabilityScore.toFixed(1)}`);
 
-  // Final Weighted Score
+  // Final Weighted Score with Location as critical priority
   const finalScore =
-    0.40 * categoryScore +
+    0.35 * categoryScore +
+    0.30 * locationScore +
     0.20 * quantityScore +
-    0.20 * locationScore +
     0.10 * priceScore +
-    0.05 * leadTimeScore +
-    0.05 * reliabilityScore;
+    0.03 * leadTimeScore +
+    0.02 * reliabilityScore;
 
-  console.log(`  FINAL SCORE: ${Math.round(finalScore)} (breakdown: cat=${(0.40*categoryScore).toFixed(1)}, qty=${(0.20*quantityScore).toFixed(1)}, loc=${(0.20*locationScore).toFixed(1)}, price=${(0.10*priceScore).toFixed(1)}, lead=${(0.05*leadTimeScore).toFixed(1)}, rating=${(0.05*reliabilityScore).toFixed(1)})`);
+  console.log(`  FINAL SCORE: ${Math.round(finalScore)} (breakdown: cat=${(0.35*categoryScore).toFixed(1)}, loc=${(0.30*locationScore).toFixed(1)}, qty=${(0.20*quantityScore).toFixed(1)}, price=${(0.10*priceScore).toFixed(1)}, lead=${(0.03*leadTimeScore).toFixed(1)}, rating=${(0.02*reliabilityScore).toFixed(1)})`);
 
   return Math.round(finalScore);
 }
