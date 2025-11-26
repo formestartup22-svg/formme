@@ -29,6 +29,7 @@ interface Manufacturer {
   price_range: string | null;
   specialties: string[] | null;
   certifications: string[] | null;
+  categories: string[] | null;
   min_order_quantity: number | null;
   max_capacity: number | null;
   rating: number | null;
@@ -71,46 +72,64 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
   }, [design.id]);
 
   const calculateAndSortManufacturers = (manufacturersList: Manufacturer[], applyFilters: boolean = true): ManufacturerWithScore[] => {
+    console.log('[calculateAndSortManufacturers] Starting with manufacturers:', manufacturersList.length);
+    console.log('[calculateAndSortManufacturers] Design category:', designCategory);
+    console.log('[calculateAndSortManufacturers] Workflow data:', workflowData);
+    
     // Filter by category first only if filters are applied
     let filtered = manufacturersList;
     
     if (designCategory && applyFilters && !viewAll) {
-      filtered = manufacturersList.filter(m => 
-        (m as any).categories?.some((cat: string) => 
+      console.log('[calculateAndSortManufacturers] Filtering by category:', designCategory);
+      filtered = manufacturersList.filter(m => {
+        const hasMatch = m.categories?.some((cat: string) => 
           cat.toLowerCase().includes(designCategory.toLowerCase()) ||
           designCategory.toLowerCase().includes(cat.toLowerCase())
-        )
-      );
+        );
+        console.log(`[calculateAndSortManufacturers] Manufacturer ${m.name} categories:`, m.categories, 'Match:', hasMatch);
+        return hasMatch;
+      });
+      console.log('[calculateAndSortManufacturers] After category filter:', filtered.length, 'manufacturers');
     }
 
     // Calculate match scores
     const withScores = filtered.map(manufacturer => {
-      const matchScore = calculateMatchScore(
-        {
-          quantity: parseInt(workflowData.quantity || '0'),
-          leadTime: workflowData.leadTime || '4-6',
-          location: workflowData.location || 'any',
-          priceRange: workflowData.priceRange || 'mid',
-          categories: designCategory ? [designCategory] : [],
-          minPrice: workflowData.minPrice ? parseInt(workflowData.minPrice) : undefined,
-          maxPrice: workflowData.maxPrice ? parseInt(workflowData.maxPrice) : undefined
-        },
-        {
-          moq: manufacturer.min_order_quantity || 0,
-          maxCapacity: manufacturer.max_capacity || undefined,
-          leadTime: manufacturer.lead_time_days || 30,
-          location: manufacturer.location || '',
-          priceTier: manufacturer.price_range || 'mid',
-          rating: manufacturer.rating || undefined,
-          categories: (manufacturer as any).categories || []
-        }
-      );
+      const criteria = {
+        quantity: parseInt(workflowData.quantity || '0'),
+        leadTime: workflowData.leadTime || '4-6',
+        location: workflowData.location || 'any',
+        priceRange: workflowData.priceRange || 'mid',
+        categories: designCategory ? [designCategory] : [],
+        minPrice: workflowData.minPrice ? parseInt(workflowData.minPrice) : undefined,
+        maxPrice: workflowData.maxPrice ? parseInt(workflowData.maxPrice) : undefined
+      };
+      
+      const profile = {
+        moq: manufacturer.min_order_quantity || 0,
+        maxCapacity: manufacturer.max_capacity || undefined,
+        leadTime: manufacturer.lead_time_days || 30,
+        location: manufacturer.location || '',
+        priceTier: manufacturer.price_range || 'mid',
+        rating: manufacturer.rating || undefined,
+        categories: manufacturer.categories || []
+      };
+      
+      console.log(`[calculateAndSortManufacturers] Calculating score for ${manufacturer.name}`);
+      console.log('  Criteria:', criteria);
+      console.log('  Profile:', profile);
+      
+      const matchScore = calculateMatchScore(criteria, profile);
+      
+      console.log(`  Match Score: ${matchScore}`);
 
       return { ...manufacturer, matchScore };
     });
 
     // Sort by match score descending
-    return withScores.sort((a, b) => b.matchScore - a.matchScore);
+    const sorted = withScores.sort((a, b) => b.matchScore - a.matchScore);
+    console.log('[calculateAndSortManufacturers] Final sorted manufacturers:', sorted.map(m => ({ name: m.name, score: m.matchScore })));
+    
+    return sorted;
   };
 
   const fetchFilteredManufacturers = async () => {
@@ -129,8 +148,9 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
       // Calculate scores for all manufacturers - the algorithm handles location and price matching
       const manufacturersWithScores = calculateAndSortManufacturers(data || [], true);
       
-      // Filter out manufacturers with very low scores (below 30) when filtering is applied
-      const filtered = manufacturersWithScores.filter(m => m.matchScore >= 30);
+      // Only show manufacturers with meaningful scores (above 20) to avoid irrelevant matches
+      // Lower threshold to ensure valid matches aren't filtered out
+      const filtered = manufacturersWithScores.filter(m => m.matchScore > 20);
       
       setManufacturers(filtered);
       setViewAll(false);
