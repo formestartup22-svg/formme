@@ -136,14 +136,12 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
       if (finalizedOrder?.manufacturer_id) {
         setSelectedManufacturer(finalizedOrder.manufacturer_id);
         
-        // If contract is already finalized, automatically navigate to production stage
+        // If contract is already finalized, immediately navigate to production stage
         console.log('[ManufacturerSelectionStage] Contract already finalized, navigating to production stage');
-        setTimeout(() => {
-          markStageComplete('tech-pack');
-          markStageComplete('factory-match');
-          markStageComplete('send-tech-pack');
-          setCurrentStage('production');
-        }, 500);
+        markStageComplete('tech-pack');
+        markStageComplete('factory-match');
+        markStageComplete('send-tech-pack');
+        setCurrentStage('production');
       }
     } catch (error: any) {
       console.error('[ManufacturerSelectionStage] Error fetching matches:', error);
@@ -194,16 +192,11 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
       
       toast.success('Contract finalized! Proceeding to production parameters.');
       
-      // Refresh matches to update UI
-      await fetchMatches();
-
-      // Automatically proceed to production parameters
-      setTimeout(() => {
-        markStageComplete('tech-pack');
-        markStageComplete('factory-match');
-        markStageComplete('send-tech-pack');
-        setCurrentStage('production');
-      }, 1000);
+      // Immediately proceed to production parameters
+      markStageComplete('tech-pack');
+      markStageComplete('factory-match');
+      markStageComplete('send-tech-pack');
+      setCurrentStage('production');
     } catch (error: any) {
       console.error('Error finalizing manufacturer:', error);
       toast.error('Failed to finalize manufacturer');
