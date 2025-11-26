@@ -6,6 +6,7 @@ interface DesignerCriteria {
   categories: string[];
   minPrice?: number;
   maxPrice?: number;
+  applyStrictFilters?: boolean; // If true, non-matching gets very low score
 }
 
 interface ManufacturerProfile {
@@ -149,17 +150,21 @@ export function calculateMatchScore(
 
   // 2. Quantity Score (MOQ) - 20%
   let quantityScore = 0;
+  let quantityPenalty = false;
+  
   if (designer.quantity <= 0) {
     quantityScore = 50; // Default if no quantity specified
     console.log('  Quantity Score: 50 (no quantity specified)');
   } else if (designer.quantity < manufacturer.moq) {
-    // Penalty for being below MOQ
+    // Below MOQ - apply penalty
     quantityScore = (designer.quantity / manufacturer.moq) * 100;
-    console.log(`  Quantity Score: ${quantityScore.toFixed(1)} (below MOQ: ${designer.quantity} < ${manufacturer.moq})`);
+    quantityPenalty = true;
+    console.log(`  Quantity Score: ${quantityScore.toFixed(1)} (below MOQ: ${designer.quantity} < ${manufacturer.moq}) - PENALTY`);
   } else if (manufacturer.maxCapacity && designer.quantity > manufacturer.maxCapacity) {
-    // Penalty for exceeding capacity
+    // Exceeds capacity - apply penalty
     quantityScore = (manufacturer.maxCapacity / designer.quantity) * 100;
-    console.log(`  Quantity Score: ${quantityScore.toFixed(1)} (exceeds capacity: ${designer.quantity} > ${manufacturer.maxCapacity})`);
+    quantityPenalty = true;
+    console.log(`  Quantity Score: ${quantityScore.toFixed(1)} (exceeds capacity: ${designer.quantity} > ${manufacturer.maxCapacity}) - PENALTY`);
   } else {
     // Perfect match - within MOQ and capacity
     quantityScore = 100;
@@ -168,14 +173,18 @@ export function calculateMatchScore(
 
   // 3. Location Score - 20%
   let locationScore = 40; // default for no match
+  let locationPenalty = false;
+  
   if (isLocationMatch(designer.location || 'any', manufacturer.location || '')) {
     locationScore = 100;
+  } else {
+    locationPenalty = true;
   }
-  console.log(`  Location Score: ${locationScore}`);
-
+  console.log(`  Location Score: ${locationScore}${locationPenalty ? ' - PENALTY' : ''}`);
 
   // 4. Price Score - 10%
   let priceScore = 50; // default
+  let pricePenalty = false;
   
   // If designer specified min/max price, use that for scoring
   if (designer.minPrice !== undefined || designer.maxPrice !== undefined) {
@@ -202,11 +211,16 @@ export function calculateMatchScore(
       // No overlap
       else {
         priceScore = 30;
+        pricePenalty = true;
       }
     }
+    console.log(`  Price Score: ${priceScore.toFixed(1)}${pricePenalty ? ' - PENALTY' : ''}`);
   } else if (manufacturer.priceTier === designer.priceRange) {
     // Fallback to tier matching if no specific prices
     priceScore = 100;
+    console.log(`  Price Score: 100 (tier match)`);
+  } else {
+    console.log(`  Price Score: ${priceScore} (default)`);
   }
 
   // 5. Lead Time Score - 5%
@@ -234,13 +248,22 @@ export function calculateMatchScore(
   console.log(`  Reliability Score: ${reliabilityScore.toFixed(1)}`);
 
   // Final Weighted Score
-  const finalScore =
+  let finalScore =
     0.40 * categoryScore +
     0.20 * quantityScore +
     0.20 * locationScore +
     0.10 * priceScore +
     0.05 * leadTimeScore +
     0.05 * reliabilityScore;
+
+  // Apply severe penalty if strict filters enabled and manufacturer doesn't match
+  if (designer.applyStrictFilters) {
+    if (quantityPenalty || locationPenalty || pricePenalty) {
+      // Cap score at 45 for manufacturers that fail key filters
+      finalScore = Math.min(finalScore, 45);
+      console.log(`  STRICT FILTER PENALTY APPLIED - capping at 45`);
+    }
+  }
 
   console.log(`  FINAL SCORE: ${Math.round(finalScore)} (breakdown: cat=${(0.40*categoryScore).toFixed(1)}, qty=${(0.20*quantityScore).toFixed(1)}, loc=${(0.20*locationScore).toFixed(1)}, price=${(0.10*priceScore).toFixed(1)}, lead=${(0.05*leadTimeScore).toFixed(1)}, rating=${(0.05*reliabilityScore).toFixed(1)})`);
 
