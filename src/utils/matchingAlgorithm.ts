@@ -4,6 +4,8 @@ interface DesignerCriteria {
   location: string;
   priceRange: string;
   categories: string[];
+  minPrice?: number;
+  maxPrice?: number;
 }
 
 interface ManufacturerProfile {
@@ -14,6 +16,41 @@ interface ManufacturerProfile {
   priceTier: string;
   rating?: number;
   categories: string[];
+}
+
+// Regional location mapping
+const REGION_COUNTRIES: Record<string, string[]> = {
+  asia: ['china', 'india', 'bangladesh', 'vietnam', 'pakistan', 'thailand', 'indonesia', 'cambodia', 'sri lanka', 'myanmar', 'philippines', 'japan', 'south korea', 'taiwan', 'malaysia', 'singapore'],
+  europe: ['italy', 'spain', 'portugal', 'france', 'germany', 'uk', 'united kingdom', 'poland', 'romania', 'turkey', 'bulgaria', 'greece', 'netherlands', 'belgium'],
+  canada: ['canada'],
+  'north america': ['usa', 'united states', 'america', 'mexico', 'canada'],
+  'central america': ['guatemala', 'honduras', 'el salvador', 'nicaragua', 'costa rica', 'panama'],
+  'south america': ['colombia', 'peru', 'brazil', 'ecuador', 'argentina', 'chile'],
+  africa: ['egypt', 'morocco', 'tunisia', 'ethiopia', 'kenya', 'mauritius', 'south africa'],
+};
+
+function isLocationMatch(designerLocation: string, manufacturerLocation: string): boolean {
+  const designerLoc = designerLocation.toLowerCase().trim();
+  const manufacturerLoc = manufacturerLocation.toLowerCase().trim();
+  
+  // If designer chose "any", always match
+  if (designerLoc === 'any') return true;
+  
+  // Exact match
+  if (manufacturerLoc === designerLoc) return true;
+  
+  // Check if designer location is a region and manufacturer is in that region
+  const regionCountries = REGION_COUNTRIES[designerLoc];
+  if (regionCountries) {
+    return regionCountries.some(country => 
+      manufacturerLoc.includes(country) || country.includes(manufacturerLoc)
+    );
+  }
+  
+  // Check if manufacturer location contains designer location
+  if (manufacturerLoc.includes(designerLoc)) return true;
+  
+  return false;
 }
 
 export function calculateMatchScore(
@@ -34,23 +71,57 @@ export function calculateMatchScore(
 
   // 2. Quantity Score (MOQ) - 20%
   let quantityScore = 0;
-  if (designer.quantity < manufacturer.moq) {
+  if (designer.quantity <= 0) {
+    quantityScore = 50; // Default if no quantity specified
+  } else if (designer.quantity < manufacturer.moq) {
+    // Penalty for being below MOQ
     quantityScore = (designer.quantity / manufacturer.moq) * 100;
   } else if (manufacturer.maxCapacity && designer.quantity > manufacturer.maxCapacity) {
+    // Penalty for exceeding capacity
     quantityScore = (manufacturer.maxCapacity / designer.quantity) * 100;
   } else {
+    // Perfect match - within MOQ and capacity
     quantityScore = 100;
   }
 
   // 3. Location Score - 20%
-  let locationScore = 40; // default
-  if (manufacturer.location?.toLowerCase() === designer.location?.toLowerCase()) {
+  let locationScore = 40; // default for no match
+  if (isLocationMatch(designer.location || 'any', manufacturer.location || '')) {
     locationScore = 100;
   }
 
   // 4. Price Score - 10%
-  let priceScore = 50;
-  if (manufacturer.priceTier === designer.priceRange) {
+  let priceScore = 50; // default
+  
+  // If designer specified min/max price, use that for scoring
+  if (designer.minPrice !== undefined || designer.maxPrice !== undefined) {
+    // Extract price from manufacturer's price_range (format: "$15-$30 per unit")
+    const priceMatch = manufacturer.priceTier.match(/\$(\d+)-\$(\d+)/);
+    if (priceMatch) {
+      const manufacturerMin = parseInt(priceMatch[1]);
+      const manufacturerMax = parseInt(priceMatch[2]);
+      const userMin = designer.minPrice ?? 0;
+      const userMax = designer.maxPrice ?? Infinity;
+      
+      // Perfect overlap - manufacturer range is within designer range
+      if (manufacturerMin >= userMin && manufacturerMax <= userMax) {
+        priceScore = 100;
+      } 
+      // Partial overlap - ranges overlap
+      else if (manufacturerMin <= userMax && manufacturerMax >= userMin) {
+        const overlapStart = Math.max(manufacturerMin, userMin);
+        const overlapEnd = Math.min(manufacturerMax, userMax);
+        const overlapSize = overlapEnd - overlapStart;
+        const designerRangeSize = userMax - userMin || 1;
+        priceScore = (overlapSize / designerRangeSize) * 100;
+      }
+      // No overlap
+      else {
+        priceScore = 30;
+      }
+    }
+  } else if (manufacturer.priceTier === designer.priceRange) {
+    // Fallback to tier matching if no specific prices
     priceScore = 100;
   }
 
