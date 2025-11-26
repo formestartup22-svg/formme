@@ -76,9 +76,9 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
     
     if (designCategory && applyFilters && !viewAll) {
       filtered = manufacturersList.filter(m => 
-        m.certifications?.some(cert => 
-          cert.toLowerCase().includes(designCategory.toLowerCase()) ||
-          designCategory.toLowerCase().includes(cert.toLowerCase())
+        (m as any).categories?.some((cat: string) => 
+          cat.toLowerCase().includes(designCategory.toLowerCase()) ||
+          designCategory.toLowerCase().includes(cat.toLowerCase())
         )
       );
     }
@@ -91,7 +91,9 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
           leadTime: workflowData.leadTime || '4-6',
           location: workflowData.location || 'any',
           priceRange: workflowData.priceRange || 'mid',
-          categories: designCategory ? [designCategory] : []
+          categories: designCategory ? [designCategory] : [],
+          minPrice: workflowData.minPrice ? parseInt(workflowData.minPrice) : undefined,
+          maxPrice: workflowData.maxPrice ? parseInt(workflowData.maxPrice) : undefined
         },
         {
           moq: manufacturer.min_order_quantity || 0,
@@ -116,43 +118,21 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
       setLoading(true);
       setShowFactories(true);
       
-      let query = supabase
+      // Fetch all active manufacturers - we'll do location matching in the algorithm
+      const { data, error } = await supabase
         .from('manufacturers')
         .select('*')
         .eq('is_active', true);
 
-      // Apply filters based on user criteria
-      if (workflowData.location && workflowData.location !== 'any') {
-        query = query.ilike('location', `%${workflowData.location}%`);
-      }
-
-      const { data, error } = await query;
-
       if (error) throw error;
       
-      // Filter by custom price range if specified
-      let filtered = data || [];
-      if (workflowData.minPrice || workflowData.maxPrice) {
-        filtered = filtered.filter(m => {
-          if (!m.price_range) return true;
-          
-          // Extract price from format like "$15-$30 per unit"
-          const priceMatch = m.price_range.match(/\$(\d+)-\$(\d+)/);
-          if (priceMatch) {
-            const manufacturerMin = parseInt(priceMatch[1]);
-            const manufacturerMax = parseInt(priceMatch[2]);
-            const userMin = workflowData.minPrice ? parseInt(workflowData.minPrice) : 0;
-            const userMax = workflowData.maxPrice ? parseInt(workflowData.maxPrice) : Infinity;
-            
-            // Check if ranges overlap
-            return manufacturerMin <= userMax && manufacturerMax >= userMin;
-          }
-          return true;
-        });
-      }
+      // Calculate scores for all manufacturers - the algorithm handles location and price matching
+      const manufacturersWithScores = calculateAndSortManufacturers(data || [], true);
       
-      const manufacturersWithScores = calculateAndSortManufacturers(filtered, true);
-      setManufacturers(manufacturersWithScores);
+      // Filter out manufacturers with very low scores (below 30) when filtering is applied
+      const filtered = manufacturersWithScores.filter(m => m.matchScore >= 30);
+      
+      setManufacturers(filtered);
       setViewAll(false);
     } catch (error: any) {
       toast.error(error.message || 'Failed to load manufacturers');
