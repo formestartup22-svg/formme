@@ -15,7 +15,8 @@ design_agent = Agent(
     name="design_agent",
     port=8001,
     seed=DESIGN_SEED,
-    endpoint=["http://localhost:8001/submit"]
+  #  endpoint=["http://localhost:8001/submit"],
+    mailbox=f"{os.getenv('AGENTVERSE_API_KEY')}@https://agentverse.ai" if os.getenv('AGENTVERSE_API_KEY') else None
 )
 
 @design_agent.on_message(model=SectionTask)

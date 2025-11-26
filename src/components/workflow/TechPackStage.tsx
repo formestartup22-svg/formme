@@ -4,14 +4,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Upload, FileCheck, Download, Sparkles, Loader2, FileUp, Plus, X } from 'lucide-react';
-import { useWorkflow } from '@/context/WorkflowContext';
-import { StageHeader } from './StageHeader';
-import { StageNavigation } from './StageNavigation';
-import { FactoryDocuments } from './FactoryDocuments';
+import { Upload, FileCheck, Sparkles, Loader2, Plus, X, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { StageNavigation } from './StageNavigation';
+
 
 interface Design {
   id: string;
@@ -23,84 +21,264 @@ interface TechPackStageProps {
   design: Design;
 }
 
+interface TechPackDraft {
+  header: {
+    styleName: string;
+    styleNumber: string;
+    category: string;
+    season: string;
+    createdBy: string;
+    brand: string;
+  };
+  designOverview: any;
+  materials: any;
+  measurements: Array<{ name: string; value: string }>;
+  fabricSpecs: Array<{ 
+    type: string; 
+    details: string; 
+    gsm?: string;
+    color?: string;
+    supplier?: string;
+    finish?: string;
+  }>;
+  constructionNotes: string;
+  markdownPreview: string;
+  designImageUrl?: string;
+}
+
+const DraftPreview: React.FC<{ techPackDraft: TechPackDraft }> = ({ techPackDraft }) => {
+  const header = techPackDraft.header || {};
+  const designOverview = techPackDraft.designOverview || {};
+  const materials = techPackDraft.materials || {};
+
+  
+
+  return (
+    <div className="space-y-6 text-sm">
+      <Card>
+        <CardContent className="p-4 space-y-2">
+          <h3 className="font-semibold">Header</h3>
+          <p><strong>Style Name:</strong> {header.styleName}</p>
+          <p><strong>Style Number:</strong> {header.styleNumber}</p>
+          <p><strong>Category:</strong> {header.category}</p>
+          <p><strong>Season:</strong> {header.season}</p>
+          <p><strong>Brand:</strong> {header.brand}</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="p-4 space-y-2">
+          <h3 className="font-semibold">Design Overview</h3>
+          {designOverview.style_description && (
+            <p><strong>Description:</strong> {designOverview.style_description}</p>
+          )}
+          {designOverview.silhouette && (
+            <p><strong>Silhouette:</strong> {designOverview.silhouette}</p>
+          )}
+          {designOverview.fit && (
+            <p><strong>Fit:</strong> {designOverview.fit}</p>
+          )}
+          {Array.isArray(designOverview.key_features) && designOverview.key_features.length > 0 && (
+            <div>
+              <strong>Key Features:</strong>
+              <ul className="list-disc ml-6">
+                {designOverview.key_features.map((feature: string, i: number) => (
+                  <li key={i}>{feature}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="p-4 space-y-2">
+          <h3 className="font-semibold">Materials</h3>
+          {materials.shell_fabric && (
+            <p><strong>Shell:</strong> {typeof materials.shell_fabric === 'string' ? materials.shell_fabric : JSON.stringify(materials.shell_fabric)}</p>
+          )}
+          {materials.lining_fabric && (
+            <p><strong>Lining:</strong> {typeof materials.lining_fabric === 'string' ? materials.lining_fabric : JSON.stringify(materials.lining_fabric)}</p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="p-4">
+          <h3 className="font-semibold mb-2">Markdown Preview</h3>
+          <pre className="text-xs bg-muted p-3 rounded overflow-auto max-h-60 whitespace-pre-wrap">
+            {techPackDraft.markdownPreview}
+          </pre>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+// Editable draft component
+const DraftEditor: React.FC<{ 
+  techPackDraft: TechPackDraft;
+  onChange: (draft: TechPackDraft) => void;
+}> = ({ techPackDraft, onChange }) => {
+  return (
+    <div className="space-y-6">
+      {/* Header Section */}
+      <Card>
+        <CardContent className="p-4 space-y-3">
+          <h3 className="font-semibold text-sm">Header Information</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-xs">Style Name</Label>
+              <Input
+                value={techPackDraft.header.styleName}
+                onChange={(e) => onChange({
+                  ...techPackDraft,
+                  header: { ...techPackDraft.header, styleName: e.target.value }
+                })}
+                className="h-9 text-sm"
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Style Number</Label>
+              <Input
+                value={techPackDraft.header.styleNumber}
+                onChange={(e) => onChange({
+                  ...techPackDraft,
+                  header: { ...techPackDraft.header, styleNumber: e.target.value }
+                })}
+                className="h-9 text-sm"
+                placeholder="e.g., TP-2024-001"
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Brand</Label>
+              <Input
+                value={techPackDraft.header.brand}
+                onChange={(e) => onChange({
+                  ...techPackDraft,
+                  header: { ...techPackDraft.header, brand: e.target.value }
+                })}
+                className="h-9 text-sm"
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Season</Label>
+              <Input
+                value={techPackDraft.header.season}
+                onChange={(e) => onChange({
+                  ...techPackDraft,
+                  header: { ...techPackDraft.header, season: e.target.value }
+                })}
+                className="h-9 text-sm"
+                placeholder="e.g., Spring/Summer 2025"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Design Overview */}
+      <Card>
+        <CardContent className="p-4 space-y-3">
+          <h3 className="font-semibold text-sm">Design Overview</h3>
+          <div>
+            <Label className="text-xs">Style Description</Label>
+            <Textarea
+              value={techPackDraft.designOverview?.style_description || ''}
+              onChange={(e) => onChange({
+                ...techPackDraft,
+                designOverview: {
+                  ...techPackDraft.designOverview,
+                  style_description: e.target.value
+                }
+              })}
+              className="text-sm"
+              rows={3}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Materials */}
+      <Card>
+        <CardContent className="p-4 space-y-3">
+          <h3 className="font-semibold text-sm">Materials</h3>
+          <div>
+            <Label className="text-xs">Shell Fabric</Label>
+            <Input
+              value={
+                typeof techPackDraft.materials?.shell_fabric === 'string'
+                  ? techPackDraft.materials.shell_fabric
+                  : JSON.stringify(techPackDraft.materials?.shell_fabric || '')
+              }
+              onChange={(e) => onChange({
+                ...techPackDraft,
+                materials: {
+                  ...techPackDraft.materials,
+                  shell_fabric: e.target.value
+                }
+              })}
+              className="h-9 text-sm"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Construction Notes */}
+      <Card>
+        <CardContent className="p-4 space-y-2">
+          <h3 className="font-semibold text-sm">Construction Notes</h3>
+          <Textarea
+            value={techPackDraft.constructionNotes}
+            onChange={(e) => onChange({ ...techPackDraft, constructionNotes: e.target.value })}
+            className="text-sm"
+            rows={4}
+            placeholder="Add construction details..."
+          />
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
 const TechPackStage = ({ design }: TechPackStageProps) => {
-  const { workflowData, updateWorkflowData } = useWorkflow();
   const [isGenerating, setIsGenerating] = useState(false);
-  const [showTechPackDialog, setShowTechPackDialog] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [generatedTechPackBlob, setGeneratedTechPackBlob] = useState<Blob | null>(null);
-  const [uploadedTechPack, setUploadedTechPack] = useState<File | null>(null);
-  const [designFile, setDesignFile] = useState<File | null>(null);
   const [designFileUrl, setDesignFileUrl] = useState<string>('');
-  const [existingTechPack, setExistingTechPack] = useState<string | null>(null);
   const [measurements, setMeasurements] = useState<Array<{ name: string; value: string }>>([
     { name: '', value: '' }
   ]);
-  const [fabricSpecs, setFabricSpecs] = useState<Array<{ type: string; details: string; gsm?: string }>>([
-    { type: '', details: '', gsm: '' }
+  const [fabricSpecs, setFabricSpecs] = useState<Array<{ 
+    type: string; 
+    details: string; 
+    gsm?: string;
+    color?: string;
+    supplier?: string;
+    finish?: string;
+  }>>([
+    { type: '', details: '', gsm: '', color: '', supplier: '', finish: '' }
   ]);
-  const [agentResults, setAgentResults] = useState<{
-    svgAnalysis?: any;
-    designSection?: any;
-    materialsSection?: any;
-  } | null>(null);
-  const [showAgentResults, setShowAgentResults] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [constructionNotes, setConstructionNotes] = useState('');
+  
+  const [techPackDraft, setTechPackDraft] = useState<TechPackDraft | null>(null);
+  const [showDraftEditor, setShowDraftEditor] = useState(false);
+  const [isFinalizingDraft, setIsFinalizingDraft] = useState(false);
+  const [draftMode, setDraftMode] = useState<'view' | 'edit'>('view');
+  const [uploadedTechPack, setUploadedTechPack] = useState<File | null>(null);
+  const [existingTechPackUrl, setExistingTechPackUrl] = useState<string | null>(null);
+
   const designFileInputRef = useRef<HTMLInputElement>(null);
+  const techPackInputRef = useRef<HTMLInputElement>(null);
 
-  // Load design specs and existing data from database
   useEffect(() => {
-    const loadDesignData = async () => {
+    if (design.design_file_url) {
+      setDesignFileUrl(design.design_file_url);
+    }
+
+    // Load existing tech pack if available
+    const loadExistingTechPack = async () => {
       try {
-        // Load design specs
-        const { data: specsData, error: specsError } = await supabase
-          .from('design_specs')
-          .select('*')
-          .eq('design_id', design.id)
-          .maybeSingle();
-
-        if (specsError && specsError.code !== 'PGRST116') throw specsError;
-        
-        if (specsData) {
-          const dbMeasurements = typeof specsData.measurements === 'object' && specsData.measurements !== null 
-            ? specsData.measurements as any
-            : [];
-            
-          // Convert measurements to array format if needed
-          if (Array.isArray(dbMeasurements) && dbMeasurements.length > 0) {
-            setMeasurements(dbMeasurements);
-          } else if (Object.keys(dbMeasurements).length > 0) {
-            // Convert old format to new format
-            const converted = Object.entries(dbMeasurements)
-              .filter(([_, value]) => value)
-              .map(([name, value]) => ({ name, value: String(value) }));
-            setMeasurements(converted.length > 0 ? converted : [{ name: '', value: '' }]);
-          }
-
-          // Load fabric specs
-          if (specsData.fabric_type || specsData.gsm || specsData.print_type) {
-            const specs = [];
-            if (specsData.fabric_type) specs.push({ type: 'Fabric Type', details: specsData.fabric_type });
-            if (specsData.gsm) specs.push({ type: 'GSM', details: specsData.gsm.toString() });
-            if (specsData.print_type) specs.push({ type: 'Print Type', details: specsData.print_type });
-            setFabricSpecs(specs.length > 0 ? specs : [{ type: '', details: '' }]);
-          }
-            
-          updateWorkflowData({
-            constructionNotes: specsData.construction_notes || '',
-          });
-
-          if (specsData.artwork_url) {
-            setDesignFileUrl(specsData.artwork_url);
-          }
-        }
-
-        // Check if design file already exists
-        if (design.design_file_url) {
-          setDesignFileUrl(design.design_file_url);
-        }
-
-        // Check for existing tech pack
         const { data: techpackData } = await supabase
           .from('techpacks')
           .select('pdf_url')
@@ -110,124 +288,148 @@ const TechPackStage = ({ design }: TechPackStageProps) => {
           .maybeSingle();
 
         if (techpackData?.pdf_url) {
-          setExistingTechPack(techpackData.pdf_url);
+          setExistingTechPackUrl(techpackData.pdf_url);
         }
       } catch (error) {
-        console.error('Error loading design data:', error);
+        console.error('Error loading existing tech pack:', error);
       }
     };
 
-    loadDesignData();
-  }, [design.id, design.design_file_url]);
+    loadExistingTechPack();
+  }, [design.design_file_url, design.id]);
 
   const handleNext = () => {
-    // Allow progression without validation
     return true;
   };
 
+  // FIXED: Generate Draft using Supabase Edge Function (Deno orchestrator)
   const handleGenerateTechPack = async () => {
+    if (!designFileUrl) {
+      toast.error('Please upload a design file first');
+      return;
+    }
+
     setIsGenerating(true);
     try {
-      // Save design specs to database first
-      const fabricData = fabricSpecs.filter(f => f.type && f.details);
-      const fabricType = fabricData.find(f => f.type.toLowerCase().includes('fabric'))?.details || '';
-      const gsmData = fabricData.find(f => f.type.toLowerCase().includes('gsm'))?.details || '';
-      const printType = fabricData.find(f => f.type.toLowerCase().includes('print'))?.details || '';
+      console.log('🚀 Generating tech pack draft via Deno edge function...');
 
-      const { error: upsertError } = await supabase
-        .from('design_specs')
-        .upsert({
-          design_id: design.id,
-          measurements: measurements.filter(m => m.name && m.value),
-          fabric_type: fabricType,
-          gsm: gsmData ? parseInt(gsmData) : null,
-          print_type: printType,
-          construction_notes: workflowData.constructionNotes,
-          artwork_url: designFileUrl || null,
-        }, {
-          onConflict: 'design_id'
-        });
-
-      if (upsertError) throw upsertError;
-
-      // Build garment brief from form data
-      const garmentBrief = `
-Design Name: ${design.name}
-Garment Type: T-Shirt
-
-Measurements:
-${measurements.filter(m => m.name && m.value).map(m => `- ${m.name}: ${m.value} inches`).join('\n')}
-
-Fabric Specifications:
-${fabricSpecs.filter(f => f.type && f.details).map(f => `- ${f.type}: ${f.details}${f.gsm ? ` (${f.gsm} GSM)` : ''}`).join('\n')}
-
-Construction Notes:
-${workflowData.constructionNotes || 'None provided'}
-      `.trim();
-
-      // Start the techpack generation with SVG URL
-      const { data: agentData, error: agentError } = await supabase.functions.invoke('start-techpack-agents', {
+      // Call Supabase Edge Function with action in body
+      const { data, error } = await supabase.functions.invoke('generate-techpack', {
         body: {
-          garmentBrief,
-          svgUrl: designFileUrl || null,
-          designId: design.id,
+          action: 'draft',
+          designData: {
+            name: design.name,
+            garmentType: measurements.find(m => m.name.toLowerCase().includes('type'))?.value || 'Garment',
+            designImageUrl: designFileUrl,
+            measurements: measurements.filter(m => m.name && m.value),
+            fabricSpecs: fabricSpecs.filter(f => f.type && f.details),
+            constructionNotes
+          },
+          _timestamp: Date.now() // Cache buster
         }
       });
 
-      if (agentError) {
-        console.error('Agent error:', agentError);
-        throw agentError;
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
       }
 
-      if (agentData?.techpackContent) {
-        console.log('Techpack generated:', agentData.techpackContent);
-        toast.success('AI tech pack generation completed!');
-      } else {
-        toast.success('Tech pack generation started!');
-      }
+      console.log('✅ Draft received:', data);
+      console.log('📋 Response keys:', Object.keys(data || {}));
 
-      // Also call the existing generate-techpack as fallback/backup
+      // Handle the response format we're actually getting
+      // Extract agent results
+      const agentResults = data.agentResults || {};
+      const designSection = agentResults.designSection || {};
+      const materialsSection = agentResults.materialsSection || {};
+      const svgFeatures = agentResults.svgAnalysis || {};
+
+      // Build draft structure from the response
+      setTechPackDraft({
+        header: {
+          styleName: design.name,
+          styleNumber: '',
+          category: measurements.find(m => m.name.toLowerCase().includes('type'))?.value || 'Garment',
+          season: '',
+          createdBy: 'AI Agent System',
+          brand: ''
+        },
+        designOverview: designSection,
+        materials: materialsSection,
+        measurements: measurements.filter(m => m.name && m.value),
+        fabricSpecs: fabricSpecs.filter(f => f.type && f.details),
+        constructionNotes: constructionNotes,
+        markdownPreview: data.techPackContent || '',
+        designImageUrl: designFileUrl // Include design image URL
+      });
+
+      setShowDraftEditor(true);
+      setDraftMode('view');
+      toast.success('✨ Draft generated successfully!');
+
+    } catch (error) {
+      console.error('❌ Error generating draft:', error);
+      toast.error(`Failed to generate: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  // Finalize draft - regenerate PDF with edited content
+  const handleFinalizeDraft = async () => {
+    if (!techPackDraft) return;
+
+    setIsFinalizingDraft(true);
+    try {
+      console.log('📄 Finalizing draft - regenerating tech pack with edits...');
+
+      // Call edge function again with the EDITED draft data
       const { data, error } = await supabase.functions.invoke('generate-techpack', {
         body: {
+          action: 'regenerate', // Tell it to regenerate with new data
           designData: {
-            name: design.name,
-            garmentType: 'T-Shirt',
-            fabricSpecs: fabricSpecs.filter(f => f.type && f.details),
-            measurements: measurements.filter(m => m.name && m.value),
-            constructionNotes: workflowData.constructionNotes,
-            designImageUrl: designFileUrl || null,
+            name: techPackDraft.header.styleName,
+            garmentType: techPackDraft.header.category,
+            designImageUrl: designFileUrl,
+            measurements: techPackDraft.measurements,
+            fabricSpecs: techPackDraft.fabricSpecs,
+            constructionNotes: techPackDraft.constructionNotes
+          },
+          // Pass the edited sections
+          customSections: {
+            designOverview: techPackDraft.designOverview,
+            materials: techPackDraft.materials
           }
         }
       });
 
       if (error) throw error;
 
-      if (data?.pdfData) {
-        // Store agent results if available
-        if (data?.agentResults) {
-          setAgentResults(data.agentResults);
-          setShowAgentResults(true);
-        }
-        
-        // Convert base64 to blob
-        const byteCharacters = atob(data.pdfData);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: 'application/pdf' });
-        
-        // Store blob for later upload
-        setGeneratedTechPackBlob(blob);
-        setShowConfirmDialog(true);
-        toast.success('Tech pack generated successfully!');
+      // Extract PDF from response
+      if (!data?.pdfData) {
+        throw new Error('No PDF data received');
       }
+
+      // Convert base64 to blob
+      const byteCharacters = atob(data.pdfData);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'application/pdf' });
+
+      setGeneratedTechPackBlob(blob);
+      setShowDraftEditor(false);
+      setShowConfirmDialog(true);
+      
+      toast.success('✅ Tech pack finalized with your edits!');
+
     } catch (error) {
-      console.error('Error generating tech pack:', error);
-      toast.error('Failed to generate tech pack. Please try again.');
+      console.error('❌ Error finalizing:', error);
+      toast.error(`Failed to finalize: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
-      setIsGenerating(false);
+      setIsFinalizingDraft(false);
     }
   };
 
@@ -236,22 +438,22 @@ ${workflowData.constructionNotes || 'None provided'}
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
+      if (!user) throw new Error('Not authenticated');
 
-      // Upload to storage with user_id in path
       const fileName = `${user.id}/${design.id}-techpack-${Date.now()}.pdf`;
+      
+      // Upload to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('design-files')
         .upload(fileName, generatedTechPackBlob);
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('design-files')
         .getPublicUrl(fileName);
 
-      // Create techpack record
+      // Save to database
       const { error: techpackError } = await supabase
         .from('techpacks')
         .insert({
@@ -263,11 +465,7 @@ ${workflowData.constructionNotes || 'None provided'}
 
       if (techpackError) throw techpackError;
 
-      setExistingTechPack(publicUrl);
-      setShowConfirmDialog(false);
-      toast.success('Tech pack saved successfully!');
-      
-      // Download the file
+      // Download PDF
       const url = URL.createObjectURL(generatedTechPackBlob);
       const a = document.createElement('a');
       a.href = url;
@@ -276,6 +474,10 @@ ${workflowData.constructionNotes || 'None provided'}
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+
+      setShowConfirmDialog(false);
+      toast.success('Tech pack saved and downloaded!');
+
     } catch (error) {
       console.error('Error saving tech pack:', error);
       toast.error('Failed to save tech pack');
@@ -288,55 +490,60 @@ ${workflowData.constructionNotes || 'None provided'}
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
+      if (!user) throw new Error('Not authenticated');
 
-      // Upload to Supabase Storage with user_id in path
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${design.id}-design-${Date.now()}.${fileExt}`;
-      const { data, error } = await supabase.storage
+
+      const { error } = await supabase.storage
         .from('design-files')
         .upload(fileName, file);
 
       if (error) throw error;
 
-      // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('design-files')
         .getPublicUrl(fileName);
 
-      setDesignFile(file);
       setDesignFileUrl(publicUrl);
-      toast.success(`Design file "${file.name}" uploaded successfully!`);
+      toast.success(`Design file uploaded!`);
     } catch (error) {
-      console.error('Error uploading design file:', error);
+      console.error('Error uploading:', error);
       toast.error('Failed to upload design file');
     }
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTechPackUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    // Validate file type
+    const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    if (!validTypes.includes(file.type)) {
+      toast.error('Please upload a PDF or DOC file');
+      return;
+    }
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
+      if (!user) throw new Error('Not authenticated');
 
-      // Upload to storage with user_id in path
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${design.id}-techpack-${Date.now()}.${fileExt}`;
-      const { data, error: uploadError } = await supabase.storage
+
+      // Upload to storage
+      const { error: uploadError } = await supabase.storage
         .from('design-files')
         .upload(fileName, file);
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('design-files')
         .getPublicUrl(fileName);
 
-      // Create techpack record
-      const { error: techpackError } = await supabase
+      // Save to database
+      const { error: dbError } = await supabase
         .from('techpacks')
         .insert({
           design_id: design.id,
@@ -345,324 +552,438 @@ ${workflowData.constructionNotes || 'None provided'}
           generated_by: 'user-upload',
         });
 
-      if (techpackError) throw techpackError;
+      if (dbError) throw dbError;
 
       setUploadedTechPack(file);
-      setExistingTechPack(publicUrl);
-      toast.success(`Tech pack "${file.name}" uploaded and saved successfully!`);
+      setExistingTechPackUrl(publicUrl);
+      toast.success(`Tech pack "${file.name}" uploaded successfully!`);
     } catch (error) {
       console.error('Error uploading tech pack:', error);
       toast.error('Failed to upload tech pack');
     }
   };
 
-  const handleUploadClick = () => {
-    fileInputRef.current?.click();
-  };
-
   return (
-    <div>
-      <StageHeader
-        icon={FileCheck}
-        title="Create your tech pack"
-        description="Start by uploading your design and adding measurements. This information will be sent to the factory for production."
-      />
+    <div className="space-y-6 p-6">
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold">Create Tech Pack</h2>
+        <p className="text-muted-foreground">Upload design and add specifications</p>
+      </div>
 
-      <div className="grid grid-cols-3 gap-6">
-        <div className="col-span-2 space-y-6">
-          {/* Design Upload */}
-          <section>
-            <h3 className="text-sm font-semibold text-foreground mb-3">Design File</h3>
-            <Card className="border-border">
-              <CardContent className="p-6">
-                <input
-                  ref={designFileInputRef}
-                  type="file"
-                  accept=".svg,image/svg+xml"
-                  onChange={handleDesignFileUpload}
-                  className="hidden"
-                />
-                {designFileUrl ? (
-                  <div className="space-y-3">
-                    <div className="p-4 bg-muted rounded-lg flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <FileCheck className="w-5 h-5 text-primary" />
-                        <div>
-                          <p className="text-sm font-medium text-foreground">Design file uploaded</p>
-                          <p className="text-xs text-muted-foreground">Click below to change</p>
-                        </div>
-                      </div>
-                      {designFileUrl.match(/\.(jpg|jpeg|png)$/i) && (
-                        <img src={designFileUrl} alt="Design preview" className="w-16 h-16 object-cover rounded" />
-                      )}
+      {/* Design Upload */}
+      <section>
+        <h3 className="text-sm font-semibold mb-3">Design File (SVG)</h3>
+        <Card>
+          <CardContent className="p-6">
+            <input
+              ref={designFileInputRef}
+              type="file"
+              accept=".svg,image/svg+xml"
+              onChange={handleDesignFileUpload}
+              className="hidden"
+            />
+            {designFileUrl ? (
+              <div className="space-y-3">
+                <div className="p-4 bg-muted rounded-lg flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <FileCheck className="w-5 h-5 text-primary" />
+                    <div>
+                      <p className="text-sm font-medium">Design uploaded</p>
+                      <p className="text-xs text-muted-foreground">Click to change</p>
                     </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full"
-                      onClick={() => designFileInputRef.current?.click()}
-                    >
-                      <Upload className="w-4 h-4 mr-2" />
-                      Upload Different File
-                    </Button>
                   </div>
-                ) : (
-                  <div 
-                    className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer"
-                    onClick={() => designFileInputRef.current?.click()}
-                  >
-                    <Upload className="w-8 h-8 mx-auto mb-3 text-muted-foreground" />
-                    <p className="text-sm font-medium text-foreground mb-1">
-                      Upload your design sketch or mockup
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      SVG files only • Max 10MB
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </section>
-
-          {/* Measurements */}
-          <section>
-            <h3 className="text-sm font-semibold text-foreground mb-3">Garment Measurements</h3>
-            <Card className="border-border">
-              <CardContent className="p-6 space-y-3">
-                {measurements.map((measurement, index) => (
-                  <div key={index} className="flex gap-2">
-                    <Input
-                      placeholder="Measurement name (e.g., Chest Width)"
-                      value={measurement.name}
-                      onChange={(e) => {
-                        const newMeasurements = [...measurements];
-                        newMeasurements[index].name = e.target.value;
-                        setMeasurements(newMeasurements);
-                      }}
-                      className="h-9 text-sm flex-1"
-                    />
-                    <Input
-                      placeholder="Value"
-                      value={measurement.value}
-                      onChange={(e) => {
-                        const newMeasurements = [...measurements];
-                        newMeasurements[index].value = e.target.value;
-                        setMeasurements(newMeasurements);
-                      }}
-                      className="h-9 text-sm w-32"
-                    />
-                    <div className="w-16 flex items-center justify-center bg-muted rounded text-xs text-muted-foreground">
-                      inches
-                    </div>
-                    {measurements.length > 1 && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setMeasurements(measurements.filter((_, i) => i !== index));
-                        }}
-                        className="h-9 w-9 p-0"
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
-                ))}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setMeasurements([...measurements, { name: '', value: '' }])}
-                  className="w-full gap-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  Add Measurement
-                </Button>
-              </CardContent>
-            </Card>
-          </section>
-
-          {/* Fabric Details */}
-          <section>
-            <h3 className="text-sm font-semibold text-foreground mb-3">Fabric Specifications</h3>
-            <Card className="border-border">
-              <CardContent className="p-6 space-y-3">
-                {fabricSpecs.map((spec, index) => (
-                  <div key={index} className="flex gap-2">
-                    <Input
-                      placeholder="Fabric type"
-                      value={spec.type}
-                      onChange={(e) => {
-                        const newSpecs = [...fabricSpecs];
-                        newSpecs[index].type = e.target.value;
-                        setFabricSpecs(newSpecs);
-                      }}
-                      className="h-9 text-sm flex-1"
-                    />
-                    <Input
-                      placeholder="Fiber %"
-                      value={spec.details}
-                      onChange={(e) => {
-                        const newSpecs = [...fabricSpecs];
-                        newSpecs[index].details = e.target.value;
-                        setFabricSpecs(newSpecs);
-                      }}
-                      className="h-9 text-sm flex-1"
-                    />
-                    <Input
-                      placeholder="GSM"
-                      value={spec.gsm || ''}
-                      onChange={(e) => {
-                        const newSpecs = [...fabricSpecs];
-                        newSpecs[index] = { ...newSpecs[index], gsm: e.target.value };
-                        setFabricSpecs(newSpecs);
-                      }}
-                      className="h-9 text-sm w-32"
-                    />
-                    {fabricSpecs.length > 1 && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setFabricSpecs(fabricSpecs.filter((_, i) => i !== index));
-                        }}
-                        className="h-9 w-9 p-0"
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
-                ))}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setFabricSpecs([...fabricSpecs, { type: '', details: '' }])}
-                  className="w-full gap-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  Add Fabric Specification
-                </Button>
-              </CardContent>
-            </Card>
-          </section>
-
-          {/* Construction Notes */}
-          <section>
-            <h3 className="text-sm font-semibold text-foreground mb-3">Construction Notes</h3>
-            <Card className="border-border">
-              <CardContent className="p-6">
-                <Textarea
-                  placeholder="Add any special instructions about fabric, stitching, trim, etc..."
-                  value={workflowData.constructionNotes}
-                  onChange={(e) => updateWorkflowData({ constructionNotes: e.target.value })}
-                  className="min-h-[100px] text-sm resize-none"
-                />
-              </CardContent>
-            </Card>
-          </section>
-
-          {/* Generate & Upload Tech Pack */}
-          <section>
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-muted-foreground mb-3">
-                  Generate a professional tech pack using AI based on your design specifications
-                </p>
+                </div>
                 <Button 
                   variant="outline" 
-                  className="w-full gap-2"
-                  onClick={handleGenerateTechPack}
-                  disabled={isGenerating}
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => designFileInputRef.current?.click()}
                 >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-4 h-4" />
-                      Generate Tech Pack with AI
-                    </>
-                  )}
+                  <Upload className="w-4 h-4 mr-2" />
+                  Upload Different File
                 </Button>
               </div>
+            ) : (
+              <div 
+                className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary/50 cursor-pointer"
+                onClick={() => designFileInputRef.current?.click()}
+              >
+                <Upload className="w-8 h-8 mx-auto mb-3 text-muted-foreground" />
+                <p className="text-sm font-medium mb-1">Upload design (SVG only)</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </section>
 
-              <div className="h-px bg-border" />
-
-              <div>
-                <p className="text-sm text-muted-foreground mb-3">
-                  Upload your existing tech pack document (PDF, DOC, or DOCX)
-                </p>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  onChange={handleFileUpload}
-                  className="hidden"
+      {/* Measurements */}
+      <section>
+        <h3 className="text-sm font-semibold mb-3">Measurements</h3>
+        <Card>
+          <CardContent className="p-6 space-y-3">
+            {measurements.map((m, i) => (
+              <div key={i} className="flex gap-2">
+                <Input
+                  placeholder="Name"
+                  value={m.name}
+                  onChange={(e) => {
+                    const updated = [...measurements];
+                    updated[i].name = e.target.value;
+                    setMeasurements(updated);
+                  }}
+                  className="flex-1"
                 />
-                <Button 
-                  onClick={handleUploadClick}
+                <Input
+                  placeholder="Value"
+                  value={m.value}
+                  onChange={(e) => {
+                    const updated = [...measurements];
+                    updated[i].value = e.target.value;
+                    setMeasurements(updated);
+                  }}
+                  className="w-32"
+                />
+                {measurements.length > 1 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setMeasurements(measurements.filter((_, idx) => idx !== i))}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setMeasurements([...measurements, { name: '', value: '' }])}
+              className="w-full"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Measurement
+            </Button>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Fabric Specs */}
+      <section>
+        <h3 className="text-sm font-semibold mb-3">Fabric Specifications</h3>
+        <Card>
+          <CardContent className="p-6 space-y-3">
+            {fabricSpecs.map((spec, i) => (
+              <div key={i} className="border rounded-lg p-3 space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label className="text-xs">Fabric Type</Label>
+                    <Input
+                      placeholder="e.g., Cotton Jersey"
+                      value={spec.type}
+                      onChange={(e) => {
+                        const updated = [...fabricSpecs];
+                        updated[i].type = e.target.value;
+                        setFabricSpecs(updated);
+                      }}
+                      className="h-8 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Color</Label>
+                    <Input
+                      placeholder="e.g., Navy Blue"
+                      value={spec.color || ''}
+                      onChange={(e) => {
+                        const updated = [...fabricSpecs];
+                        updated[i].color = e.target.value;
+                        setFabricSpecs(updated);
+                      }}
+                      className="h-8 text-sm"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-xs">Details/Composition</Label>
+                  <Input
+                    placeholder="e.g., 100% Organic Cotton"
+                    value={spec.details}
+                    onChange={(e) => {
+                      const updated = [...fabricSpecs];
+                      updated[i].details = e.target.value;
+                      setFabricSpecs(updated);
+                    }}
+                    className="h-8 text-sm"
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <Label className="text-xs">GSM</Label>
+                    <Input
+                      placeholder="180"
+                      value={spec.gsm || ''}
+                      onChange={(e) => {
+                        const updated = [...fabricSpecs];
+                        updated[i].gsm = e.target.value;
+                        setFabricSpecs(updated);
+                      }}
+                      className="h-8 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Finish</Label>
+                    <Input
+                      placeholder="Enzyme Wash"
+                      value={spec.finish || ''}
+                      onChange={(e) => {
+                        const updated = [...fabricSpecs];
+                        updated[i].finish = e.target.value;
+                        setFabricSpecs(updated);
+                      }}
+                      className="h-8 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Supplier</Label>
+                    <Input
+                      placeholder="Supplier Name"
+                      value={spec.supplier || ''}
+                      onChange={(e) => {
+                        const updated = [...fabricSpecs];
+                        updated[i].supplier = e.target.value;
+                        setFabricSpecs(updated);
+                      }}
+                      className="h-8 text-sm"
+                    />
+                  </div>
+                </div>
+                {fabricSpecs.length > 1 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setFabricSpecs(fabricSpecs.filter((_, idx) => idx !== i))}
+                    className="w-full text-xs"
+                  >
+                    <X className="w-3 h-3 mr-1" />
+                    Remove
+                  </Button>
+                )}
+              </div>
+            ))}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setFabricSpecs([...fabricSpecs, { type: '', details: '', gsm: '', color: '', supplier: '', finish: '' }])}
+              className="w-full"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Fabric Spec
+            </Button>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Construction Notes */}
+      <section>
+        <h3 className="text-sm font-semibold mb-3">Construction Notes</h3>
+        <Card>
+          <CardContent className="p-6">
+            <Textarea
+              placeholder="Add construction details..."
+              value={constructionNotes}
+              onChange={(e) => setConstructionNotes(e.target.value)}
+              rows={4}
+            />
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Generate & Upload Tech Pack */}
+      <section>
+        <h3 className="text-sm font-semibold mb-3">Tech Pack</h3>
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            {/* Generate with AI */}
+            <div>
+              <p className="text-sm text-muted-foreground mb-3">
+                Generate a professional tech pack using AI. You'll be able to review and edit before finalizing.
+              </p>
+              <Button 
+                className="w-full"
+                onClick={handleGenerateTechPack}
+                disabled={isGenerating || !designFileUrl}
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Generating Draft...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Generate Tech Pack Draft with AI
+                  </>
+                )}
+              </Button>
+            </div>
+
+            {/* Show if draft exists */}
+            {techPackDraft && (
+              <div className="rounded-lg bg-primary/10 p-3 space-y-2">
+                <div className="flex items-center gap-2 text-sm font-medium text-primary">
+                  <FileCheck className="w-4 h-4" />
+                  Draft ready for review
+                </div>
+                <Button
                   variant="outline"
-                  className="w-full gap-2"
+                  size="sm"
+                  onClick={() => setShowDraftEditor(true)}
+                  className="w-full"
                 >
-                  <FileUp className="w-4 h-4" />
-                  {uploadedTechPack ? uploadedTechPack.name : 'Upload Existing Tech Pack'}
+                  <Edit className="w-4 h-4 mr-2" />
+                  Review Draft
                 </Button>
               </div>
+            )}
 
-              {existingTechPack && (
-                <div className="rounded-lg bg-primary/10 p-3 space-y-2">
-                  <div className="flex items-center gap-2 text-sm font-medium text-primary">
-                    <FileCheck className="w-4 h-4" />
-                    Tech pack already uploaded
-                  </div>
-                  <a 
-                    href={existingTechPack} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-xs text-muted-foreground hover:text-foreground underline"
-                  >
-                    View tech pack
-                  </a>
-                </div>
-              )}
-
-              {agentResults && (
-                <div className="rounded-lg bg-primary/10 p-3 space-y-2">
-                  <div className="flex items-center gap-2 text-sm font-medium text-primary">
-                    <Sparkles className="w-4 h-4" />
-                    AI Agent Analysis Available
-                  </div>
-                  <Button
-                    variant="link"
-                    onClick={() => setShowAgentResults(true)}
-                    className="h-auto p-0 text-xs text-primary hover:text-primary/80 underline"
-                  >
-                    View detailed agent results
-                  </Button>
-                </div>
-              )}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Or</span>
+              </div>
             </div>
-          </section>
 
-          <StageNavigation 
+            {/* Upload existing tech pack */}
+            <div>
+              <p className="text-sm text-muted-foreground mb-3">
+                Upload your existing tech pack document (PDF or DOC)
+              </p>
+              <input
+                ref={techPackInputRef}
+                type="file"
+                accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                onChange={handleTechPackUpload}
+                className="hidden"
+              />
+              <Button 
+                variant="outline"
+                onClick={() => techPackInputRef.current?.click()}
+                className="w-full"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                {uploadedTechPack ? uploadedTechPack.name : 'Upload Existing Tech Pack'}
+              </Button>
+            </div>
+
+            {/* Show existing tech pack */}
+            {existingTechPackUrl && (
+              <div className="rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 p-3 space-y-2">
+                <div className="flex items-center gap-2 text-sm font-medium text-green-700 dark:text-green-400">
+                  <FileCheck className="w-4 h-4" />
+                  Tech pack uploaded
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(existingTechPackUrl, '_blank')}
+                    className="flex-1 text-xs"
+                  >
+                    View Tech Pack
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setExistingTechPackUrl(null);
+                      setUploadedTechPack(null);
+                    }}
+                    className="text-xs"
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
+                  
+                </div>
+                
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </section>
+
+      <StageNavigation 
             onNext={handleNext}
             nextLabel="Continue to Find Manufacturer"
             showBack={true}
           />
-        </div>
 
-        <div className="space-y-4">
-          <FactoryDocuments />
-        </div>
-      </div>
+      {/* Draft Editor/Viewer Dialog */}
+      <Dialog open={showDraftEditor} onOpenChange={setShowDraftEditor}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <DialogTitle>Review Tech Pack Draft</DialogTitle>
+                <DialogDescription>
+                  {draftMode === 'view' ? 'Preview your tech pack' : 'Edit your tech pack before generating PDF'}
+                </DialogDescription>
+              </div>
+              <div className="inline-flex rounded-full border p-1 text-xs">
+                <button
+                  onClick={() => setDraftMode('view')}
+                  className={`px-3 py-1 rounded-full transition ${draftMode === 'view' ? 'bg-background shadow-sm' : ''}`}
+                >
+                  View
+                </button>
+                <button
+                  onClick={() => setDraftMode('edit')}
+                  className={`px-3 py-1 rounded-full transition ${draftMode === 'edit' ? 'bg-background shadow-sm' : ''}`}
+                >
+                  Edit
+                </button>
+              </div>
+            </div>
+          </DialogHeader>
 
+          {techPackDraft && (
+            <div className="space-y-6">
+              {draftMode === 'view' ? (
+                <DraftPreview techPackDraft={techPackDraft} />
+              ) : (
+                <DraftEditor 
+                  techPackDraft={techPackDraft} 
+                  onChange={setTechPackDraft}
+                />
+              )}
+              
+              <div className="flex gap-3 justify-end pt-4">
+                <Button variant="outline" onClick={() => setShowDraftEditor(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleFinalizeDraft} disabled={isFinalizingDraft}>
+                  {isFinalizingDraft ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Generating PDF...
+                    </>
+                  ) : (
+                    'Generate Final PDF'
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirm Dialog */}
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Save Tech Pack?</DialogTitle>
             <DialogDescription>
-              Your AI-generated tech pack is ready. Would you like to use this tech pack and link it to your design?
+              Your tech pack is ready to save and download
             </DialogDescription>
           </DialogHeader>
           <div className="flex gap-3 justify-end pt-4">
@@ -670,187 +991,8 @@ ${workflowData.constructionNotes || 'None provided'}
               Cancel
             </Button>
             <Button onClick={handleConfirmTechPack}>
-              Yes, Save Tech Pack
+              Save & Download
             </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Agent Results Dialog */}
-      <Dialog open={showAgentResults} onOpenChange={setShowAgentResults}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>AI Agent Analysis Results</DialogTitle>
-            <DialogDescription>
-              View detailed analysis from each AI agent that contributed to your tech pack
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            {/* SVG Analysis Section */}
-            {agentResults?.svgAnalysis && (
-              <details className="group border border-border rounded-lg">
-                <summary className="cursor-pointer p-4 hover:bg-muted/50 font-semibold flex items-center gap-2">
-                  <span className="text-primary">📐</span>
-                  SVG Design Analysis
-                </summary>
-                <div className="p-4 pt-0 space-y-2 text-sm">
-                  <div>
-                    <span className="font-medium">Estimated Silhouette:</span>{' '}
-                    <span className="text-muted-foreground">{agentResults.svgAnalysis.estimated_silhouette}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium">Canvas Size:</span>{' '}
-                    <span className="text-muted-foreground">
-                      {agentResults.svgAnalysis.canvas.width} × {agentResults.svgAnalysis.canvas.height}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="font-medium">Elements Detected:</span>
-                    <ul className="ml-4 mt-1 space-y-1 text-muted-foreground">
-                      <li>• Paths: {agentResults.svgAnalysis.object_counts.paths}</li>
-                      <li>• Rectangles: {agentResults.svgAnalysis.object_counts.rectangles}</li>
-                      <li>• Groups: {agentResults.svgAnalysis.object_counts.groups}</li>
-                      <li>• Text elements: {agentResults.svgAnalysis.object_counts.texts}</li>
-                    </ul>
-                  </div>
-                </div>
-              </details>
-            )}
-
-            {/* Design Agent Section */}
-            {agentResults?.designSection && (
-              <details className="group border border-border rounded-lg">
-                <summary className="cursor-pointer p-4 hover:bg-muted/50 font-semibold flex items-center gap-2">
-                  <span className="text-primary">✨</span>
-                  Design Overview (Design Agent)
-                </summary>
-                <div className="p-4 pt-0 space-y-3 text-sm">
-                  {!agentResults.designSection.error ? (
-                    <>
-                      {agentResults.designSection.style_description && (
-                        <div>
-                          <span className="font-medium">Style Description:</span>
-                          <p className="text-muted-foreground mt-1">{agentResults.designSection.style_description}</p>
-                        </div>
-                      )}
-                      {agentResults.designSection.silhouette && (
-                        <div>
-                          <span className="font-medium">Silhouette:</span>{' '}
-                          <span className="text-muted-foreground">{agentResults.designSection.silhouette}</span>
-                        </div>
-                      )}
-                      {agentResults.designSection.fit && (
-                        <div>
-                          <span className="font-medium">Fit:</span>{' '}
-                          <span className="text-muted-foreground">{agentResults.designSection.fit}</span>
-                        </div>
-                      )}
-                      {agentResults.designSection.intended_use && (
-                        <div>
-                          <span className="font-medium">Intended Use:</span>{' '}
-                          <span className="text-muted-foreground">{agentResults.designSection.intended_use}</span>
-                        </div>
-                      )}
-                      {agentResults.designSection.key_features && (
-                        <div>
-                          <span className="font-medium">Key Features:</span>
-                          <ul className="ml-4 mt-1 space-y-1 text-muted-foreground">
-                            {agentResults.designSection.key_features.map((feature: string, idx: number) => (
-                              <li key={idx}>• {feature}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="text-destructive">
-                      <p className="font-medium">Agent encountered an error:</p>
-                      <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-auto">
-                        {JSON.stringify(agentResults.designSection, null, 2)}
-                      </pre>
-                    </div>
-                  )}
-                </div>
-              </details>
-            )}
-
-            {/* Materials Agent Section */}
-            {agentResults?.materialsSection && (
-              <details className="group border border-border rounded-lg">
-                <summary className="cursor-pointer p-4 hover:bg-muted/50 font-semibold flex items-center gap-2">
-                  <span className="text-primary">🧵</span>
-                  Materials Specifications (Materials Agent)
-                </summary>
-                <div className="p-4 pt-0 space-y-3 text-sm">
-                  {!agentResults.materialsSection.error ? (
-                    <>
-                      {agentResults.materialsSection.shell_fabric && (
-                        <div>
-                          <span className="font-medium">Shell Fabric:</span>
-                          {typeof agentResults.materialsSection.shell_fabric === 'string' ? (
-                            <p className="text-muted-foreground mt-1">{agentResults.materialsSection.shell_fabric}</p>
-                          ) : (
-                            <div className="ml-4 mt-1 space-y-1 text-muted-foreground text-xs">
-                              {Object.entries(agentResults.materialsSection.shell_fabric).map(([key, value]) => (
-                                <div key={key}>
-                                  <span className="font-medium capitalize">{key.replace(/_/g, ' ')}:</span> {String(value)}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      {agentResults.materialsSection.lining_fabric && (
-                        <div>
-                          <span className="font-medium">Lining Fabric:</span>
-                          {typeof agentResults.materialsSection.lining_fabric === 'string' ? (
-                            <p className="text-muted-foreground mt-1">{agentResults.materialsSection.lining_fabric}</p>
-                          ) : (
-                            <div className="ml-4 mt-1 space-y-1 text-muted-foreground text-xs">
-                              {Object.entries(agentResults.materialsSection.lining_fabric).map(([key, value]) => (
-                                <div key={key}>
-                                  <span className="font-medium capitalize">{key.replace(/_/g, ' ')}:</span> {String(value)}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      {agentResults.materialsSection.trims && Array.isArray(agentResults.materialsSection.trims) && (
-                        <div>
-                          <span className="font-medium">Trims:</span>
-                          <ul className="ml-4 mt-1 space-y-1 text-muted-foreground">
-                            {agentResults.materialsSection.trims.map((trim: any, idx: number) => (
-                              <li key={idx}>• {typeof trim === 'string' ? trim : JSON.stringify(trim)}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      {agentResults.materialsSection.hardware && Array.isArray(agentResults.materialsSection.hardware) && (
-                        <div>
-                          <span className="font-medium">Hardware:</span>
-                          <ul className="ml-4 mt-1 space-y-1 text-muted-foreground">
-                            {agentResults.materialsSection.hardware.map((hw: any, idx: number) => (
-                              <li key={idx}>• {typeof hw === 'string' ? hw : JSON.stringify(hw)}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="text-destructive">
-                      <p className="font-medium">Agent encountered an error:</p>
-                      <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-auto">
-                        {JSON.stringify(agentResults.materialsSection, null, 2)}
-                      </pre>
-                    </div>
-                  )}
-                </div>
-              </details>
-            )}
-          </div>
-          <div className="flex justify-end pt-4">
-            <Button onClick={() => setShowAgentResults(false)}>Close</Button>
           </div>
         </DialogContent>
       </Dialog>

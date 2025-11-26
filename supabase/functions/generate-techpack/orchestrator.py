@@ -1,128 +1,139 @@
-from uagents import Agent, Context
-from shared_models import (
-    TechpackRequest,
-    SectionTask,
-    SectionResponse,
-    SVGParseTask,
-    SVGParseResult,
-)
-from uagents.setup import fund_agent_if_low
+# backend/services/orchestrator.py
 
-ORCHESTRATOR_SEED = "orchestrator-seed-123"
-
-orchestrator = Agent(
-    name="orchestrator",
-    port=8000,
-    seed=ORCHESTRATOR_SEED,
-    endpoint=["http://localhost:8000/submit"]
-)
-
-# Worker agent addresses — update to your deployed addresses
-SVG_AGENT_ADDR = "agent1qt5rewclmdwfppnfe2y2yym0fe0gf8j6u3lhrzqnvqvx4qqc3wjsypxvehj"        
-DESIGN_AGENT_ADDR = "agent1qwfqgcpc9uzghapujdcfty96tuk8dkzn3egk86eed50tx6gh8ks2wu3lw2r" 
-MATERIALS_AGENT_ADDR = "agent1qg7pg74wqr0pwp37ryzn88vw4xdqxdm69ssjt9jganlcpjx7gc3euqw3eut"
+import base64
+import requests
+from pydantic import BaseModel
+from typing import Any, Dict
 
 
-# ============================================================
-# STEP 1 — Handle Incoming User Request
-# ============================================================
-@orchestrator.on_message(model=TechpackRequest)
-async def handle_request(ctx: Context, sender: str, msg: TechpackRequest):
-
-    # Prevent duplicates
-    if ctx.storage.get("state") not in [None, "idle"]:
-        ctx.logger.info("Ignoring duplicate request — already processing.")
-        return
-
-    ctx.logger.info(f"Received techpack request from sender: {sender}")
-
-    ctx.storage.set("state", "waiting_svg")
-    ctx.storage.set("original_sender", sender)
-    ctx.storage.set("garment_brief", msg.garment_brief)
-    ctx.storage.set("template_svg", msg.template_image_b64)
-
-    # --- Send SVG to SVG Parser Agent ---
-    svg_task = SVGParseTask(
-        svg_b64=msg.template_image_b64,
-        garment_brief=msg.garment_brief
-    )
-    await ctx.send(SVG_AGENT_ADDR, svg_task)
+# -------------------------------------------------------------------
+# Agent URLs — match your running agents
+# -------------------------------------------------------------------
+SVG_AGENT_URL = "http://localhost:8003/submit"
+DESIGN_AGENT_URL = "http://localhost:8001/submit"
+MATERIALS_AGENT_URL = "http://localhost:8002/submit"
 
 
-# ============================================================
-# STEP 2 — Collect SVG Parser Output
-# ============================================================
-@orchestrator.on_message(model=SVGParseResult)
-async def handle_svg_result(ctx: Context, sender: str, msg: SVGParseResult):
-
-    ctx.logger.info("[Orchestrator] Received SVG parser output")
-
-    ctx.storage.set("svg_features", msg.features)
-
-    # Now dispatch design + materials agents
-    garment_brief = ctx.storage.get("garment_brief")
-    svg_features = msg.features
-    svg_b64 = ctx.storage.get("template_svg")
-
-    # --- DESIGN TASK ---
-    design_task = SectionTask(
-        section="design",
-        garment_brief=garment_brief,
-        template_image_b64=svg_b64,
-        svg_features=svg_features
-    )
-    await ctx.send(DESIGN_AGENT_ADDR, design_task)
-
-    # --- MATERIALS TASK ---
-    materials_task = SectionTask(
-        section="materials",
-        garment_brief=garment_brief,
-        template_image_b64=svg_b64,
-        svg_features=svg_features
-    )
-    await ctx.send(MATERIALS_AGENT_ADDR, materials_task)
-
-    ctx.storage.set("pending_sections", 2)
-    ctx.storage.set("results", {})
-    ctx.storage.set("state", "waiting_agents")
+# -------------------------------------------------------------------
+# Incoming Request Model
+# -------------------------------------------------------------------
+class OrchestrationRequest(BaseModel):
+    garment_brief: str
+    svg_b64: str   # cleaned + always base64
 
 
-# ============================================================
-# STEP 3 — Collect Worker Agent Responses
-# ============================================================
-@orchestrator.on_message(model=SectionResponse)
-async def collect_responses(ctx: Context, sender: str, msg: SectionResponse):
+# -------------------------------------------------------------------
+# HELPER: Send HTTP message to uAgents
+# -------------------------------------------------------------------
+def call_agent(url: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Calls a uAgent HTTP endpoint using requests.post and returns JSON.
+    """
 
-    state = ctx.storage.get("state")
-    if state != "waiting_agents":
-        return
-
-    ctx.logger.info(f"[Orchestrator] Received section: {msg.section}")
-
-    results = ctx.storage.get("results") or {}
-    results[msg.section] = msg.content
-    ctx.storage.set("results", results)
-
-    pending = ctx.storage.get("pending_sections")
-    pending -= 1
-    ctx.storage.set("pending_sections", pending)
-
-    # Complete
-    if pending == 0:
-        final = {
-            "garment_brief": ctx.storage.get("garment_brief"),
-            "svg_features": ctx.storage.get("svg_features"),
-            "sections": ctx.storage.get("results")
-        }
-
-        ctx.logger.info("🎉 Techpack complete!")
-        ctx.logger.info(str(final))
-
-        # Reset state so new requests can be processed
-        ctx.storage.set("state", "idle")
+    try:
+        response = requests.post(url, json=payload)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        raise RuntimeError(f"Agent at {url} failed: {e}")
 
 
-# ============================================================
-if __name__ == "__main__":
-    fund_agent_if_low(orchestrator.wallet.address())
-    orchestrator.run()
+# -------------------------------------------------------------------
+# HELPER: Normalize raw SVG into base64
+# -------------------------------------------------------------------
+def normalize_svg(svg_input: str) -> str:
+    """
+    Supports:
+    - Raw <svg> XML string
+    - Base64 encoded SVG
+    - URL pointing to an SVG file
+    """
+    svg_input = svg_input.strip()
+
+    # Case 1: It is the raw XML SVG text itself
+    if svg_input.startswith("<svg") or svg_input.startswith("<?xml"):
+        return base64.b64encode(svg_input.encode()).decode()
+
+    # Case 2: It is already base64
+    try:
+        decoded = base64.b64decode(svg_input)
+        decoded.decode("utf-8")    # validate string
+        return svg_input           # it is VALID base64 SVG
+    except Exception:
+        pass  # Not base64 → try next
+
+    # Case 3: It is a URL
+    if svg_input.startswith("http://") or svg_input.startswith("https://"):
+        try:
+            remote = requests.get(svg_input)
+            remote.raise_for_status()
+            xml = remote.text
+            return base64.b64encode(xml.encode()).decode()
+        except Exception:
+            raise ValueError("Could not fetch SVG from URL")
+
+    raise ValueError("Invalid SVG input — must be raw XML, base64, or URL")
+
+
+# -------------------------------------------------------------------
+# MAIN ORCHESTRATION PIPELINE
+# -------------------------------------------------------------------
+async def run_orchestration(req: OrchestrationRequest):
+    """
+    Executes: SVG → DESIGN → MATERIALS
+    Returns: svg_features, design_section, materials_section
+    """
+
+    # Normalize SVG input
+    svg_b64 = normalize_svg(req.svg_b64)
+
+    # -----------------------------------------------------------
+    # 1. CALL SVG PARSER AGENT
+    # -----------------------------------------------------------
+    svg_payload = {
+        "svg_b64": svg_b64,
+        "garment_brief": req.garment_brief
+    }
+
+    svg_response = call_agent(SVG_AGENT_URL, svg_payload)
+
+    svg_features = svg_response.get("features")
+    if svg_features is None:
+        raise ValueError("SVG agent returned no features")
+
+    # -----------------------------------------------------------
+    # 2. CALL DESIGN AGENT
+    # -----------------------------------------------------------
+    design_payload = {
+        "section": "design",
+        "garment_brief": req.garment_brief,
+        "template_image_b64": svg_b64,
+        "svg_features": svg_features
+    }
+
+    design_response = call_agent(DESIGN_AGENT_URL, design_payload)
+
+    design_section = design_response.get("content")
+    if design_section is None:
+        raise ValueError("Design agent returned no content")
+
+    # -----------------------------------------------------------
+    # 3. CALL MATERIALS AGENT
+    # -----------------------------------------------------------
+    materials_payload = {
+        "section": "materials",
+        "garment_brief": req.garment_brief,
+        "template_image_b64": svg_b64,
+        "svg_features": svg_features
+    }
+
+    materials_response = call_agent(MATERIALS_AGENT_URL, materials_payload)
+
+    materials_section = materials_response.get("content")
+    if materials_section is None:
+        raise ValueError("Materials agent returned no content")
+
+    # -----------------------------------------------------------
+    # 4. DONE: return all three results
+    # -----------------------------------------------------------
+    return svg_features, design_section, materials_section
