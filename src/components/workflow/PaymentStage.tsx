@@ -157,7 +157,7 @@ const PaymentStage = ({ design }: PaymentStageProps) => {
 
         <StageNavigation 
           onNext={() => true}
-          nextLabel="Continue to Production Parameters"
+          nextLabel="Skip Payment & Continue to Sample Review"
           showBack={true}
         />
       </div>
