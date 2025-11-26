@@ -112,10 +112,13 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
             .eq('manufacturer_id', match.manufacturer_id)
             .maybeSingle();
           
+          // Finalized means status is manufacturer_review or beyond
+          const isFinalized = order && order.status !== 'sent_to_manufacturer' && order.status !== 'draft' && order.status !== 'tech_pack_pending';
+          
           return {
             ...match,
             orders: order ? [order] : [],
-            isFinalized: !!order?.manufacturer_id // Finalized if manufacturer_id is set
+            isFinalized
           };
         })
       );
@@ -124,13 +127,12 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
       setMatches(matchesWithOrders as any);
 
       // Check if any manufacturer is already finalized
-      // A finalized contract means manufacturer_id is set and status is manufacturer_review or beyond
       const { data: finalizedOrders } = await supabase
         .from('orders')
         .select('manufacturer_id, status')
         .eq('design_id', design.id)
         .not('manufacturer_id', 'is', null)
-        .neq('status', 'sent_to_manufacturer');
+        .in('status', ['manufacturer_review', 'production_approval', 'sample_development', 'quality_check', 'shipping', 'delivered']);
 
       console.log('[ManufacturerSelectionStage] Finalized orders:', finalizedOrders);
 
@@ -177,34 +179,35 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
         return;
       }
 
+      const orderId = manufacturerToFinalize.orders[0].id;
+      console.log('[handleConfirmFinalize] Updating order:', orderId, 'to manufacturer_review status');
+
       // Update the order to mark this manufacturer as finalized
       const { error: updateError } = await supabase
         .from('orders')
         .update({ 
-          manufacturer_id: manufacturerId,
           status: 'manufacturer_review'
         })
-        .eq('id', manufacturerToFinalize.orders[0].id);
+        .eq('id', orderId);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('[handleConfirmFinalize] Update error:', updateError);
+        throw updateError;
+      }
 
-      toast.success('Contract finalized! Proceeding to production parameters.');
-      
-      // Wait for database to update and refetch to ensure UI is in sync
-      await new Promise(resolve => setTimeout(resolve, 500));
-      await fetchMatches();
+      console.log('[handleConfirmFinalize] Order updated successfully');
       
       setSelectedManufacturer(manufacturerId);
       setConfirmDialogOpen(false);
       setManufacturerToFinalize(null);
       
-      // Immediately proceed to production parameters after state is synced
-      setTimeout(() => {
-        markStageComplete('tech-pack');
-        markStageComplete('factory-match');
-        markStageComplete('send-tech-pack');
-        setCurrentStage('production');
-      }, 100);
+      toast.success('Contract finalized! Proceeding to production parameters.');
+      
+      // Immediately proceed to production parameters
+      markStageComplete('tech-pack');
+      markStageComplete('factory-match');
+      markStageComplete('send-tech-pack');
+      setCurrentStage('production');
     } catch (error: any) {
       console.error('Error finalizing manufacturer:', error);
       toast.error('Failed to finalize manufacturer');
