@@ -51,7 +51,6 @@ const ManufacturerOrderWorkspace = () => {
   const [gsm, setGsm] = useState('');
   const [shrinkage, setShrinkage] = useState('');
   const [colorFastness, setColorFastness] = useState('');
-  const [labDipFiles, setLabDipFiles] = useState<FileList | null>(null);
   const [samplePhotos, setSamplePhotos] = useState<FileList | null>(null);
   const [sampleNotes, setSampleNotes] = useState('');
   const [productionPhotos, setProductionPhotos] = useState<FileList | null>(null);
@@ -215,30 +214,6 @@ const ManufacturerOrderWorkspace = () => {
     
     setSubmitting(true);
     try {
-      // Upload lab dip photos if any
-      let labDipUrls: string[] = [];
-      if (labDipFiles && labDipFiles.length > 0) {
-        const uploadPromises = Array.from(labDipFiles).map(async (file) => {
-          const fileExt = file.name.split('.').pop();
-          const fileName = `${order.id}-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-          const filePath = `${order.designer_id}/${fileName}`;
-
-          const { error: uploadError, data } = await supabase.storage
-            .from('design-files')
-            .upload(filePath, file);
-
-          if (uploadError) throw uploadError;
-
-          const { data: { publicUrl } } = supabase.storage
-            .from('design-files')
-            .getPublicUrl(filePath);
-
-          return publicUrl;
-        });
-
-        labDipUrls = await Promise.all(uploadPromises);
-      }
-
       const { error } = await supabase
         .from('orders')
         .update({
@@ -248,7 +223,6 @@ const ManufacturerOrderWorkspace = () => {
           gsm: gsm,
           shrinkage: shrinkage || null,
           color_fastness: colorFastness || null,
-          lab_dip_photos: labDipUrls.length > 0 ? labDipUrls : null,
           production_params_submitted_at: new Date().toISOString(),
           status: 'production_approval'
         })
@@ -732,26 +706,6 @@ const ManufacturerOrderWorkspace = () => {
                         onChange={(e) => setProductionCompletionDate(e.target.value)}
                       />
                     </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-3">
-                  <Label>Upload Lab Dip Photos</Label>
-                  <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
-                    <Input 
-                      type="file" 
-                      className="hidden" 
-                      id="lab-dip" 
-                      multiple 
-                      accept="image/*"
-                      onChange={(e) => setLabDipFiles(e.target.files)}
-                    />
-                    <Label htmlFor="lab-dip" className="cursor-pointer inline-block">
-                      <Button variant="outline" className="gap-2" type="button">
-                        <Upload className="w-4 h-4" />
-                        Upload Photos {labDipFiles && labDipFiles.length > 0 && `(${labDipFiles.length})`}
-                      </Button>
-                    </Label>
                   </div>
                 </div>
                 

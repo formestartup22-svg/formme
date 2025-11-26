@@ -101,7 +101,7 @@ const ProductionStage = ({ design }: ProductionStageProps) => {
       <StageHeader 
         icon={Factory} 
         title="Review production parameters" 
-        description="Factory uploads fabric details, lab dips, and production timeline for your approval before production begins."
+        description="Factory uploads fabric details and production timeline for your approval before production begins."
         contextInfo={[
           { label: 'Factory', value: workflowData.selectedFactory?.name || 'Not selected' },
           { label: 'Quantity', value: workflowData.quantity || 'Not set' }
@@ -122,7 +122,7 @@ const ProductionStage = ({ design }: ProductionStageProps) => {
                     Waiting for manufacturer
                   </h3>
                   <p className="text-sm text-muted-foreground max-w-md">
-                    {manufacturerName} is preparing the production parameters. You'll be able to review fabric specifications and lab dip photos once they submit them.
+                    {manufacturerName} is preparing the production parameters. You'll be able to review fabric specifications once they submit them.
                   </p>
                 </div>
               </div>
