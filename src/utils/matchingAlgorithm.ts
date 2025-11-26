@@ -156,15 +156,17 @@ export function calculateMatchScore(
     quantityScore = 50; // Default if no quantity specified
     console.log('  Quantity Score: 50 (no quantity specified)');
   } else if (designer.quantity < manufacturer.moq) {
-    // Below MOQ - apply penalty
-    quantityScore = (designer.quantity / manufacturer.moq) * 100;
-    quantityPenalty = true;
-    console.log(`  Quantity Score: ${quantityScore.toFixed(1)} (below MOQ: ${designer.quantity} < ${manufacturer.moq}) - PENALTY`);
+    // Below MOQ - severe penalty in strict mode
+    const rawScore = (designer.quantity / manufacturer.moq) * 100;
+    quantityScore = designer.applyStrictFilters ? Math.min(rawScore, 10) : rawScore;
+    quantityPenalty = designer.applyStrictFilters;
+    console.log(`  Quantity Score: ${quantityScore.toFixed(1)} (below MOQ: ${designer.quantity} < ${manufacturer.moq})${quantityPenalty ? ' - STRICT PENALTY' : ''}`);
   } else if (manufacturer.maxCapacity && designer.quantity > manufacturer.maxCapacity) {
-    // Exceeds capacity - apply penalty
-    quantityScore = (manufacturer.maxCapacity / designer.quantity) * 100;
-    quantityPenalty = true;
-    console.log(`  Quantity Score: ${quantityScore.toFixed(1)} (exceeds capacity: ${designer.quantity} > ${manufacturer.maxCapacity}) - PENALTY`);
+    // Exceeds capacity - severe penalty in strict mode
+    const rawScore = (manufacturer.maxCapacity / designer.quantity) * 100;
+    quantityScore = designer.applyStrictFilters ? Math.min(rawScore, 10) : rawScore;
+    quantityPenalty = designer.applyStrictFilters;
+    console.log(`  Quantity Score: ${quantityScore.toFixed(1)} (exceeds capacity: ${designer.quantity} > ${manufacturer.maxCapacity})${quantityPenalty ? ' - STRICT PENALTY' : ''}`);
   } else {
     // Perfect match - within MOQ and capacity
     quantityScore = 100;
@@ -178,9 +180,11 @@ export function calculateMatchScore(
   if (isLocationMatch(designer.location || 'any', manufacturer.location || '')) {
     locationScore = 100;
   } else {
-    locationPenalty = true;
+    // In strict mode, non-matching location gets very low score
+    locationScore = designer.applyStrictFilters ? 5 : 40;
+    locationPenalty = designer.applyStrictFilters;
   }
-  console.log(`  Location Score: ${locationScore}${locationPenalty ? ' - PENALTY' : ''}`);
+  console.log(`  Location Score: ${locationScore}${locationPenalty ? ' - STRICT PENALTY' : ''}`);
 
   // 4. Price Score - 10%
   let priceScore = 50; // default
@@ -208,13 +212,13 @@ export function calculateMatchScore(
         const designerRangeSize = userMax - userMin || 1;
         priceScore = (overlapSize / designerRangeSize) * 100;
       }
-      // No overlap
+      // No overlap - severe penalty in strict mode
       else {
-        priceScore = 30;
-        pricePenalty = true;
+        priceScore = designer.applyStrictFilters ? 10 : 30;
+        pricePenalty = designer.applyStrictFilters;
       }
     }
-    console.log(`  Price Score: ${priceScore.toFixed(1)}${pricePenalty ? ' - PENALTY' : ''}`);
+    console.log(`  Price Score: ${priceScore.toFixed(1)}${pricePenalty ? ' - STRICT PENALTY' : ''}`);
   } else if (manufacturer.priceTier === designer.priceRange) {
     // Fallback to tier matching if no specific prices
     priceScore = 100;
@@ -248,22 +252,13 @@ export function calculateMatchScore(
   console.log(`  Reliability Score: ${reliabilityScore.toFixed(1)}`);
 
   // Final Weighted Score
-  let finalScore =
+  const finalScore =
     0.40 * categoryScore +
     0.20 * quantityScore +
     0.20 * locationScore +
     0.10 * priceScore +
     0.05 * leadTimeScore +
     0.05 * reliabilityScore;
-
-  // Apply severe penalty if strict filters enabled and manufacturer doesn't match
-  if (designer.applyStrictFilters) {
-    if (quantityPenalty || locationPenalty || pricePenalty) {
-      // Cap score at 45 for manufacturers that fail key filters
-      finalScore = Math.min(finalScore, 45);
-      console.log(`  STRICT FILTER PENALTY APPLIED - capping at 45`);
-    }
-  }
 
   console.log(`  FINAL SCORE: ${Math.round(finalScore)} (breakdown: cat=${(0.40*categoryScore).toFixed(1)}, qty=${(0.20*quantityScore).toFixed(1)}, loc=${(0.20*locationScore).toFixed(1)}, price=${(0.10*priceScore).toFixed(1)}, lead=${(0.05*leadTimeScore).toFixed(1)}, rating=${(0.05*reliabilityScore).toFixed(1)})`);
 
