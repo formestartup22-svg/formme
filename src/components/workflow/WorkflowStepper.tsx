@@ -9,7 +9,6 @@ const stages = [
   'send-tech-pack',
   'production',
   'payment',
-  'waiting-sample',
   'sample',
   'quality',
   'shipping'
