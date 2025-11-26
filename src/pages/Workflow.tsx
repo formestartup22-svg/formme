@@ -160,9 +160,8 @@ const Workflow = () => {
       if (acceptedMatches && acceptedMatches.length > 0) {
         const { data: finalizedOrder } = await supabase
           .from('orders')
-          .select('status, manufacturer_id')
+          .select('status, manufacturer_id, production_params_approved')
           .eq('design_id', designId)
-          .eq('status', 'manufacturer_review')
           .not('manufacturer_id', 'is', null)
           .maybeSingle();
         
@@ -172,16 +171,21 @@ const Workflow = () => {
           return;
         }
         
-        // If contract is finalized, go to production parameters
-        console.log('[Workflow] Contract finalized, going to production parameters');
-        setInitialStage('production');
+        // If contract is finalized, determine stage based on production params approval
+        if (finalizedOrder.production_params_approved) {
+          console.log('[Workflow] Production params approved, proceeding to payment/sample');
+          setInitialStage('payment');
+        } else {
+          console.log('[Workflow] Contract finalized, going to production parameters review');
+          setInitialStage('production');
+        }
         return;
       }
       
       // Otherwise, determine stage from order status
       const { data: order } = await supabase
         .from('orders')
-        .select('status')
+        .select('status, production_params_approved')
         .eq('design_id', designId)
         .order('created_at', { ascending: false })
         .limit(1)
@@ -192,20 +196,23 @@ const Workflow = () => {
         return;
       }
       
+      // Check if production params are approved to determine exact stage
+      const productionParamsApproved = order.production_params_approved;
+      
       // Map order status to workflow stage
       const stageMap: Record<string, string> = {
         'draft': 'tech-pack',
         'tech_pack_pending': 'tech-pack',
         'sent_to_manufacturer': 'send-tech-pack',
         'manufacturer_review': 'production',
-        'production_approval': 'production',
-        'sample_development': 'waiting-sample',
+        'production_approval': productionParamsApproved ? 'payment' : 'production', // Show production until approved
+        'sample_development': 'sample', // Show sample review, not waiting
         'quality_check': 'quality',
         'shipping': 'shipping',
         'delivered': 'shipping'
       };
       
-      console.log('[Workflow] Order status:', order.status, 'Mapped stage:', stageMap[order.status]);
+      console.log('[Workflow] Order status:', order.status, 'Params approved:', productionParamsApproved, 'Mapped stage:', stageMap[order.status]);
       setInitialStage(stageMap[order.status] || 'tech-pack');
     };
     
