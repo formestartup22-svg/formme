@@ -107,7 +107,7 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
         (data || []).map(async (match: any) => {
           const { data: order } = await supabase
             .from('orders')
-            .select('id, status')
+            .select('id, status, manufacturer_id')
             .eq('design_id', design.id)
             .eq('manufacturer_id', match.manufacturer_id)
             .maybeSingle();
@@ -115,7 +115,7 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
           return {
             ...match,
             orders: order ? [order] : [],
-            isFinalized: order?.status === 'manufacturer_review'
+            isFinalized: !!order?.manufacturer_id // Finalized if manufacturer_id is set
           };
         })
       );
@@ -123,18 +123,27 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
       console.log('[ManufacturerSelectionStage] Matches with orders:', matchesWithOrders);
       setMatches(matchesWithOrders as any);
 
-      // Check if a manufacturer is already finalized
+      // Check if a manufacturer is already finalized (manufacturer_id is set, not null)
       const { data: finalizedOrder } = await supabase
         .from('orders')
         .select('manufacturer_id')
         .eq('design_id', design.id)
-        .eq('status', 'manufacturer_review')
+        .not('manufacturer_id', 'is', null)
         .maybeSingle();
 
       console.log('[ManufacturerSelectionStage] Finalized order:', finalizedOrder);
 
       if (finalizedOrder?.manufacturer_id) {
         setSelectedManufacturer(finalizedOrder.manufacturer_id);
+        
+        // If contract is already finalized, automatically navigate to production stage
+        console.log('[ManufacturerSelectionStage] Contract already finalized, navigating to production stage');
+        setTimeout(() => {
+          markStageComplete('tech-pack');
+          markStageComplete('factory-match');
+          markStageComplete('send-tech-pack');
+          setCurrentStage('production');
+        }, 500);
       }
     } catch (error: any) {
       console.error('[ManufacturerSelectionStage] Error fetching matches:', error);
