@@ -123,17 +123,19 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
       console.log('[ManufacturerSelectionStage] Matches with orders:', matchesWithOrders);
       setMatches(matchesWithOrders as any);
 
-      // Check if a manufacturer is already finalized (manufacturer_id is set, not null)
-      const { data: finalizedOrder } = await supabase
+      // Check if any manufacturer is already finalized
+      // A finalized contract means manufacturer_id is set and status is manufacturer_review or beyond
+      const { data: finalizedOrders } = await supabase
         .from('orders')
-        .select('manufacturer_id')
+        .select('manufacturer_id, status')
         .eq('design_id', design.id)
         .not('manufacturer_id', 'is', null)
-        .maybeSingle();
+        .neq('status', 'sent_to_manufacturer');
 
-      console.log('[ManufacturerSelectionStage] Finalized order:', finalizedOrder);
+      console.log('[ManufacturerSelectionStage] Finalized orders:', finalizedOrders);
 
-      if (finalizedOrder?.manufacturer_id) {
+      if (finalizedOrders && finalizedOrders.length > 0) {
+        const finalizedOrder = finalizedOrders[0];
         setSelectedManufacturer(finalizedOrder.manufacturer_id);
         
         // If contract is already finalized, immediately navigate to production stage
@@ -186,17 +188,23 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
 
       if (updateError) throw updateError;
 
+      toast.success('Contract finalized! Proceeding to production parameters.');
+      
+      // Wait for database to update and refetch to ensure UI is in sync
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await fetchMatches();
+      
       setSelectedManufacturer(manufacturerId);
       setConfirmDialogOpen(false);
       setManufacturerToFinalize(null);
       
-      toast.success('Contract finalized! Proceeding to production parameters.');
-      
-      // Immediately proceed to production parameters
-      markStageComplete('tech-pack');
-      markStageComplete('factory-match');
-      markStageComplete('send-tech-pack');
-      setCurrentStage('production');
+      // Immediately proceed to production parameters after state is synced
+      setTimeout(() => {
+        markStageComplete('tech-pack');
+        markStageComplete('factory-match');
+        markStageComplete('send-tech-pack');
+        setCurrentStage('production');
+      }, 100);
     } catch (error: any) {
       console.error('Error finalizing manufacturer:', error);
       toast.error('Failed to finalize manufacturer');
