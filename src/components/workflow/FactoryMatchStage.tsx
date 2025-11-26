@@ -76,23 +76,122 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
     console.log('[calculateAndSortManufacturers] Design category:', designCategory);
     console.log('[calculateAndSortManufacturers] Workflow data:', workflowData);
     
-    // Filter by category first only if filters are applied
     let filtered = manufacturersList;
     
-    if (designCategory && applyFilters && !viewAll) {
-      console.log('[calculateAndSortManufacturers] Filtering by category:', designCategory);
-      filtered = manufacturersList.filter(m => {
-        const hasMatch = m.categories?.some((cat: string) => 
-          cat.toLowerCase().includes(designCategory.toLowerCase()) ||
-          designCategory.toLowerCase().includes(cat.toLowerCase())
-        );
-        console.log(`[calculateAndSortManufacturers] Manufacturer ${m.name} categories:`, m.categories, 'Match:', hasMatch);
-        return hasMatch;
-      });
-      console.log('[calculateAndSortManufacturers] After category filter:', filtered.length, 'manufacturers');
+    // Apply hard filters when filtering is enabled
+    if (applyFilters && !viewAll) {
+      // 1. Category filter (mandatory)
+      if (designCategory) {
+        console.log('[calculateAndSortManufacturers] HARD FILTER: Category:', designCategory);
+        filtered = filtered.filter(m => {
+          const hasMatch = m.categories?.some((cat: string) => 
+            cat.toLowerCase().includes(designCategory.toLowerCase()) ||
+            designCategory.toLowerCase().includes(cat.toLowerCase())
+          );
+          console.log(`  ${m.name}: ${hasMatch ? 'PASS' : 'FAIL'} (categories: ${m.categories?.join(', ')})`);
+          return hasMatch;
+        });
+        console.log('[calculateAndSortManufacturers] After category filter:', filtered.length, 'manufacturers');
+      }
+
+      // 2. Location filter (hard filter if not "any")
+      const userLocation = workflowData.location?.toLowerCase().trim();
+      if (userLocation && userLocation !== 'any') {
+        console.log('[calculateAndSortManufacturers] HARD FILTER: Location:', userLocation);
+        filtered = filtered.filter(m => {
+          const manufacturerLoc = m.location?.toLowerCase().trim() || '';
+          
+          // Check region match
+          const regionCountries: Record<string, string[]> = {
+            asia: ['bangladesh', 'china', 'india', 'vietnam', 'pakistan', 'thailand', 'indonesia', 'dhaka'],
+            europe: ['italy', 'spain', 'portugal', 'france', 'germany', 'milan', 'uk'],
+            canada: ['canada', 'toronto', 'vancouver', 'montreal'],
+            'north america': ['usa', 'united states', 'canada', 'mexico', 'new york', 'los angeles', 'portland']
+          };
+          
+          // Exact match
+          if (manufacturerLoc === userLocation) {
+            console.log(`  ${m.name} (${m.location}): PASS (exact match)`);
+            return true;
+          }
+          
+          // Region match
+          const countries = regionCountries[userLocation];
+          if (countries) {
+            const match = countries.some(country => 
+              manufacturerLoc.includes(country) || country.includes(manufacturerLoc)
+            );
+            console.log(`  ${m.name} (${m.location}): ${match ? 'PASS' : 'FAIL'} (region check)`);
+            return match;
+          }
+          
+          // Substring match
+          const match = manufacturerLoc.includes(userLocation) || userLocation.includes(manufacturerLoc);
+          console.log(`  ${m.name} (${m.location}): ${match ? 'PASS' : 'FAIL'} (substring check)`);
+          return match;
+        });
+        console.log('[calculateAndSortManufacturers] After location filter:', filtered.length, 'manufacturers');
+      }
+
+      // 3. Quantity filter (must be within MOQ and max capacity)
+      const quantity = parseInt(workflowData.quantity || '0');
+      if (quantity > 0) {
+        console.log('[calculateAndSortManufacturers] HARD FILTER: Quantity:', quantity);
+        filtered = filtered.filter(m => {
+          const moq = m.min_order_quantity || 0;
+          const maxCap = m.max_capacity;
+          
+          // Must be above MOQ
+          if (quantity < moq) {
+            console.log(`  ${m.name}: FAIL (below MOQ: ${quantity} < ${moq})`);
+            return false;
+          }
+          
+          // Must be below max capacity if specified
+          if (maxCap && quantity > maxCap) {
+            console.log(`  ${m.name}: FAIL (exceeds capacity: ${quantity} > ${maxCap})`);
+            return false;
+          }
+          
+          console.log(`  ${m.name}: PASS (${quantity} within ${moq}-${maxCap || '∞'})`);
+          return true;
+        });
+        console.log('[calculateAndSortManufacturers] After quantity filter:', filtered.length, 'manufacturers');
+      }
+
+      // 4. Price filter (price ranges must overlap)
+      const minPrice = workflowData.minPrice ? parseInt(workflowData.minPrice) : undefined;
+      const maxPrice = workflowData.maxPrice ? parseInt(workflowData.maxPrice) : undefined;
+      
+      if (minPrice !== undefined || maxPrice !== undefined) {
+        console.log('[calculateAndSortManufacturers] HARD FILTER: Price range:', minPrice, '-', maxPrice);
+        filtered = filtered.filter(m => {
+          if (!m.price_range) {
+            console.log(`  ${m.name}: PASS (no price range specified)`);
+            return true;
+          }
+          
+          const priceMatch = m.price_range.match(/\$(\d+)-\$(\d+)/);
+          if (!priceMatch) {
+            console.log(`  ${m.name}: PASS (couldn't parse price range: ${m.price_range})`);
+            return true;
+          }
+          
+          const mfgMin = parseInt(priceMatch[1]);
+          const mfgMax = parseInt(priceMatch[2]);
+          const userMin = minPrice ?? 0;
+          const userMax = maxPrice ?? Infinity;
+          
+          // Check if ranges overlap
+          const overlap = mfgMin <= userMax && mfgMax >= userMin;
+          console.log(`  ${m.name} ($${mfgMin}-$${mfgMax}): ${overlap ? 'PASS' : 'FAIL'} (user: $${userMin}-$${userMax})`);
+          return overlap;
+        });
+        console.log('[calculateAndSortManufacturers] After price filter:', filtered.length, 'manufacturers');
+      }
     }
 
-    // Calculate match scores
+    // Calculate match scores for filtered manufacturers
     const withScores = filtered.map(manufacturer => {
       const criteria = {
         quantity: parseInt(workflowData.quantity || '0'),
@@ -114,20 +213,15 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
         categories: manufacturer.categories || []
       };
       
-      console.log(`[calculateAndSortManufacturers] Calculating score for ${manufacturer.name}`);
-      console.log('  Criteria:', criteria);
-      console.log('  Profile:', profile);
-      
       const matchScore = calculateMatchScore(criteria, profile);
-      
-      console.log(`  Match Score: ${matchScore}`);
+      console.log(`[calculateAndSortManufacturers] ${manufacturer.name}: Score ${matchScore}`);
 
       return { ...manufacturer, matchScore };
     });
 
     // Sort by match score descending
     const sorted = withScores.sort((a, b) => b.matchScore - a.matchScore);
-    console.log('[calculateAndSortManufacturers] Final sorted manufacturers:', sorted.map(m => ({ name: m.name, score: m.matchScore })));
+    console.log('[calculateAndSortManufacturers] Final result:', sorted.length, 'manufacturers');
     
     return sorted;
   };
@@ -137,7 +231,7 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
       setLoading(true);
       setShowFactories(true);
       
-      // Fetch all active manufacturers - we'll do location matching in the algorithm
+      // Fetch all active manufacturers
       const { data, error } = await supabase
         .from('manufacturers')
         .select('*')
@@ -145,14 +239,10 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
 
       if (error) throw error;
       
-      // Calculate scores for all manufacturers - the algorithm handles location and price matching
+      // Apply hard filters and calculate scores
       const manufacturersWithScores = calculateAndSortManufacturers(data || [], true);
       
-      // Only show manufacturers with meaningful scores (above 20) to avoid irrelevant matches
-      // Lower threshold to ensure valid matches aren't filtered out
-      const filtered = manufacturersWithScores.filter(m => m.matchScore > 20);
-      
-      setManufacturers(filtered);
+      setManufacturers(manufacturersWithScores);
       setViewAll(false);
     } catch (error: any) {
       toast.error(error.message || 'Failed to load manufacturers');
