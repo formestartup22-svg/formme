@@ -38,7 +38,7 @@ Most designers struggle with production, not creativity Clear communication is m
 Support more garment types + variations Build a vetted manufacturer network Add pricing/MOQ estimates and sample tracking Improve real-time collaboration for designers + factories
 
 
-<a id="fetchai-implementation"></a>
+<a id="fetcha-i-implementation"></a>
 ## Fetch.ai Implementation
 
 To power Formme’s end-to-end workflow, we built a lightweight multi-agent system using Fetch.ai, with all agents running locally for speed, privacy, and full control.
