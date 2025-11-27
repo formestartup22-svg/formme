@@ -49,15 +49,17 @@ To run Formme, developers must run these agents locally and provide a valid Gemi
 ### Our Agents
 
 1. SVG Parser Agent
-Path: /supabase/backend/agents/svg_parser_agent
+   
+**Path:** [/supabase/backend/agents/svg_parser_agent](https://github.com/formestartup22-svg/formme/blob/main/supabase/backend/agents/svg_parser.py)
 Extracts structure from sketches/SVGs — paths, shapes, groups, and annotations — and converts raw visuals into machine-readable features.
 
-2. Design Agent
-Path: /supabase/backend/agents/design_agent
+3. Design Agent
+   
+**Path:** [/supabase/backend/agents/design_agent](https://github.com/formestartup22-svg/formme/blob/main/supabase/backend/agents/design_agent.py)
 Takes parsed SVG features + any designer notes and turns them into structured design specifications: silhouettes, components, and construction details.
 
-3. Materials Agent
-Path: /supabase/backend/agents/materials_agent
+4. Materials Agent
+**Path:** [/supabase/backend/agents/materials_agent](https://github.com/formestartup22-svg/formme/blob/main/supabase/backend/agents/materials_agent.py)
 Standardizes materials, trims, fabrics, and finishes using a consistent vocabulary so every tech pack is clear and production-ready.
 
 ### How the Pipeline Works
