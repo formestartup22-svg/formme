@@ -1,74 +1,35 @@
-# Welcome to your Lovable project
+# Welcome to Formme!
 
-## Project info
+The key to turning your designs into a reality. 
 
-**URL**: https://lovable.dev/projects/e77ed1d8-b6a0-4f9c-b379-dce6ab6344a6
+## Inspiration
+We interviewed 30+ independent designers and emerging brands. Almost all of them said the same thing: “I can create… but I can’t produce.” Turning a sketch into a garment was slow, confusing, and disconnected — and that’s the problem we set out to solve.
 
-## How can I edit this code?
+## What it does
+Formme helps designers go from idea to production by:
 
-There are several ways of editing your application.
+- Generating clear, structured tech packs
+- Standardizing materials, measurements, and construction details
+- Improving communication with manufacturers
+- Keeping the whole workflow in one place
 
-**Use Lovable**
+## How we built it
+We combined:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/e77ed1d8-b6a0-4f9c-b379-dce6ab6344a6) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/e77ed1d8-b6a0-4f9c-b379-dce6ab6344a6) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
+- AI-driven parsing of sketches + design details
+- A structured tech pack generator
+- A matching algorithm to best match designers with their manufacturer
+- Clean UI for better communication
 
 
-Yes it is!
+## Challenges we ran into
+Standardizing tech packs across different design styles Making a complex process feel simple Turning vague sketches into precise production details Designing a UX that doesn’t overwhelm new designers
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## Accomplishments that we're proud of
+Built a tech pack generator designers actually enjoy using Created a smooth end-to-end flow from sketch → spec Validated the problem through 30+ interviews Turned messy production processes into clear, structured steps
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## What we learned
+Most designers struggle with production, not creativity Clear communication is more valuable than more tools Standardization removes huge bottlenecks Designers want confidence, not complexity
+
+## What's next for formme
+Support more garment types + variations Build a vetted manufacturer network Add pricing/MOQ estimates and sample tracking Improve real-time collaboration for designers + factories
