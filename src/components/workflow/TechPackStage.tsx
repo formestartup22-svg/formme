@@ -47,9 +47,9 @@ interface TechPackDraft {
 }
 
 const DraftPreview: React.FC<{ techPackDraft: TechPackDraft }> = ({ techPackDraft }) => {
-  const header = techPackDraft.header || {};
-  const designOverview = techPackDraft.designOverview || {};
-  const materials = techPackDraft.materials || {};
+  const header = (techPackDraft.header || {}) as { styleName?: string; styleNumber?: string; category?: string; season?: string; brand?: string };
+  const designOverview = (techPackDraft.designOverview || {}) as Record<string, any>;
+  const materials = (techPackDraft.materials || {}) as Record<string, any>;
 
   
 
