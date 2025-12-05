@@ -45,7 +45,10 @@ const WaitingForSampleStage = ({ design }: WaitingForSampleStageProps) => {
         // Auto-proceed after 2 seconds
         setTimeout(() => {
           markStageComplete('waiting-sample');
-          navigate(`/workflow?designId=${design.id}&stage=sample`);
+          navigate({
+            pathname: '/workflow',
+            search: `designId=${design.id}&stage=sample`
+          });
         }, 2000);
       }
     };
@@ -73,7 +76,10 @@ const WaitingForSampleStage = ({ design }: WaitingForSampleStageProps) => {
             // Auto-proceed to sample stage after 2 seconds
             setTimeout(() => {
               markStageComplete('waiting-sample');
-              navigate(`/workflow?designId=${design.id}&stage=sample`);
+              navigate({
+                pathname: '/workflow',
+                search: `designId=${design.id}&stage=sample`
+              });
             }, 2000);
           }
         }
