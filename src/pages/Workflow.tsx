@@ -464,21 +464,26 @@ const Workflow = () => {
                       </div>
                     ) : (
                       designs.map((design) => (
-                        <Link key={design.id} to={`/workflow?designId=${design.id}`}>
-                          <Card className="border-border hover:border-primary/50 transition-all hover:shadow-sm cursor-pointer">
-                            <CardHeader className="pb-3">
-                              <div className="flex items-start justify-between gap-3">
-                                <div className="flex-1 min-w-0">
-                                  <h3 className="font-semibold text-foreground mb-2">{design.name}</h3>
-                                  <p className="text-sm text-muted-foreground mb-2">
-                                    {design.category || 'Uncategorized'}
-                                  </p>
-                                  <Badge variant="outline">{design.status || 'draft'}</Badge>
-                                </div>
+                        <Card 
+                          key={design.id} 
+                          className="border-border hover:border-primary/50 transition-all hover:shadow-sm cursor-pointer"
+                          onClick={() => navigate({
+                            pathname: '/workflow',
+                            search: `?designId=${design.id}`
+                          })}
+                        >
+                          <CardHeader className="pb-3">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-semibold text-foreground mb-2">{design.name}</h3>
+                                <p className="text-sm text-muted-foreground mb-2">
+                                  {design.category || 'Uncategorized'}
+                                </p>
+                                <Badge variant="outline">{design.status || 'draft'}</Badge>
                               </div>
-                            </CardHeader>
-                          </Card>
-                        </Link>
+                            </div>
+                          </CardHeader>
+                        </Card>
                       ))
                     )}
                   </TabsContent>

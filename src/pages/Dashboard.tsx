@@ -219,36 +219,41 @@ const Dashboard = () => {
                 </div>
               ) : (
                 filteredDesigns.map((design) => (
-                  <Link key={design.id} to={`/workflow?designId=${design.id}`}>
-                    <Card className="border-border hover:border-primary/50 transition-all hover:shadow-sm cursor-pointer">
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-2">
-                              <FileCheck className="w-4 h-4" />
-                              <h3 className="font-semibold text-foreground">{design.name}</h3>
-                            </div>
-                            <p className="text-sm text-muted-foreground mb-2">
-                              {getStatusDisplay(design.status)}
+                  <Card 
+                    key={design.id} 
+                    className="border-border hover:border-primary/50 transition-all hover:shadow-sm cursor-pointer"
+                    onClick={() => navigate({
+                      pathname: '/workflow',
+                      search: `?designId=${design.id}`
+                    })}
+                  >
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2">
+                            <FileCheck className="w-4 h-4" />
+                            <h3 className="font-semibold text-foreground">{design.name}</h3>
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            {getStatusDisplay(design.status)}
+                          </p>
+                          {design.description && (
+                            <p className="text-xs text-muted-foreground line-clamp-2">
+                              {design.description}
                             </p>
-                            {design.description && (
-                              <p className="text-xs text-muted-foreground line-clamp-2">
-                                {design.description}
-                              </p>
-                            )}
-                          </div>
-                          <div className="flex flex-col items-end gap-2">
-                            <Badge variant={getStatusBadge(design.status)}>
-                              {getStatusDisplay(design.status)}
-                            </Badge>
-                            <span className="text-xs text-muted-foreground whitespace-nowrap">
-                              {new Date(design.created_at).toLocaleDateString()}
-                            </span>
-                          </div>
+                          )}
                         </div>
-                      </CardHeader>
-                    </Card>
-                  </Link>
+                        <div className="flex flex-col items-end gap-2">
+                          <Badge variant={getStatusBadge(design.status)}>
+                            {getStatusDisplay(design.status)}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">
+                            {new Date(design.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                    </CardHeader>
+                  </Card>
                 ))
               )}
             </div>
