@@ -124,7 +124,7 @@ const NewDesign = () => {
       // Navigate directly to tech pack stage using proper object syntax
       navigate({
         pathname: '/workflow',
-        search: `designId=${design.id}`
+        search: `?designId=${design.id}`
       });
     } catch (error: any) {
       console.error("Full error details:", error);

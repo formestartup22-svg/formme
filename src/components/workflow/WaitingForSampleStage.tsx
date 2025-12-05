@@ -47,7 +47,7 @@ const WaitingForSampleStage = ({ design }: WaitingForSampleStageProps) => {
           markStageComplete('waiting-sample');
           navigate({
             pathname: '/workflow',
-            search: `designId=${design.id}&stage=sample`
+            search: `?designId=${design.id}&stage=sample`
           });
         }, 2000);
       }
@@ -78,7 +78,7 @@ const WaitingForSampleStage = ({ design }: WaitingForSampleStageProps) => {
               markStageComplete('waiting-sample');
               navigate({
                 pathname: '/workflow',
-                search: `designId=${design.id}&stage=sample`
+                search: `?designId=${design.id}&stage=sample`
               });
             }, 2000);
           }

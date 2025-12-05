@@ -312,7 +312,7 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
                 <p className="text-muted-foreground mb-4">No manufacturer requests found</p>
                 <Button onClick={() => navigate({
                   pathname: '/workflow',
-                  search: `designId=${design.id}&stage=factory-match`
+                  search: `?designId=${design.id}&stage=factory-match`
                 })}>
                   Find Manufacturers
                 </Button>
@@ -402,7 +402,7 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
                       variant="outline"
                       onClick={() => navigate({
                         pathname: '/workflow',
-                        search: `designId=${design.id}&stage=factory-match`
+                        search: `?designId=${design.id}&stage=factory-match`
                       })}
                       className="gap-2"
                     >
