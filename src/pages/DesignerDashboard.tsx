@@ -151,7 +151,7 @@ const DesignerDashboard = () => {
                     className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
                     onClick={() => navigate({
                       pathname: '/workflow',
-                      search: `designId=${order.design_id}`
+                      search: `?designId=${order.design_id}`
                     })}
                   >
                     <div className="flex items-center justify-between">
