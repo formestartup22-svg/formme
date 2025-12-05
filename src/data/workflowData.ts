@@ -1,7 +1,7 @@
 export interface Design {
   id: string;
   name: string;
-  stage: 'tech-pack' | 'factory-match' | 'send-tech-pack' | 'waiting' | 'production' | 'payment' | 'sample' | 'quality' | 'shipping';
+  stage: 'design' | 'specifications' | 'fabric-color' | 'tech-pack' | 'factory-selection' | 'factory-match' | 'send-tech-pack' | 'waiting' | 'production' | 'payment' | 'sample' | 'quality' | 'shipping';
   status: 'on-track' | 'delayed' | 'action-required' | 'completed';
   nextAction: string;
   eta: string;
@@ -51,7 +51,7 @@ export const mockDesigns: Design[] = [
   {
     id: '3',
     name: 'Knit Tank',
-    stage: 'tech-pack',
+    stage: 'design',
     status: 'action-required',
     nextAction: 'Add size chart and construction notes',
     eta: 'Nov 28, 2025',
@@ -157,20 +157,38 @@ export const mockTasks: Task[] = [
   }
 ];
 
-export const stageNames = {
-  'tech-pack': 'Create your tech pack',
-  'factory-match': 'Find your manufacturer',
-  'send-tech-pack': 'Select manufacturer',
-  'waiting': 'Waiting for manufacturer',
-  'production': 'Review production parameters',
-  'payment': 'Make payment',
-  'sample': 'Review sample',
+// Designer-friendly stage names
+export const stageNames: Record<string, string> = {
+  // Creative stages
+  'design': 'Design',
+  'specifications': 'Specifications', 
+  'fabric-color': 'Fabric & Color',
+  'tech-pack': 'Tech Pack',
+  
+  // Transition
+  'factory-selection': 'Find a Maker',
+  
+  // Production stages (sub-stages)
+  'factory-match': 'Select Maker',
+  'send-tech-pack': 'Maker Response',
+  'waiting': 'Waiting for Response',
+  'production': 'Review Details',
+  'payment': 'Payment',
+  'sample': 'Sample Review',
   'quality': 'Quality Check',
-  'shipping': 'Shipping & Logistics'
+  'shipping': 'Delivery'
 };
 
+// Full stage order for workflow
 export const stageOrder = [
+  // Creative phase
+  'design',
+  'specifications',
+  'fabric-color',
   'tech-pack',
+  // Transition
+  'factory-selection',
+  // Production phase
   'factory-match',
   'send-tech-pack',
   'waiting',
@@ -180,3 +198,8 @@ export const stageOrder = [
   'quality',
   'shipping'
 ] as const;
+
+// Legacy mapping for backward compatibility
+export const legacyStageMapping: Record<string, string> = {
+  'tech-pack': 'design', // Old tech-pack stage now maps to design
+};
