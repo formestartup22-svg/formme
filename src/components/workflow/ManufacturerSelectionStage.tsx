@@ -310,7 +310,10 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
             ) : matches.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-muted-foreground mb-4">No manufacturer requests found</p>
-                <Button onClick={() => navigate(`/workflow?designId=${design.id}&stage=factory-match`)}>
+                <Button onClick={() => navigate({
+                  pathname: '/workflow',
+                  search: `designId=${design.id}&stage=factory-match`
+                })}>
                   Find Manufacturers
                 </Button>
               </div>
@@ -397,7 +400,10 @@ export const ManufacturerSelectionStage = ({ design }: ManufacturerSelectionStag
                     </p>
                     <Button
                       variant="outline"
-                      onClick={() => navigate(`/workflow?designId=${design.id}&stage=factory-match`)}
+                      onClick={() => navigate({
+                        pathname: '/workflow',
+                        search: `designId=${design.id}&stage=factory-match`
+                      })}
                       className="gap-2"
                     >
                       <ArrowRight className="w-4 h-4" />

@@ -149,7 +149,10 @@ const DesignerDashboard = () => {
                   <Card
                     key={order.id}
                     className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
-                    onClick={() => navigate(`/workflow/${order.id}`)}
+                    onClick={() => navigate({
+                      pathname: '/workflow',
+                      search: `designId=${order.design_id}`
+                    })}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">

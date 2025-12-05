@@ -257,7 +257,10 @@ const FactoryMatchStage = ({ design }: FactoryMatchStageProps) => {
       
       // Mark stage complete and navigate to send-tech-pack stage
       markStageComplete('factory-match');
-      navigate(`/workflow?designId=${design.id}&stage=send-tech-pack`);
+      navigate({
+        pathname: '/workflow',
+        search: `designId=${design.id}&stage=send-tech-pack`
+      });
       
       return false; // Return false to prevent StageNavigation from also navigating
     } catch (error: any) {
