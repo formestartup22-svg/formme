@@ -139,8 +139,17 @@ export const WorkflowProvider = ({ children, initialStage }: { children: ReactNo
   }, [initialStage]);
 
   const stages = [
+    // Creative phase
+    'design',
+    'specifications',
+    'fabric-color',
     'tech-pack',
+    'tech-pack-review',
+    // Transition
+    'factory-selection',
+    // Production phase
     'factory-match',
+    'send-tech-pack',
     'waiting',
     'production',
     'payment',

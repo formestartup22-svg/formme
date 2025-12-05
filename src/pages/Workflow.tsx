@@ -11,8 +11,12 @@ import { useDesigns } from '@/hooks/useDesigns';
 import { useUserRole } from '@/hooks/useUserRole';
 import { WorkflowProvider, useWorkflow } from '@/context/WorkflowContext';
 import { supabase } from '@/integrations/supabase/client';
-import { WorkflowStepper } from '@/components/workflow/WorkflowStepper';
+import { HorizontalProgressTabs } from '@/components/workflow/HorizontalProgressTabs';
 import TechPackStage from '@/components/workflow/TechPackStage';
+import DesignStage from '@/components/workflow/DesignStage';
+import SpecificationsStage from '@/components/workflow/SpecificationsStage';
+import FabricColorStage from '@/components/workflow/FabricColorStage';
+import FactorySelectionStage from '@/components/workflow/FactorySelectionStage';
 import FactoryMatchStage from '@/components/workflow/FactoryMatchStage';
 import { ManufacturerSelectionStage } from '@/components/workflow/ManufacturerSelectionStage';
 import WaitingForManufacturerStage from '@/components/workflow/WaitingForManufacturerStage';
@@ -53,8 +57,20 @@ const WorkspaceContent = ({ design }: { design: any }) => {
 
   const renderStage = () => {
     switch (currentStage) {
+      // Creative stages
+      case 'design':
+        return <DesignStage design={design} />;
+      case 'specifications':
+        return <SpecificationsStage design={design} />;
+      case 'fabric-color':
+        return <FabricColorStage design={design} />;
       case 'tech-pack':
+      case 'tech-pack-review':
         return <TechPackStage design={design} />;
+      // Transition stage
+      case 'factory-selection':
+        return <FactorySelectionStage design={design} />;
+      // Production stages
       case 'factory-match':
         return <FactoryMatchStage design={design} />;
       case 'send-tech-pack':
@@ -74,31 +90,17 @@ const WorkspaceContent = ({ design }: { design: any }) => {
       case 'shipping':
         return <ShippingStage design={design} />;
       default:
-        return <TechPackStage design={design} />;
+        return <DesignStage design={design} />;
     }
   };
 
   return (
-    <div className="flex gap-6">
-      {/* Left Sidebar - Stepper */}
-      <div className="w-72 shrink-0">
-        <div className="sticky top-6">
-          <Card className="border-border">
-            <div className="p-4 border-b">
-              <h3 className="font-semibold text-sm mb-1">Production Pipeline</h3>
-              <p className="text-xs text-muted-foreground">
-                Follow each step to complete your order
-              </p>
-            </div>
-            <div className="p-4">
-              <WorkflowStepper />
-            </div>
-          </Card>
-        </div>
-      </div>
+    <div className="space-y-6">
+      {/* Horizontal Progress Tabs */}
+      <HorizontalProgressTabs />
 
       {/* Main Content Area */}
-      <div className="flex-1 min-w-0">
+      <div className="w-full">
         {renderStage()}
       </div>
     </div>
@@ -192,28 +194,28 @@ const Workflow = () => {
         .maybeSingle();
       
       if (!order) {
-        setInitialStage('tech-pack');
+        setInitialStage('design');
         return;
       }
       
       // Check if production params are approved to determine exact stage
       const productionParamsApproved = order.production_params_approved;
       
-      // Map order status to workflow stage
+      // Map order status to workflow stage (design -> specs -> fabric -> tech-pack -> production stages)
       const stageMap: Record<string, string> = {
-        'draft': 'tech-pack',
+        'draft': 'design',
         'tech_pack_pending': 'tech-pack',
         'sent_to_manufacturer': 'send-tech-pack',
         'manufacturer_review': 'production',
-        'production_approval': productionParamsApproved ? 'payment' : 'production', // Show production until approved
-        'sample_development': 'sample', // Show sample review, not waiting
+        'production_approval': productionParamsApproved ? 'payment' : 'production',
+        'sample_development': 'sample',
         'quality_check': 'quality',
         'shipping': 'shipping',
         'delivered': 'shipping'
       };
       
       console.log('[Workflow] Order status:', order.status, 'Params approved:', productionParamsApproved, 'Mapped stage:', stageMap[order.status]);
-      setInitialStage(stageMap[order.status] || 'tech-pack');
+      setInitialStage(stageMap[order.status] || 'design');
     };
     
     determineStage();
