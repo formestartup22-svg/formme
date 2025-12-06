@@ -222,10 +222,7 @@ const Dashboard = () => {
                   <Card 
                     key={design.id} 
                     className="border-border hover:border-primary/50 transition-all hover:shadow-sm cursor-pointer"
-                    onClick={() => navigate({
-                      pathname: '/workflow',
-                      search: `?designId=${design.id}`
-                    })}
+                    onClick={() => navigate(`/workflow?designId=${design.id}`)}
                   >
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between gap-3">
