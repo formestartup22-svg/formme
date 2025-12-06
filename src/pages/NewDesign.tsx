@@ -122,10 +122,7 @@ const NewDesign = () => {
 
       toast.success("Design created successfully!");
       // Navigate directly to tech pack stage using proper object syntax
-      navigate({
-        pathname: '/workflow',
-        search: `?designId=${design.id}`
-      });
+      navigate(`/workflow?designId=${design.id}`);
     } catch (error: any) {
       console.error("Full error details:", error);
       toast.error(error.message || "Failed to create design");
