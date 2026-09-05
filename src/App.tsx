@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import { ScrollToTop } from "./components/ScrollToTop";
 import Index from "./pages/Index";
 import Templates from "./pages/Templates";
 import Marketplace from "./pages/Marketplace";
@@ -33,6 +34,7 @@ function App() {
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="App">
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />

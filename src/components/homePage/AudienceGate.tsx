@@ -1,85 +1,92 @@
 import { useState } from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Check, Factory, FileText, Shirt, Truck } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { INK, LAVENDER, MUTED, MUTED2, PURPLE, PURPLE_BG } from './theme';
 import type { Audience } from './theme';
 
-const gateSteps = ['Orders', 'Sampling', 'Production', 'Quality', 'Shipment'];
+const introFeatures = [
+  { icon: FileText, label: 'Shared tech packs & samples' },
+  { icon: Factory, label: 'Live production tracking' },
+  { icon: Truck, label: 'Quality & shipment visibility' },
+];
 
-const cardCopy: Record<Audience, { eyebrow: string; heading: string; description: string; supporting: string; preview: string }> = {
+const gateCopy: Record<Audience, {
+  icon: typeof Shirt;
+  eyebrow: string;
+  heading: string;
+  description: string;
+  bullets: string[];
+  previewLabel: string;
+  previewMeta: string;
+}> = {
   brand: {
-    eyebrow: 'For brands',
+    icon: Shirt,
+    eyebrow: 'FOR BRANDS',
     heading: 'I’m a Brand',
     description: 'I want to get apparel produced.',
-    supporting: 'Find production partners and follow your order from development to shipment.',
-    preview: 'Tech pack · 600 pcs · Washed black',
+    bullets: [
+      'Connect with vetted manufacturing partners',
+      'Approve samples and lock in the details',
+      'Track your order from cut to carton',
+    ],
+    previewLabel: 'Oversized hoodie',
+    previewMeta: 'FM-HOOD-004 · 72%',
   },
   manufacturer: {
-    eyebrow: 'For manufacturers',
+    icon: Factory,
+    eyebrow: 'FOR MANUFACTURERS',
     heading: 'I’m a Manufacturer',
     description: 'I want to manage apparel production.',
-    supporting: 'Manage orders, production, quality and customer visibility from one system.',
-    preview: 'Line 04 · Sewing · 72%',
+    bullets: [
+      'Manage every order and production line',
+      'Log quality checks and approvals',
+      'Keep brands updated automatically',
+    ],
+    previewLabel: 'Line 04 · Sewing',
+    previewMeta: '72% complete',
   },
 };
 
-const cardContainerVariants = { hidden: {}, show: { transition: { staggerChildren: 0.12, delayChildren: 0.15 } } };
-const cardItemVariants = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } } };
+const cardContainerVariants = { hidden: {}, show: { transition: { staggerChildren: 0.12, delayChildren: 0.2 } } };
+const cardItemVariants = { hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } } };
 const cardContainerVariantsReduced = { hidden: {}, show: { transition: { staggerChildren: 0 } } };
 const cardItemVariantsReduced = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { duration: 0.2 } } };
 
-const AudienceCard = ({
+const GateCard = ({
   audience, active, dimmed, reduced, onSelect,
 }: { audience: Audience; active: boolean; dimmed: boolean; reduced?: boolean; onSelect: (a: Audience) => void }) => {
-  const copy = cardCopy[audience];
+  const copy = gateCopy[audience];
+  const Icon = copy.icon;
   return (
-    // Entrance stagger lives on this wrapper only, so it settles at a fixed opacity/position
-    // after mounting and never fights with the plain button's own dimmed/active styling below.
-    <motion.div variants={reduced ? cardItemVariantsReduced : cardItemVariants} className="flex-1">
+    <motion.div variants={reduced ? cardItemVariantsReduced : cardItemVariants}>
       <button
         type="button"
         onClick={() => onSelect(audience)}
         aria-label={`${copy.heading} — ${copy.description}`}
-        className="group relative w-full h-full text-left rounded-2xl bg-white p-7 md:p-8 transition-[border-color,box-shadow,opacity] duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5D52D6] focus-visible:ring-offset-2"
-        style={{
-          border: `1.5px solid ${active ? PURPLE : '#E7E3F5'}`,
-          boxShadow: active ? '0 12px 32px -16px rgba(93,82,214,0.35)' : '0 8px 24px -18px rgba(21,19,28,0.08)',
-          opacity: dimmed ? 0.5 : 1,
-        }}
+        className="gate-card"
+        data-active={active}
+        data-dimmed={dimmed}
       >
-        <span className="inline-block text-[10px] uppercase tracking-[0.1em] font-inter font-semibold mb-4" style={{ color: PURPLE }}>
-          {copy.eyebrow}
-        </span>
-        <h2 className="font-cormorant font-medium mb-2" style={{ color: INK, fontSize: 'clamp(24px, 2.4vw, 30px)' }}>
-          {copy.heading}
-        </h2>
-        <p className="font-inter mb-3" style={{ color: INK, fontSize: '14px' }}>
-          {copy.description}
-        </p>
-        <p className="font-inter leading-relaxed mb-6" style={{ color: MUTED2, fontSize: '13px' }}>
-          {copy.supporting}
-        </p>
-
-        <div
-          className="mb-6 rounded-lg px-3 py-2 opacity-0 -translate-y-1 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0"
-          style={{ background: PURPLE_BG }}
-        >
-          <span className="text-[11px] font-dm-sans font-medium" style={{ color: PURPLE }}>{copy.preview}</span>
+        <span className="gate-card-icon"><Icon size={20} /></span>
+        <span className="production-eyebrow">{copy.eyebrow}</span>
+        <h2>{copy.heading}</h2>
+        <p className="gate-card-desc">{copy.description}</p>
+        <ul>
+          {copy.bullets.map(item => <li key={item}><Check size={14} />{item}</li>)}
+        </ul>
+        <div className="gate-card-preview">
+          <strong>{copy.previewLabel}</strong>
+          <span>{copy.previewMeta}</span>
         </div>
-
-        <span className="inline-flex items-center gap-1.5 text-[13px] font-inter font-medium" style={{ color: PURPLE }}>
-          Continue
-          <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
-        </span>
+        <span className="gate-card-cta">Continue <ArrowRight size={15} /></span>
       </button>
     </motion.div>
   );
 };
 
 /**
- * The very first thing a visitor sees: a minimal neutral positioning statement, then a single
- * choice between the two Formme audiences. Unmounts (via the parent's AnimatePresence) once a
- * choice is made, handing off to the personalized homepage content.
+ * The very first thing a visitor sees: a short introduction to what Formme actually does,
+ * then a single choice between the two Formme audiences. Unmounts (via the parent's
+ * AnimatePresence) once a choice is made, handing off to the personalized homepage content.
  */
 export const AudienceGate = ({ onSelect, prefersReduced }: { onSelect: (a: Audience) => void; prefersReduced: boolean }) => {
   const [pending, setPending] = useState<Audience | null>(null);
@@ -91,44 +98,38 @@ export const AudienceGate = ({ onSelect, prefersReduced }: { onSelect: (a: Audie
   };
 
   return (
-    <section className="relative" aria-label="Choose your Formme experience" style={{ background: LAVENDER }}>
-      <div className="mx-auto max-w-[900px] px-6 pt-32 md:pt-40 pb-20 md:pb-24">
-        <motion.div
-          className="text-center"
-          initial={prefersReduced ? undefined : { opacity: 0, y: 16 }}
-          animate={{ opacity: pending ? 0.35 : 1, y: 0 }}
-          transition={{ duration: prefersReduced ? 0.15 : 0.5, ease: 'easeOut' }}
-        >
-          <span
-            className="inline-flex items-center rounded-full px-3.5 py-1.5 text-[10px] uppercase tracking-[0.1em] font-inter font-medium mb-4"
-            style={{ background: PURPLE_BG, color: PURPLE }}
-          >
-            Fashion production, connected
-          </span>
-          <h1 className="font-cormorant font-medium leading-[1.1] tracking-[-0.01em] mb-4" style={{ color: INK, fontSize: 'clamp(34px, 4.6vw, 52px)' }}>
-            The operating system connecting fashion production.
-          </h1>
-          <p className="font-inter leading-relaxed max-w-lg mx-auto mb-10" style={{ color: MUTED2, fontSize: '15px' }}>
-            Formme connects brands and apparel manufacturers from order to shipment.
-          </p>
-          <p className="text-[13px] font-inter font-medium mb-6" style={{ color: INK }}>
-            What brings you to Formme?
-          </p>
-        </motion.div>
+    <section className="gate-section" aria-label="Choose your Formme experience">
+      <motion.div
+        className="production-container gate-intro"
+        initial={prefersReduced ? undefined : { opacity: 0, y: 16 }}
+        animate={{ opacity: pending ? 0.35 : 1, y: 0 }}
+        transition={{ duration: prefersReduced ? 0.15 : 0.5, ease: 'easeOut' }}
+      >
+        <span className="production-eyebrow"><span className="production-dot" /> FASHION PRODUCTION, CONNECTED</span>
+        <h1>The operating system<br /><em>connecting fashion production.</em></h1>
+        <p>
+          Formme brings brands and manufacturers into one shared workspace — tech packs, samples,
+          live production tracking, and shipment updates, all in one place instead of scattered
+          across emails and spreadsheets.
+        </p>
+        <div className="gate-features">
+          {introFeatures.map(({ icon: Icon, label }) => (
+            <span key={label}><Icon size={16} />{label}</span>
+          ))}
+        </div>
+      </motion.div>
 
+      <div className="production-container">
+        <p className="gate-prompt">What brings you to Formme?</p>
         <motion.div
-          className="grid sm:grid-cols-2 gap-4 md:gap-5"
+          className="gate-cards"
           variants={prefersReduced ? cardContainerVariantsReduced : cardContainerVariants}
           initial="hidden"
           animate="show"
         >
-          <AudienceCard audience="brand" active={pending === 'brand'} dimmed={pending === 'manufacturer'} reduced={prefersReduced} onSelect={handleSelect} />
-          <AudienceCard audience="manufacturer" active={pending === 'manufacturer'} dimmed={pending === 'brand'} reduced={prefersReduced} onSelect={handleSelect} />
+          <GateCard audience="brand" active={pending === 'brand'} dimmed={pending === 'manufacturer'} reduced={prefersReduced} onSelect={handleSelect} />
+          <GateCard audience="manufacturer" active={pending === 'manufacturer'} dimmed={pending === 'brand'} reduced={prefersReduced} onSelect={handleSelect} />
         </motion.div>
-
-        <p className="text-center mt-10 text-[11px] font-inter tracking-wide" style={{ color: MUTED }}>
-          {gateSteps.join(' · ')}
-        </p>
       </div>
     </section>
   );

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ChevronDown, Linkedin } from 'lucide-react';
-import { BG, BORDER, BORDER_DARK, INK, MUTED, MUTED2, PURPLE, PURPLE_BG } from './theme';
+import { ArrowRight, ChevronDown, Linkedin, Menu, X } from 'lucide-react';
+import { BG, BORDER, BORDER_DARK, INK, MUTED2, PURPLE, PURPLE_BG } from './theme';
 import type { Audience } from './theme';
 
 export const CONTACT_EMAIL = 'hello@formme.io';
@@ -58,11 +58,24 @@ export const LandingHeader = ({
   onSwitchAudience,
 }: { audience?: Audience | null; onSwitchAudience?: (a: Audience) => void } = {}) => {
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setMenuOpen(false);
+        document.getElementById('landing-menu-button')?.focus();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [menuOpen]);
 
   return (
     <header
@@ -72,21 +85,26 @@ export const LandingHeader = ({
       <div className="mx-auto max-w-[1400px] flex items-center justify-between px-6 md:px-10 h-16 md:h-[72px]">
         <Logo />
 
-        <nav className="hidden lg:flex items-center gap-8">
+        <nav className="hidden xl:flex items-center gap-5" aria-label="Main navigation">
           {navLinks.map((item) =>
             item.route ? (
               <Link key={item.label} to={item.href} className="inline-flex items-center gap-1 text-[13px] font-inter" style={{ color: MUTED2 }}>
                 {item.label}{item.chevron && <ChevronDown className="w-3.5 h-3.5" />}
               </Link>
             ) : (
-              <a key={item.label} href={item.href} className="inline-flex items-center gap-1 text-[13px] font-inter" style={{ color: MUTED2 }}>
+              <a key={item.label} href={item.href} onClick={(event) => {
+                if (onSwitchAudience && (item.href === '#brands' || item.href === '#factories')) {
+                  event.preventDefault();
+                  onSwitchAudience(item.href === '#brands' ? 'brand' : 'manufacturer');
+                }
+              }} className="inline-flex items-center gap-1 text-[13px] font-inter" style={{ color: MUTED2 }}>
                 {item.label}{item.chevron && <ChevronDown className="w-3.5 h-3.5" />}
               </a>
             )
           )}
         </nav>
 
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-3 lg:gap-5">
           {audience && onSwitchAudience && (
             <div className="hidden lg:flex items-center gap-1 text-[12px] font-inter mr-1">
               <button
@@ -111,9 +129,44 @@ export const LandingHeader = ({
           <Link to="/auth?mode=signin" className="hidden sm:inline text-[13px] font-inter font-medium" style={{ color: INK }}>
             Sign in
           </Link>
-          <SolidButton href={CONTACT_HREF}>Get in touch <ArrowRight className="w-3.5 h-3.5" /></SolidButton>
+          <span className="landing-header-contact"><SolidButton href={CONTACT_HREF}>Get in touch <ArrowRight className="w-3.5 h-3.5" /></SolidButton></span>
+          <button
+            id="landing-menu-button"
+            type="button"
+            aria-label={menuOpen ? 'Close navigation' : 'Open navigation'}
+            aria-expanded={menuOpen}
+            aria-controls="landing-mobile-navigation"
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="xl:hidden flex items-center justify-center w-8 h-9 rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            style={{ color: PURPLE }}
+          >
+            {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
         </div>
       </div>
+      {menuOpen && (
+        <nav id="landing-mobile-navigation" aria-label="Mobile navigation" className="xl:hidden border-t px-6 py-5 bg-white" style={{ borderColor: BORDER }}>
+          <div className="grid grid-cols-2 gap-4 text-[13px] font-inter" style={{ color: MUTED2 }}>
+            {navLinks.map(item => item.route ? (
+              <Link key={item.label} to={item.href} onClick={() => setMenuOpen(false)}>{item.label}</Link>
+            ) : (
+              <a key={item.label} href={item.href} onClick={(event) => {
+                setMenuOpen(false);
+                if (onSwitchAudience && (item.href === '#brands' || item.href === '#factories')) {
+                  event.preventDefault();
+                  onSwitchAudience(item.href === '#brands' ? 'brand' : 'manufacturer');
+                }
+              }}>{item.label}</a>
+            ))}
+            {onSwitchAudience && (['brand', 'manufacturer'] as Audience[]).map(value => (
+              <button key={value} type="button" className="text-left" style={{ color: PURPLE }} onClick={() => { onSwitchAudience(value); setMenuOpen(false); }}>
+                {value === 'brand' ? 'For brands' : 'For manufacturers'}
+              </button>
+            ))}
+            <Link to="/auth?mode=signin" onClick={() => setMenuOpen(false)}>Sign in</Link>
+          </div>
+        </nav>
+      )}
     </header>
   );
 };
@@ -127,7 +180,7 @@ const footerLinks = [
   { label: 'Company', to: '/about' },
 ];
 
-export const LandingFooter = () => (
+export const LandingFooter = ({ onSwitchAudience }: { onSwitchAudience?: (audience: Audience) => void } = {}) => (
   <footer style={{ background: BG, borderTop: `1px solid ${BORDER}` }}>
     <div className="mx-auto max-w-[1300px] px-6 py-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
       <Logo />
@@ -136,15 +189,20 @@ export const LandingFooter = () => (
           l.to.startsWith('/') ? (
             <Link key={l.label} to={l.to} className="text-[13px] font-inter" style={{ color: MUTED2 }}>{l.label}</Link>
           ) : (
-            <a key={l.label} href={l.to} className="text-[13px] font-inter" style={{ color: MUTED2 }}>{l.label}</a>
+            <a key={l.label} href={l.to} onClick={(event) => {
+              if (onSwitchAudience && (l.to === '#brands' || l.to === '#factories')) {
+                event.preventDefault();
+                onSwitchAudience(l.to === '#brands' ? 'brand' : 'manufacturer');
+              }
+            }} className="text-[13px] font-inter" style={{ color: MUTED2 }}>{l.label}</a>
           )
         )}
       </nav>
       <div className="flex items-center gap-5">
-        <a href="https://www.linkedin.com/company/formmedesign" target="_blank" rel="noopener noreferrer" style={{ color: MUTED }}>
+        <a href="https://www.linkedin.com/company/formmedesign" target="_blank" rel="noopener noreferrer" aria-label="Formme on LinkedIn" style={{ color: MUTED2 }}>
           <Linkedin className="h-4 w-4" />
         </a>
-        <span className="text-[12px] font-inter" style={{ color: MUTED }}>© {new Date().getFullYear()} Formme. All rights reserved.</span>
+        <span className="text-[12px] font-inter" style={{ color: MUTED2 }}>© {new Date().getFullYear()} Formme. All rights reserved.</span>
       </div>
     </div>
   </footer>
