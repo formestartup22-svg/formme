@@ -75,8 +75,8 @@ function AudiencePanel({ audience }: AudienceProps) {
             <div className="audience-panel-copy">
               <span className="production-eyebrow">LESS CHASING. MORE CLARITY.</span>
               <h3>See what’s happening.<br />Without having to ask.</h3>
-              <p>When details live across emails, chats, and spreadsheets, it’s hard to know what’s current. Formme gives you and your factory one place to work from.</p>
-              <ul>{['A shared brief, so your factory has the right details', 'A record of approvals, so decisions don’t get lost', 'Order progress, so you know what happens next'].map(item => <li key={item}><Check size={15} />{item}</li>)}</ul>
+              <p>Formme manages production with your manufacturer. Your workspace keeps the details, approvals, and progress visible while our team handles coordination.</p>
+              <ul>{['We coordinate with your manufacturer', 'You review samples and approve the details', 'You see how your order is progressing'].map(item => <li key={item}><Check size={15} />{item}</li>)}</ul>
               <a className="production-button production-button-outline" href="#product">Explore your workflow <ArrowRight size={15} /></a>
             </div>
             <BrandOverview />
@@ -112,9 +112,9 @@ export function ProductionLandingExperience({ audience }: AudienceProps) {
           <div className="production-hero-copy">
             <span className="production-eyebrow"><span className="production-dot" /> {isBrand ? 'FOR BRANDS · FROM IDEA TO DELIVERY' : 'FOR MANUFACTURERS · FROM ORDER TO SHIPMENT'}</span>
             <h1 id="production-hero-title">{isBrand ? 'Your production.' : 'Your factory floor.'}<em>{isBrand ? 'Finally connected.' : 'In full view.'}</em></h1>
-            <p>{isBrand ? 'Formme helps apparel brands connect with manufacturing partners, approve samples, and track production through shipment—all in one shared workspace.' : 'See what’s running, what’s due, and what needs attention. Connect production lines, quality checks, and dispatch in one workspace for your factory.'}</p>
+            <p>{isBrand ? 'We help apparel brands find the right manufacturer and manage their production. Our team coordinates with the factory, while you approve samples and follow progress in one workspace.' : 'See what’s running, what’s due, and what needs attention. Connect production lines, quality checks, and dispatch in one workspace for your factory.'}</p>
             <div className="production-actions"><a className="production-button" href={CONTACT_HREF}>{isBrand ? 'Talk about your collection' : 'Talk about your factory'} <ArrowRight size={16} /></a><a className="production-text-link" href="#product">{isBrand ? 'See how it works' : 'Explore factory operations'} <ArrowDown size={15} /></a></div>
-            <div className="production-hero-note"><Check size={14} /> {isBrand ? 'One place for your brand and your manufacturing partner.' : 'Your orders. Your production. One clear view.'}</div>
+            <div className="production-hero-note"><Check size={14} /> {isBrand ? 'Manufacturer matching. Managed production. Clear updates.' : 'Your orders. Your production. One clear view.'}</div>
           </div>
           {isBrand ? <ProductionStory /> : <ManufacturerHeroPreview />}
         </div>

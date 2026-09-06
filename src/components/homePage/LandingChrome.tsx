@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ArrowRight, ChevronDown, Linkedin, Menu, X } from 'lucide-react';
 import { BG, BORDER, BORDER_DARK, INK, MUTED2, PURPLE, PURPLE_BG } from './theme';
-import type { Audience } from './theme';
+import { ProductMenu, MobileProductAccordion } from './ProductMenu';
 
 export const CONTACT_EMAIL = 'hello@formme.io';
 export const CONTACT_HREF = `mailto:${CONTACT_EMAIL}`;
@@ -44,21 +44,29 @@ export const OutlineButton = ({ children, href, dark = false }: { children: Reac
   </a>
 );
 
-const navLinks: { label: string; href: string; route?: boolean; chevron?: boolean }[] = [
-  { label: 'Product', href: '#product', chevron: true },
-  { label: 'Factories', href: '#factories' },
-  { label: 'Brands', href: '#brands' },
-  { label: 'Cost Predictor', href: '/cost-predictor', route: true },
-  { label: 'Resources', href: '/support', route: true, chevron: true },
-  { label: 'Company', href: '/about', route: true, chevron: true },
+/**
+ * "Factory Network" doesn't have a dedicated destination yet — there's an
+ * older, currently-disabled manufacturer-directory page (src/pages/Manufacturers.tsx)
+ * that matches the concept more literally, but its route was already reassigned
+ * to the new manufacturer landing experience. Pointing this at /manufacturers
+ * for now (same as "For Manufacturers") rather than inventing a new page/route.
+ */
+const primaryLinks: { label: string; to: string }[] = [
+  { label: 'For Brands', to: '/brands' },
+  { label: 'For Manufacturers', to: '/manufacturers' },
+  { label: 'Factory Network', to: '/manufacturers' },
 ];
 
-export const LandingHeader = ({
-  audience,
-  onSwitchAudience,
-}: { audience?: Audience | null; onSwitchAudience?: (a: Audience) => void } = {}) => {
+const secondaryLinks: { label: string; to: string; chevron?: boolean }[] = [
+  { label: 'Resources', to: '/support', chevron: true },
+  { label: 'Company', to: '/about', chevron: true },
+];
+
+export const LandingHeader = () => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const { pathname } = useLocation();
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -86,46 +94,26 @@ export const LandingHeader = ({
         <Logo />
 
         <nav className="hidden xl:flex items-center gap-5" aria-label="Main navigation">
-          {navLinks.map((item) =>
-            item.route ? (
-              <Link key={item.label} to={item.href} className="inline-flex items-center gap-1 text-[13px] font-inter" style={{ color: MUTED2 }}>
-                {item.label}{item.chevron && <ChevronDown className="w-3.5 h-3.5" />}
-              </Link>
-            ) : (
-              <a key={item.label} href={item.href} onClick={(event) => {
-                if (onSwitchAudience && (item.href === '#brands' || item.href === '#factories')) {
-                  event.preventDefault();
-                  onSwitchAudience(item.href === '#brands' ? 'brand' : 'manufacturer');
-                }
-              }} className="inline-flex items-center gap-1 text-[13px] font-inter" style={{ color: MUTED2 }}>
-                {item.label}{item.chevron && <ChevronDown className="w-3.5 h-3.5" />}
-              </a>
-            )
-          )}
+          <ProductMenu />
+          {primaryLinks.map((item) => (
+            <Link
+              key={item.label}
+              to={item.to}
+              aria-current={pathname === item.to ? 'page' : undefined}
+              className="inline-flex items-center gap-1 text-[13px] font-inter"
+              style={{ color: pathname === item.to ? PURPLE : MUTED2 }}
+            >
+              {item.label}
+            </Link>
+          ))}
+          {secondaryLinks.map((item) => (
+            <Link key={item.label} to={item.to} className="inline-flex items-center gap-1 text-[13px] font-inter" style={{ color: MUTED2 }}>
+              {item.label}{item.chevron && <ChevronDown className="w-3.5 h-3.5" />}
+            </Link>
+          ))}
         </nav>
 
         <div className="flex items-center gap-3 lg:gap-5">
-          {audience && onSwitchAudience && (
-            <div className="hidden lg:flex items-center gap-1 text-[12px] font-inter mr-1">
-              <button
-                onClick={() => onSwitchAudience('brand')}
-                aria-pressed={audience === 'brand'}
-                className="rounded-full px-2.5 py-1 transition-colors"
-                style={{ color: audience === 'brand' ? PURPLE : MUTED2, background: audience === 'brand' ? PURPLE_BG : 'transparent' }}
-              >
-                For Brands
-              </button>
-              <span style={{ color: BORDER }}>|</span>
-              <button
-                onClick={() => onSwitchAudience('manufacturer')}
-                aria-pressed={audience === 'manufacturer'}
-                className="rounded-full px-2.5 py-1 transition-colors"
-                style={{ color: audience === 'manufacturer' ? PURPLE : MUTED2, background: audience === 'manufacturer' ? PURPLE_BG : 'transparent' }}
-              >
-                For Manufacturers
-              </button>
-            </div>
-          )}
           <Link to="/auth?mode=signin" className="hidden sm:inline text-[13px] font-inter font-medium" style={{ color: INK }}>
             Sign in
           </Link>
@@ -147,21 +135,14 @@ export const LandingHeader = ({
       {menuOpen && (
         <nav id="landing-mobile-navigation" aria-label="Mobile navigation" className="xl:hidden border-t px-6 py-5 bg-white" style={{ borderColor: BORDER }}>
           <div className="grid grid-cols-2 gap-4 text-[13px] font-inter" style={{ color: MUTED2 }}>
-            {navLinks.map(item => item.route ? (
-              <Link key={item.label} to={item.href} onClick={() => setMenuOpen(false)}>{item.label}</Link>
-            ) : (
-              <a key={item.label} href={item.href} onClick={(event) => {
-                setMenuOpen(false);
-                if (onSwitchAudience && (item.href === '#brands' || item.href === '#factories')) {
-                  event.preventDefault();
-                  onSwitchAudience(item.href === '#brands' ? 'brand' : 'manufacturer');
-                }
-              }}>{item.label}</a>
+            <MobileProductAccordion onNavigate={() => setMenuOpen(false)} />
+            {primaryLinks.map((item) => (
+              <Link key={item.label} to={item.to} onClick={() => setMenuOpen(false)} style={{ color: pathname === item.to ? PURPLE : MUTED2 }}>
+                {item.label}
+              </Link>
             ))}
-            {onSwitchAudience && (['brand', 'manufacturer'] as Audience[]).map(value => (
-              <button key={value} type="button" className="text-left" style={{ color: PURPLE }} onClick={() => { onSwitchAudience(value); setMenuOpen(false); }}>
-                {value === 'brand' ? 'For brands' : 'For manufacturers'}
-              </button>
+            {secondaryLinks.map((item) => (
+              <Link key={item.label} to={item.to} onClick={() => setMenuOpen(false)}>{item.label}</Link>
             ))}
             <Link to="/auth?mode=signin" onClick={() => setMenuOpen(false)}>Sign in</Link>
           </div>
@@ -172,31 +153,22 @@ export const LandingHeader = ({
 };
 
 const footerLinks = [
-  { label: 'Product', to: '#product' },
-  { label: 'Factories', to: '#factories' },
-  { label: 'Brands', to: '#brands' },
+  { label: 'For Brands', to: '/brands' },
+  { label: 'For Manufacturers', to: '/manufacturers' },
+  { label: 'Factory Network', to: '/manufacturers' },
   { label: 'Cost Predictor', to: '/cost-predictor' },
   { label: 'Resources', to: '/support' },
   { label: 'Company', to: '/about' },
 ];
 
-export const LandingFooter = ({ onSwitchAudience }: { onSwitchAudience?: (audience: Audience) => void } = {}) => (
+export const LandingFooter = () => (
   <footer style={{ background: BG, borderTop: `1px solid ${BORDER}` }}>
     <div className="mx-auto max-w-[1300px] px-6 py-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
       <Logo />
       <nav className="flex flex-wrap items-center gap-x-8 gap-y-2">
-        {footerLinks.map((l) =>
-          l.to.startsWith('/') ? (
-            <Link key={l.label} to={l.to} className="text-[13px] font-inter" style={{ color: MUTED2 }}>{l.label}</Link>
-          ) : (
-            <a key={l.label} href={l.to} onClick={(event) => {
-              if (onSwitchAudience && (l.to === '#brands' || l.to === '#factories')) {
-                event.preventDefault();
-                onSwitchAudience(l.to === '#brands' ? 'brand' : 'manufacturer');
-              }
-            }} className="text-[13px] font-inter" style={{ color: MUTED2 }}>{l.label}</a>
-          )
-        )}
+        {footerLinks.map((l) => (
+          <Link key={l.label} to={l.to} className="text-[13px] font-inter" style={{ color: MUTED2 }}>{l.label}</Link>
+        ))}
       </nav>
       <div className="flex items-center gap-5">
         <a href="https://www.linkedin.com/company/formmedesign" target="_blank" rel="noopener noreferrer" aria-label="Formme on LinkedIn" style={{ color: MUTED2 }}>

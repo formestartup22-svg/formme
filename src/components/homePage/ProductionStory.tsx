@@ -1,43 +1,38 @@
-import { ArrowRight, CheckCheck, FileText } from 'lucide-react';
+import { Check, Factory, FileText, MapPin, Paperclip, Truck } from 'lucide-react';
 import { Progress } from './ProductionUI';
+import { Logo } from './LandingChrome';
 
-/** The brand's product journey: a clear brief, an approved sample, and order visibility. */
 export function ProductionStory() {
   return (
-    <div className="production-story production-story-simple" aria-label="Example: one order, from design to delivery">
-      <div className="story-brief">
-        <span className="story-step"><b>01</b> SHARE YOUR DESIGN</span>
-        <div className="story-card">
-          <div className="story-card-heading"><FileText size={15} /><strong>Your design brief</strong></div>
-          <div className="story-sketch"><img src="/techpackSketch.png" alt="Technical drawing for the example hoodie order" /></div>
-          <p className="story-explanation">Share your design and requirements with your factory.</p>
-          <div className="story-card-footer"><CheckCheck size={13} /><span>Brief shared with factory</span></div>
+    <div className="brand-journey" aria-label="Example order: manufacturer matching and managed production">
+      <div className="brand-journey-steps">
+        {[
+          { icon: FileText, title: '1. Submit your product', text: 'Tell us what you want to make' },
+          { icon: Factory, title: '2. We find the right factory', text: 'We match your needs and coordinate production' },
+          { icon: Truck, title: '3. Track production', text: 'Follow progress from sample to delivery' },
+        ].map(({ icon: Icon, title, text }, index) => <div className="brand-journey-step" key={title}><span className="brand-journey-icon"><Icon size={25} /></span><strong>{title}</strong><p>{text}</p>{index < 2 && <svg className="brand-journey-arrow" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><path d="M 2 32 Q 50 0 97 31" /><path className="brand-journey-arrowhead" d="M 94 26 L 97 31 L 92 31.5" /></svg>}</div>)}
+      </div>
+      <div className="brand-journey-body">
+        <div className="brand-journey-card brand-journey-brief">
+          <div className="brand-journey-card-title"><FileText size={18} /><strong>Tech pack</strong></div>
+          <div className="brand-journey-sketch"><img src="/techpackSketch.png" alt="Technical drawing of the oversized hoodie" /></div>
+          <h3>Oversized hoodie</h3><p>Heavyweight cotton fleece<br />Ribbed cuffs and hem<br />Kangaroo pocket<br />Washed black</p>
+          <span className="brand-journey-files"><Paperclip size={13} /> Product details attached</span>
+          <div className="brand-journey-swatches" aria-hidden="true"><span /><img src="/techpackSketch.png" alt="" /><img src="/mockupHoodieFront.png" alt="" /></div>
+        </div>
+        <div className="brand-journey-product">
+          <div className="brand-journey-halo" aria-hidden="true" />
+          <img className="brand-journey-hoodie" src="/mockupHoodieFront.png" alt="Black oversized hoodie for the example order" fetchPriority="high" />
+          <span className="brand-journey-product-label">YOUR PRODUCT</span><div className="brand-journey-wordmark"><Logo /></div><span className="brand-journey-tagline">BRIDGES BRANDS & FACTORIES</span>
+        </div>
+        <div className="brand-journey-card brand-journey-factory">
+          <div className="brand-journey-match"><span className="brand-journey-factory-icon"><Factory size={28} /></span><div><span className="brand-journey-matched"><Check size={12} /> Matched</span><h3>Supreme Stitch Bangladesh</h3><span className="brand-journey-location"><MapPin size={12} /> Bangladesh</span></div></div>
+          <div className="brand-journey-progress"><strong>Production progress</strong><span>72%</span></div><Progress value={72} label="Example order production progress" />
+          <ol className="brand-journey-timeline">{[['Sample approved', 'Done'], ['Production in progress', 'Now'], ['Quality check', 'Next'], ['Preparing for shipment', 'Next']].map(([label, status], index) => <li key={label} data-complete={index < 2}><span>{index < 2 && <Check size={11} />}</span><strong>{label}</strong><small>{status}</small></li>)}</ol>
+          <div className="brand-journey-delivery"><Truck size={16} /><span>Estimated delivery</span><strong>18 Sep</strong></div>
         </div>
       </div>
-
-      <div className="story-garment">
-        <div className="story-orbit" aria-hidden="true" />
-        <img className="story-hoodie" src="/mockupHoodieFront.png" alt="Black hoodie connecting the three steps of the example order" fetchPriority="high" />
-        <div className="story-order"><img src="/logo-mark.png" alt="" /><div><strong>Your next collection</strong><span>One order. Every step together.</span></div></div>
-        <ArrowRight className="story-arrow story-arrow-in" size={18} aria-hidden="true" />
-        <ArrowRight className="story-arrow story-arrow-out" size={18} aria-hidden="true" />
-      </div>
-
-      <div className="story-output">
-        <div className="story-card story-execution">
-          <span className="story-step"><b>02</b> APPROVE YOUR SAMPLE</span>
-          <div className="brand-sample-heading"><span><CheckCheck size={22} /></span><strong>Approved by you.</strong></div>
-          <p className="story-explanation">Review your sample before production begins.</p>
-        </div>
-        <div className="story-card story-visibility">
-          <span className="story-step"><b>03</b> FOLLOW PRODUCTION</span>
-          <p className="story-explanation">Your factory shares progress. You see where things stand.</p>
-          <div className="story-visibility-progress"><span>Sewing in progress</span><strong>72%</strong></div>
-          <Progress value={72} label="Brand view of the same hoodie order" />
-          <div className="story-card-footer"><span className="story-live"><i /> Updated by your factory</span></div>
-        </div>
-      </div>
-      <span className="story-caption">Example: one order, from design to delivery.</span>
+      <p className="brand-journey-example">Example order · Production managed with Formme</p>
     </div>
   );
 }

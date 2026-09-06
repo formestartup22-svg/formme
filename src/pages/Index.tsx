@@ -19,9 +19,9 @@ const Index = () => {
   return (
     <div className="production-page">
       <SEO canonical="/" description="Formme connects brands and apparel manufacturers from tech pack to shipment, with shared production workflows, sample approvals, quality checks, and shipment visibility." />
-      <LandingHeader onSwitchAudience={exploreAudience} />
+      <LandingHeader />
       <AudienceGate onSelect={exploreAudience} prefersReduced={!!prefersReducedMotion} />
-      <LandingFooter onSwitchAudience={exploreAudience} />
+      <LandingFooter />
     </div>
   );
 };

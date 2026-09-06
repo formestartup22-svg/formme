@@ -7,11 +7,11 @@ import { previewOrders } from './productionPreviewData';
 
 const workflows = {
   brand: [
-    { title: 'Start your order', short: 'Tell us what you’re making.', heading: 'Every great product starts with a clear brief.', description: 'Bring your tech pack, quantities, and product details into one shared order.' },
-    { title: 'Find your factory', short: 'Connect with the right production partner.', heading: 'A manufacturing partner for what you make.', description: 'Review capabilities, discuss feasibility, and agree on the details before moving forward.' },
-    { title: 'Develop & approve', short: 'Get the sample and the details right.', heading: 'Make the decisions before the production run.', description: 'Keep sample feedback, revisions, and approvals attached to the product.' },
-    { title: 'Move into production', short: 'Turn the approved sample into your collection.', heading: 'An agreed plan. A clear handoff.', description: 'Confirm your quantities, materials, and production parameters with your factory.' },
-    { title: 'Follow every update', short: 'See progress, quality, and shipment status.', heading: 'Know where your order stands.', description: 'Follow factory updates from the production floor through quality checks and shipping.' },
+    { title: 'Tell us about your product', short: 'Share what you want to make.', heading: 'Start with your design and requirements.', description: 'Tell Formme about your product, quantities, and timeline. Share your tech pack if you have one.' },
+    { title: 'We find your manufacturer', short: 'Matched to your production needs.', heading: 'We help you find the right factory.', description: 'Formme helps find a manufacturer suited to your product and production requirements.' },
+    { title: 'You approve the sample', short: 'Review the product before production.', heading: 'You decide when the sample is right.', description: 'We coordinate sampling with your manufacturer. You review the sample, share feedback, and approve the details.' },
+    { title: 'We manage production', short: 'Our team coordinates with your factory.', heading: 'Formme keeps production connected.', description: 'After sample approval, we manage production with your manufacturer and keep you informed as work progresses.' },
+    { title: 'You follow the progress', short: 'See updates in your workspace.', heading: 'Know where your order stands.', description: 'While Formme manages production, your workspace keeps order progress, quality updates, and shipment status in view.' },
   ],
   manufacturer: [
     { title: 'Review the order', short: 'Check the brief and confirm feasibility.', heading: 'Start with the information your team needs.', description: 'Review the tech pack, flag questions, and confirm what you can produce.' },
@@ -92,7 +92,7 @@ function WorkflowPreview({ audience, step }: { audience: Audience; step: number 
   if (step === 1) return (
     <div className="workflow-factory-match">
       <img src="/factory.jpg" alt="Apparel manufacturing workspace" loading="lazy" />
-      <div><span className="production-eyebrow">MANUFACTURING PARTNER</span><h4>Built for your product.</h4><p>Discuss construction, materials, and capacity with your factory before you commit.</p><div className="workflow-tags"><Badge>Cotton knits</Badge><Badge>Cut & sew</Badge><Badge>Sampling</Badge></div></div>
+      <div><span className="production-eyebrow">MANUFACTURING PARTNER</span><h4>Matched to your product.</h4><p>Formme helps match your requirements with a manufacturer’s capabilities.</p><div className="workflow-tags"><Badge>Cotton knits</Badge><Badge>Cut & sew</Badge><Badge>Sampling</Badge></div></div>
     </div>
   );
   if (step === 2) return <QualityPreview />;
@@ -198,8 +198,8 @@ export function WorkflowShowcase({ audience }: { audience: Audience }) {
       <div className="production-container">
         <SectionHeading
           eyebrow={audience === 'brand' ? 'HOW IT WORKS FOR BRANDS' : 'HOW IT WORKS FOR MANUFACTURERS'}
-          title={<>From {audience === 'brand' ? 'idea to delivery.' : 'order to shipment.'}<br /><em>Every step, connected.</em></>}
-          description={audience === 'brand' ? 'Follow an example order through five steps. Select a step to see what you and your factory work on together.' : 'Review the brief, plan the work, and coordinate production through quality and dispatch. Explore your factory workflow, step by step.'}
+          title={<>From {audience === 'brand' ? 'brief to delivery.' : 'order to shipment.'}<br /><em>Every step, connected.</em></>}
+          description={audience === 'brand' ? 'See what we handle and where you’re involved, from finding your manufacturer to managing production.' : 'Review the brief, plan the work, and coordinate production through quality and dispatch. Explore your factory workflow, step by step.'}
         />
         <WorkflowSteps key={audience} audience={audience} />
         <div className="workflow-connection"><span>FACTORY OPERATIONS</span><i /><span className="workflow-formme">formme</span><i /><span>BRAND VISIBILITY</span></div>

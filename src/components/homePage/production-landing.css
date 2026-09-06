@@ -771,6 +771,67 @@
   .production-story-simple .brand-sample-heading { align-items: flex-start; }
 }
 
+.brand-journey { min-width: 0; color: var(--production-ink); }
+.brand-journey-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 28px; }
+.brand-journey-step { position: relative; text-align: center; }
+.brand-journey-arrow { position: absolute; left: calc(50% + 32px); top: 0; width: calc(100% - 48px); height: 32px; overflow: visible; pointer-events: none; fill: none; stroke: #9675e5; stroke-width: 1.6; }
+.brand-journey-arrow path { vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 2 5; }
+.brand-journey-arrow .brand-journey-arrowhead { stroke-dasharray: none; stroke: #7952de; }
+.brand-journey-icon { display: grid; place-items: center; width: 49px; height: 49px; border: 5px solid #ffffff80; background: #f8f4ff; border-radius: 50%; margin: 0 auto 9px; color: #7050db; }
+.brand-journey-step > strong { display: inline-block; font-size: 11px; line-height: 1.4; color: #6340c7; border-radius: 25px; background: #ffffffd9; padding: 6px 9px; }
+.brand-journey-step > p { font-size: 10px; line-height: 1.5; color: var(--production-muted); margin: 7px auto 0; max-width: 170px; }
+.brand-journey-body { display: grid; grid-template-columns: 1fr 1.08fr 1.08fr; gap: 12px; align-items: center; }
+.brand-journey-card { min-width: 0; padding: 15px; background: #ffffffed; border: 1px solid #e3d7fc; border-radius: 13px; box-shadow: 0 12px 28px -20px #8966d84a; }
+.brand-journey-card-title { display: flex; gap: 8px; align-items: center; font-size: 12px; }
+.brand-journey-card-title svg { color: #7652dc; }
+.brand-journey-sketch { height: 113px; margin-block: 14px; background: #f8f5fd; border-radius: 7px; padding: 10px; }
+.brand-journey-sketch img { width: 100%; height: 100%; object-fit: contain; }
+.brand-journey-card h3 { font-family: 'DM Sans', sans-serif; font-size: 11px; line-height: 1.45; font-weight: 600; }
+.brand-journey-brief > p { font-size: 10px; line-height: 1.7; margin-top: 5px; color: var(--production-muted); }
+.brand-journey-files { display: flex; align-items: center; gap: 5px; font-size: 9px; color: var(--production-muted); margin-top: 16px; }
+.brand-journey-swatches { display: flex; gap: 6px; margin-top: 9px; }
+.brand-journey-swatches > * { width: 32px; height: 32px; border: 1px solid #e8e0f2; border-radius: 6px; object-fit: contain; background: #f0ebf6; }
+.brand-journey-swatches > span { background: linear-gradient(130deg, #161616, #444, #171717); }
+.brand-journey-product { position: relative; isolation: isolate; min-width: 0; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.brand-journey-halo { position: absolute; top: 35px; width: 90%; aspect-ratio: 1; border-radius: 50%; background: #e6ddfc80; z-index: -1; pointer-events: none; }
+.brand-journey-hoodie { position: relative; width: 155%; max-width: none; height: 265px; object-fit: contain; filter: drop-shadow(0 14px 14px #24153615); }
+.brand-journey-product-label { position: relative; border-radius: 20px; background: #ffffffbd; padding: 7px 12px; font-size: 9px; letter-spacing: .08em; font-weight: 600; color: #7450d9; }
+.brand-journey-wordmark { margin-top: 18px; display: flex; justify-content: center; }
+.brand-journey-tagline { font-size: 7px; letter-spacing: .13em; color: var(--production-muted); margin-top: 5px; }
+.brand-journey-match { display: flex; align-items: center; gap: 9px; padding-bottom: 19px; border-bottom: 1px solid #eee7f8; }
+.brand-journey-factory-icon { display: grid; place-items: center; width: 44px; height: 58px; flex-shrink: 0; background: #eee7fb; color: #7855d0; border-radius: 8px; }
+.brand-journey-matched { display: inline-flex; gap: 4px; align-items: center; padding: 3px 6px; color: #27714e; background: #e6f5ec; border-radius: 12px; font-size: 9px; margin-bottom: 5px; }
+.brand-journey-location { display: flex; align-items: center; gap: 3px; color: var(--production-muted); font-size: 9px; margin-top: 4px; }
+.brand-journey-progress { display: flex; align-items: center; justify-content: space-between; gap: 5px; margin: 17px 0 8px; font-size: 10px; }
+.brand-journey-progress > span { font-size: 16px; font-weight: 600; color: #7954dc; }
+.brand-journey-timeline { list-style: none; margin-block: 15px; padding: 0; }
+.brand-journey-timeline li { position: relative; display: flex; align-items: center; gap: 7px; min-height: 30px; font-size: 9px; }
+.brand-journey-timeline li:not(:last-child)::before { content: ''; position: absolute; width: 1px; height: 30px; background: #e1d5fc; left: 7px; top: 15px; }
+.brand-journey-timeline li > span { display: grid; place-items: center; position: relative; width: 15px; height: 15px; flex-shrink: 0; border: 1px solid #b39ae8; background: #fff; border-radius: 50%; }
+.brand-journey-timeline li[data-complete='true'] > span { background: #7950e5; color: #fff; border-color: #7950e5; }
+.brand-journey-timeline strong { font-weight: 400; }
+.brand-journey-timeline small { margin-left: auto; font-size: 8px; color: var(--production-muted); }
+.brand-journey-delivery { display: flex; align-items: center; gap: 6px; padding: 10px 8px; background: #f4effc; border-radius: 8px; font-size: 8px; color: var(--production-muted); }
+.brand-journey-delivery svg, .brand-journey-delivery strong { color: #6d45cc; flex-shrink: 0; }
+.brand-journey-delivery strong { margin-left: auto; font-size: 10px; }
+.brand-journey-example { text-align: center; font-size: 9px; color: var(--production-muted); margin-top: 18px; }
+@media (max-width: 639px) {
+  .brand-journey-steps { gap: 6px; margin-bottom: 20px; }
+  .brand-journey-step > strong { font-size: 9px; padding: 5px; }
+  .brand-journey-step > p { font-size: 9px; }
+  .brand-journey-arrow { width: calc(100% - 58px); }
+  .brand-journey-body { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .brand-journey-product { grid-column: 2; grid-row: 1; }
+  .brand-journey-hoodie { width: 100%; height: 220px; }
+  .brand-journey-halo { width: 90%; }
+  .brand-journey-card { padding: 12px; }
+  .brand-journey-factory { grid-column: 1 / -1; }
+  .brand-journey-factory-icon { width: 50px; height: 50px; }
+  .brand-journey-factory h3 { font-size: 13px; }
+  .brand-journey-timeline li { font-size: 11px; }
+  .brand-journey-delivery { font-size: 10px; }
+}
+
 /* About page — the founder story, told with the same visual system as the rest of the site. */
 .about-hero { padding-block: 96px 40px; background: radial-gradient(ellipse at 30% 20%, #ece4fb, transparent 55%), radial-gradient(ellipse at 80% 60%, #f3effc, transparent 60%), #fbf9fe; text-align: center; }
 .about-hero-inner { max-width: 720px; margin-inline: auto; }

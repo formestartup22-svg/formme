@@ -46,7 +46,7 @@ const GateCard = ({
         <span className="gate-card-top"><span className="gate-card-icon"><Icon size={22} /></span><span className="production-eyebrow">{copy.eyebrow}</span></span>
         <h2>{copy.heading}</h2>
         <p className="gate-card-desc">{copy.description}</p>
-        <span className="gate-card-summary">{audience === 'brand' ? 'Find your factory. Perfect your sample. Bring your collection to life.' : 'Plan your lines. Track every order. Keep your brands in the loop.'}</span>
+        <span className="gate-card-summary">{audience === 'brand' ? 'We help find your manufacturer and manage production for your brand.' : 'Plan your lines. Track every order. Keep your brands in the loop.'}</span>
         <span className="gate-capabilities">{(audience === 'brand' ? ['Factory matching', 'Sample approvals', 'Order tracking'] : ['Production planning', 'Quality checks', 'Brand updates']).map(label => <span key={label}>{label}</span>)}</span>
         <span className="gate-card-cta">Explore {audience === 'brand' ? 'for brands' : 'for manufacturers'} <ArrowRight size={16} /></span>
       </button>

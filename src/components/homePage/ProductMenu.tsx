@@ -1,0 +1,210 @@
+import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Calculator, ChevronDown, ClipboardList, Eye, Factory, LayoutGrid, Route } from 'lucide-react';
+import { BORDER, INK, MUTED, MUTED2, PURPLE, PURPLE_BG } from './theme';
+
+type ProductItem = {
+  icon: typeof LayoutGrid;
+  label: string;
+  description: string;
+  to: string;
+};
+
+const forBrands: ProductItem[] = [
+  { icon: LayoutGrid, label: 'Production Workspace', description: 'Manage samples, orders and production.', to: '/brands' },
+  { icon: Factory, label: 'Factory Matching', description: 'Find the right manufacturing partner.', to: '/brands#product' },
+  { icon: Calculator, label: 'Cost Predictor', description: 'Estimate apparel production costs.', to: '/cost-predictor' },
+];
+
+const forManufacturers: ProductItem[] = [
+  { icon: ClipboardList, label: 'Factory Operations', description: 'Manage orders and apparel production.', to: '/manufacturers' },
+  { icon: Eye, label: 'Buyer Visibility', description: 'Keep brands updated from the same production workflow.', to: '/manufacturers' },
+];
+
+const MenuLink = ({ item, tabIndex, onNavigate }: { item: ProductItem; tabIndex: number; onNavigate: () => void }) => {
+  const Icon = item.icon;
+  return (
+    <Link
+      to={item.to}
+      onClick={onNavigate}
+      role="menuitem"
+      tabIndex={tabIndex}
+      className="flex items-start gap-3 rounded-xl px-3 py-2.5 transition-colors duration-150 hover:bg-[rgba(93,82,214,0.07)] focus-visible:bg-[rgba(93,82,214,0.07)] focus-visible:outline-none"
+    >
+      <span className="mt-0.5 flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: PURPLE_BG, color: PURPLE }}>
+        <Icon className="w-3.5 h-3.5" strokeWidth={1.75} />
+      </span>
+      <span className="min-w-0">
+        <span className="block text-[13px] font-inter font-medium" style={{ color: INK }}>{item.label}</span>
+        <span className="block text-[12px] font-inter leading-snug mt-0.5" style={{ color: MUTED2 }}>{item.description}</span>
+      </span>
+    </Link>
+  );
+};
+
+/**
+ * Compact "Product" dropdown for the main nav — grouped by audience, plus a
+ * clearly-marked coming-soon capability. Always mounted (so it can transition
+ * smoothly), with tabIndex toggled so closed links aren't keyboard-reachable.
+ */
+export const ProductMenu = () => {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const openTimer = useRef<number>();
+  const closeTimer = useRef<number>();
+
+  const clearTimers = () => {
+    if (openTimer.current) window.clearTimeout(openTimer.current);
+    if (closeTimer.current) window.clearTimeout(closeTimer.current);
+  };
+
+  const scheduleOpen = () => {
+    clearTimers();
+    openTimer.current = window.setTimeout(() => setOpen(true), 90);
+  };
+  const scheduleClose = () => {
+    clearTimers();
+    closeTimer.current = window.setTimeout(() => setOpen(false), 130);
+  };
+
+  useEffect(() => clearTimers, []);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (event: MouseEvent) => {
+      if (rootRef.current && !rootRef.current.contains(event.target as Node)) setOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
+    };
+    document.addEventListener('mousedown', onPointerDown);
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown);
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [open]);
+
+  const tabIndex = open ? 0 : -1;
+  const close = () => setOpen(false);
+
+  return (
+    <div ref={rootRef} className="relative" onMouseEnter={scheduleOpen} onMouseLeave={scheduleClose}>
+      <button
+        ref={triggerRef}
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className="inline-flex items-center gap-1 text-[13px] font-inter"
+        style={{ color: MUTED2 }}
+      >
+        Product
+        <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      <div
+        role="menu"
+        aria-label="Product"
+        aria-hidden={!open}
+        className="absolute left-1/2 mt-3 w-[600px] max-w-[92vw] rounded-2xl bg-white p-5 grid grid-cols-2 gap-x-6 transition-[opacity,transform] duration-200 origin-top"
+        style={{
+          border: `1px solid ${BORDER}`,
+          boxShadow: '0 20px 45px -20px rgba(21,19,28,0.22)',
+          opacity: open ? 1 : 0,
+          transform: open ? 'translate(-50%, 0) scale(1)' : 'translate(-50%, -6px) scale(0.98)',
+          pointerEvents: open ? 'auto' : 'none',
+        }}
+      >
+        <div>
+          <p className="px-3 mb-1.5 text-[10px] uppercase tracking-[0.1em] font-inter font-semibold" style={{ color: MUTED }}>For brands</p>
+          {forBrands.map((item) => <MenuLink key={item.label} item={item} tabIndex={tabIndex} onNavigate={close} />)}
+        </div>
+        <div>
+          <p className="px-3 mb-1.5 text-[10px] uppercase tracking-[0.1em] font-inter font-semibold" style={{ color: MUTED }}>For manufacturers</p>
+          {forManufacturers.map((item) => <MenuLink key={item.label} item={item} tabIndex={tabIndex} onNavigate={close} />)}
+        </div>
+        <div className="col-span-2 mt-3 pt-3" style={{ borderTop: `1px solid ${BORDER}` }}>
+          <Link
+            to="/coming-soon?feature=visibility"
+            role="menuitem"
+            tabIndex={tabIndex}
+            onClick={close}
+            className="flex items-start gap-3 rounded-xl px-3 py-2.5 transition-colors duration-150 hover:bg-[rgba(93,82,214,0.09)] focus-visible:outline-none"
+            style={{ background: 'rgba(93,82,214,0.05)' }}
+          >
+            <span className="mt-0.5 flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: PURPLE_BG, color: PURPLE }}>
+              <Route className="w-3.5 h-3.5" strokeWidth={1.75} />
+            </span>
+            <span className="min-w-0">
+              <span className="flex items-center gap-2">
+                <span className="text-[13px] font-inter font-medium" style={{ color: INK }}>Supply Chain Visibility</span>
+                <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] uppercase tracking-wide font-inter font-semibold flex-shrink-0" style={{ background: PURPLE, color: '#fff' }}>
+                  Coming soon
+                </span>
+              </span>
+              <span className="block text-[12px] font-inter leading-snug mt-0.5" style={{ color: MUTED2 }}>
+                Trace materials, suppliers and production from source to shipment.
+              </span>
+            </span>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const productMenuGroups = [
+  { heading: 'For brands', items: forBrands },
+  { heading: 'For manufacturers', items: forManufacturers },
+];
+
+/** Mobile equivalent: an expandable accordion inside the mobile nav panel. */
+export const MobileProductAccordion = ({ onNavigate }: { onNavigate: () => void }) => {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div className="col-span-2">
+      <button
+        type="button"
+        aria-expanded={expanded}
+        onClick={() => setExpanded((v) => !v)}
+        className="w-full flex items-center justify-between text-left"
+        style={{ color: MUTED2 }}
+      >
+        Product
+        <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} />
+      </button>
+      {expanded && (
+        <div className="mt-3 flex flex-col gap-4">
+          {productMenuGroups.map((group) => (
+            <div key={group.heading}>
+              <p className="text-[10px] uppercase tracking-[0.1em] font-inter font-semibold mb-2" style={{ color: MUTED }}>{group.heading}</p>
+              <div className="flex flex-col gap-2.5">
+                {group.items.map((item) => (
+                  <Link key={item.label} to={item.to} onClick={onNavigate} className="text-[13px] font-inter" style={{ color: INK }}>
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
+          <Link
+            to="/coming-soon?feature=visibility"
+            onClick={onNavigate}
+            className="inline-flex items-center gap-2 text-[13px] font-inter"
+            style={{ color: INK }}
+          >
+            Supply Chain Visibility
+            <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] uppercase tracking-wide font-inter font-semibold" style={{ background: PURPLE, color: '#fff' }}>
+              Coming soon
+            </span>
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+};

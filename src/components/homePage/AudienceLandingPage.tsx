@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom';
 import { SEO } from '@/components/SEO';
 import { LandingHeader, LandingFooter } from './LandingChrome';
 import { ProductionLandingExperience } from './ProductionLandingExperience';
@@ -11,21 +10,11 @@ const seoCopy: Record<Audience, string> = {
   manufacturer: 'Formme helps manufacturers run production — manage orders, plan lines, track quality, and keep brands updated automatically.',
 };
 
-export const AudienceLandingPage = ({ audience }: { audience: Audience }) => {
-  const navigate = useNavigate();
-
-  const switchAudience = (next: Audience) => {
-    if (next === audience) return;
-    navigate(routeFor[next]);
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  };
-
-  return (
-    <div className="production-page">
-      <SEO canonical={routeFor[audience]} description={seoCopy[audience]} />
-      <LandingHeader audience={audience} onSwitchAudience={switchAudience} />
-      <ProductionLandingExperience key={audience} audience={audience} />
-      <LandingFooter onSwitchAudience={switchAudience} />
-    </div>
-  );
-};
+export const AudienceLandingPage = ({ audience }: { audience: Audience }) => (
+  <div className="production-page">
+    <SEO canonical={routeFor[audience]} description={seoCopy[audience]} />
+    <LandingHeader />
+    <ProductionLandingExperience key={audience} audience={audience} />
+    <LandingFooter />
+  </div>
+);
