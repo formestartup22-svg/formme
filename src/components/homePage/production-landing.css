@@ -700,7 +700,7 @@
 .about-story-location { margin-top: 24px; padding-top: 22px; border-top: 1px solid #eee5f7; font-size: 12px; letter-spacing: .02em; }
 .about-story-location strong { color: var(--production-ink); }
 .about-story-media { position: sticky; top: 100px; }
-.about-story-media img { width: 100%; height: 340px; object-fit: cover; border-radius: 16px; border: 1px solid var(--production-border); }
+.about-story-media img { width: 100%; height: 340px; object-fit: cover; object-position: center 68%; border-radius: 16px; border: 1px solid var(--production-border); }
 .about-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 20px; }
 .about-stats > div { padding: 20px; border-radius: 14px; background: #fff; border: 1px solid var(--production-border); box-shadow: 0 10px 26px -22px rgba(30,15,60,.25); }
 .about-stats strong { display: block; font-family: 'DM Sans', sans-serif; font-size: 30px; font-weight: 600; letter-spacing: -.02em; color: var(--production-purple); }

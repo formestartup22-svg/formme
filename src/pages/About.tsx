@@ -1,7 +1,7 @@
 import { ArrowRight, BarChart3, Check, Factory, LayoutGrid } from 'lucide-react';
 import { SEO } from '@/components/SEO';
 import { LandingHeader, LandingFooter, CONTACT_HREF } from '@/components/homePage/LandingChrome';
-import designerImage from '@/assets/about-designer.jpg';
+import designerImage from '@/assets/about-formme-feature.jpg';
 import '@/components/homePage/production-landing.css';
 
 const storyPoints = [
@@ -76,7 +76,7 @@ const About = () => (
           </p>
         </div>
         <div className="about-story-media">
-          <img src={designerImage} alt="Designer working with fabric samples" loading="lazy" />
+          <img src={designerImage} alt="Formme presented as the fashion stream organiser at a startup event" loading="lazy" />
           <div className="about-stats">
             {stats.map(s => (
               <div key={s.label}><strong>{s.value}</strong><span>{s.label}</span></div>
