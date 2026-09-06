@@ -65,9 +65,9 @@ const CostPredictor = () => {
           <div className="reveal flex justify-center">
             <Eyebrow>Cost predictor</Eyebrow>
           </div>
-          <h1 className="reveal font-cormorant font-medium leading-[1.08] tracking-[-0.01em]" style={{ color: INK, fontSize: 'clamp(36px, 5vw, 58px)' }}>
-            Know your cost{' '}
-            <span className="italic" style={{ color: PURPLE }}>before you commit.</span>
+          <h1 className="reveal font-dm-sans font-semibold leading-[1.1] tracking-[-0.02em]" style={{ color: INK, fontSize: 'clamp(36px, 4.2vw, 54px)' }}>
+            Know your cost<br />
+            <span className="font-cormorant italic font-medium" style={{ color: PURPLE }}>before you commit.</span>
           </h1>
           <p className="reveal mt-6 max-w-xl mx-auto font-inter leading-relaxed" style={{ color: MUTED2, fontSize: '15px' }}>
             Pick a garment, a decoration method, and a quantity to get an instant estimate of production cost and total price.
