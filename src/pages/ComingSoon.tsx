@@ -2,12 +2,14 @@ import { useLocation } from 'react-router-dom';
 import { SEO } from '@/components/SEO';
 import { BG, LAVENDER, INK, MUTED2, PURPLE } from '@/components/homePage/theme';
 import { LandingHeader, LandingFooter } from '@/components/homePage/LandingChrome';
+import { VisibilityPreview } from '@/components/homePage/VisibilityPreview';
+import '@/components/homePage/production-landing.css';
 
 const ComingSoon = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const feature = searchParams.get('feature');
-  void feature; // reserved for feature-specific copy later
+  if (feature === 'visibility') return <div className="production-page"><SEO title="Supply Chain Visibility — Coming Soon" noindex={true} /><LandingHeader /><VisibilityPreview /><LandingFooter /></div>;
 
   return (
     <div className="min-h-screen overflow-x-hidden flex flex-col" style={{ background: BG, color: INK }}>
