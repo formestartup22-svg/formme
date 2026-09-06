@@ -199,7 +199,7 @@ export function WorkflowShowcase({ audience }: { audience: Audience }) {
         <SectionHeading
           eyebrow={audience === 'brand' ? 'HOW IT WORKS FOR BRANDS' : 'HOW IT WORKS FOR MANUFACTURERS'}
           title={<>From {audience === 'brand' ? 'idea to delivery.' : 'order to shipment.'}<br /><em>Every step, connected.</em></>}
-          description={audience === 'brand' ? 'Start with your design, find your manufacturing partner, and follow your collection through production. Explore your workflow, step by step.' : 'Review the brief, plan the work, and coordinate production through quality and dispatch. Explore your factory workflow, step by step.'}
+          description={audience === 'brand' ? 'Follow an example order through five steps. Select a step to see what you and your factory work on together.' : 'Review the brief, plan the work, and coordinate production through quality and dispatch. Explore your factory workflow, step by step.'}
         />
         <WorkflowSteps key={audience} audience={audience} />
         <div className="workflow-connection"><span>FACTORY OPERATIONS</span><i /><span className="workflow-formme">formme</span><i /><span>BRAND VISIBILITY</span></div>

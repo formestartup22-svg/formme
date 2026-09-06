@@ -1,48 +1,25 @@
 import { useState } from 'react';
-import { ArrowRight, Check, Factory, FileText, Shirt, Truck } from 'lucide-react';
+import { ArrowRight, Factory, Shirt } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Audience } from './theme';
-
-const introFeatures = [
-  { icon: FileText, label: 'Shared tech packs & samples' },
-  { icon: Factory, label: 'Live production tracking' },
-  { icon: Truck, label: 'Quality & shipment visibility' },
-];
 
 const gateCopy: Record<Audience, {
   icon: typeof Shirt;
   eyebrow: string;
   heading: string;
   description: string;
-  bullets: string[];
-  previewLabel: string;
-  previewMeta: string;
 }> = {
   brand: {
     icon: Shirt,
     eyebrow: 'FOR BRANDS',
     heading: 'I’m a Brand',
     description: 'I want to get apparel produced.',
-    bullets: [
-      'Connect with vetted manufacturing partners',
-      'Approve samples and lock in the details',
-      'Track your order from cut to carton',
-    ],
-    previewLabel: 'Oversized hoodie',
-    previewMeta: 'FM-HOOD-004 · 72%',
   },
   manufacturer: {
     icon: Factory,
     eyebrow: 'FOR MANUFACTURERS',
     heading: 'I’m a Manufacturer',
     description: 'I want to manage apparel production.',
-    bullets: [
-      'Manage every order and production line',
-      'Log quality checks and approvals',
-      'Keep brands updated automatically',
-    ],
-    previewLabel: 'Line 04 · Sewing',
-    previewMeta: '72% complete',
   },
 };
 
@@ -62,31 +39,24 @@ const GateCard = ({
         type="button"
         onClick={() => onSelect(audience)}
         aria-label={`${copy.heading} — ${copy.description}`}
-        className="gate-card"
+        className={`gate-card gate-card-${audience}`}
         data-active={active}
         data-dimmed={dimmed}
       >
-        <span className="gate-card-icon"><Icon size={20} /></span>
-        <span className="production-eyebrow">{copy.eyebrow}</span>
+        <span className="gate-card-top"><span className="gate-card-icon"><Icon size={22} /></span><span className="production-eyebrow">{copy.eyebrow}</span></span>
         <h2>{copy.heading}</h2>
         <p className="gate-card-desc">{copy.description}</p>
-        <ul>
-          {copy.bullets.map(item => <li key={item}><Check size={14} />{item}</li>)}
-        </ul>
-        <div className="gate-card-preview">
-          <strong>{copy.previewLabel}</strong>
-          <span>{copy.previewMeta}</span>
-        </div>
-        <span className="gate-card-cta">Continue <ArrowRight size={15} /></span>
+        <span className="gate-card-summary">{audience === 'brand' ? 'Find your factory. Perfect your sample. Bring your collection to life.' : 'Plan your lines. Track every order. Keep your brands in the loop.'}</span>
+        <span className="gate-capabilities">{(audience === 'brand' ? ['Factory matching', 'Sample approvals', 'Order tracking'] : ['Production planning', 'Quality checks', 'Brand updates']).map(label => <span key={label}>{label}</span>)}</span>
+        <span className="gate-card-cta">Explore {audience === 'brand' ? 'for brands' : 'for manufacturers'} <ArrowRight size={16} /></span>
       </button>
     </motion.div>
   );
 };
 
 /**
- * The very first thing a visitor sees: a short introduction to what Formme actually does,
- * then a single choice between the two Formme audiences. Unmounts (via the parent's
- * AnimatePresence) once a choice is made, handing off to the personalized homepage content.
+ * Every visit to the homepage starts with an explicit audience choice.
+ * Selecting a card opens that audience's landing experience.
  */
 export const AudienceGate = ({ onSelect, prefersReduced }: { onSelect: (a: Audience) => void; prefersReduced: boolean }) => {
   const [pending, setPending] = useState<Audience | null>(null);
@@ -106,21 +76,14 @@ export const AudienceGate = ({ onSelect, prefersReduced }: { onSelect: (a: Audie
         transition={{ duration: prefersReduced ? 0.15 : 0.5, ease: 'easeOut' }}
       >
         <span className="production-eyebrow"><span className="production-dot" /> FASHION PRODUCTION, CONNECTED</span>
-        <h1>The operating system<br /><em>connecting fashion production.</em></h1>
+        <h1>Are you a brand<br /><em>or a manufacturer?</em></h1>
         <p>
-          Formme brings brands and manufacturers into one shared workspace — tech packs, samples,
-          live production tracking, and shipment updates, all in one place instead of scattered
-          across emails and spreadsheets.
+          From first sample to final shipment, Formme keeps your production connected.
+          Choose your side to see how it works.
         </p>
-        <div className="gate-features">
-          {introFeatures.map(({ icon: Icon, label }) => (
-            <span key={label}><Icon size={16} />{label}</span>
-          ))}
-        </div>
       </motion.div>
 
       <div className="production-container">
-        <p className="gate-prompt">What brings you to Formme?</p>
         <motion.div
           className="gate-cards"
           variants={prefersReduced ? cardContainerVariantsReduced : cardContainerVariants}
@@ -130,6 +93,7 @@ export const AudienceGate = ({ onSelect, prefersReduced }: { onSelect: (a: Audie
           <GateCard audience="brand" active={pending === 'brand'} dimmed={pending === 'manufacturer'} reduced={prefersReduced} onSelect={handleSelect} />
           <GateCard audience="manufacturer" active={pending === 'manufacturer'} dimmed={pending === 'brand'} reduced={prefersReduced} onSelect={handleSelect} />
         </motion.div>
+        <p className="gate-footnote">Two sides of production. One shared workspace.<span>You can switch experiences anytime.</span></p>
       </div>
     </section>
   );

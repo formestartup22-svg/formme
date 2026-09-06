@@ -684,6 +684,93 @@
   .gate-card { padding: 26px; }
 }
 
+/* A focused audience choice with a glimpse of each workspace. */
+.gate-section { padding-block: 110px 48px; }
+.gate-intro { max-width: 720px; }
+.gate-intro h1 { font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: clamp(36px, 4.5vw, 58px); letter-spacing: -.045em; line-height: 1.08; margin-top: 18px; }
+.gate-intro h1 em { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 500; font-size: 1.13em; letter-spacing: -.035em; color: var(--production-purple); }
+.gate-intro > p { max-width: 490px; margin: 20px auto 0; font-size: 14px; line-height: 1.7; }
+.gate-cards { max-width: 960px; margin-top: 36px; gap: 24px; }
+.gate-card { padding: 26px; height: 100%; border-radius: 20px; overflow: hidden; }
+.gate-card:hover { border-color: #a895de; transform: translateY(-5px); }
+.gate-card:focus-visible { outline: 3px solid #7655d8; outline-offset: 5px; }
+.gate-card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+.gate-card-top > svg { margin-left: auto; color: var(--production-purple); }
+.gate-card-icon { width: 32px; height: 32px; border-radius: 9px; margin: 0; }
+.gate-card-top .production-eyebrow { margin: 0; font-size: 10px; letter-spacing: .1em; }
+.gate-card h2 { font-family: 'DM Sans', sans-serif; font-size: clamp(22px, 2.4vw, 28px); font-weight: 600; letter-spacing: -.035em; }
+.gate-card-desc { color: #62556f; font-size: 13px; margin-bottom: 20px; }
+.gate-visual { display: block; position: relative; height: 210px; border-radius: 12px; overflow: hidden; background: radial-gradient(ellipse at center, #e5dcf4, #f4f0fa); border: 1px solid #e8e0f1; }
+.gate-visual-label { position: absolute; top: 15px; left: 16px; font-size: 8px; letter-spacing: .12em; color: #62556f; }
+.gate-visual img { display: block; height: 170px; width: 200px; object-fit: contain; margin: 13px auto 0; transition: transform .35s; }
+.gate-card:hover .gate-visual img { transform: rotate(-3deg) scale(1.04); }
+.gate-sample-tag { position: absolute; right: 12px; top: 65px; display: flex; align-items: center; gap: 5px; background: #fff; color: #27714e; padding: 8px 9px; font-size: 9px; border: 1px solid #e4e8e2; border-radius: 7px; box-shadow: 0 5px 15px #2213330a; }
+.gate-garment-caption { position: absolute; left: 16px; bottom: 13px; display: grid; gap: 3px; }
+.gate-garment-caption strong { font-size: 11px; font-weight: 600; }
+.gate-garment-caption > span { font-size: 9px; color: #62556f; }
+.gate-card-manufacturer .gate-visual { background: #25212e; border-color: #393142; color: #f6f2fc; padding: 17px; }
+.gate-board-heading { display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 500; padding-bottom: 19px; }
+.gate-board-heading > span:last-child { display: flex; align-items: center; gap: 5px; font-size: 9px; color: #bce8ce; }
+.gate-board-heading i { width: 5px; height: 5px; border-radius: 50%; background: #9bddb7; }
+.gate-board-columns { display: flex; justify-content: space-between; font-size: 7px; letter-spacing: .09em; color: #b8adc8; padding-bottom: 6px; }
+.gate-board-row { display: flex; gap: 10px; align-items: center; border-top: 1px solid #403748; padding: 7px 0; }
+.gate-line-number { display: grid; place-items: center; width: 25px; height: 25px; background: #393142; border-radius: 6px; font-size: 10px; color: #cec0e8; }
+.gate-board-row strong { display: block; font-size: 10px; font-weight: 500; }
+.gate-board-row small { display: block; font-size: 8px; color: #bfb3ce; margin-top: 3px; }
+.gate-line-progress { margin-left: auto; width: 65px; text-align: right; }
+.gate-line-progress > span { display: block; height: 4px; background: #4b4059; border-radius: 3px; overflow: hidden; }
+.gate-line-progress i { display: block; height: 100%; background: #b39ae9; border-radius: inherit; }
+.gate-card-summary { display: block; margin: 18px 0; max-width: 320px; font-size: 12px; line-height: 1.7; color: #62556f; }
+.gate-card-cta { display: flex; justify-content: space-between; border-top: 1px solid #ece6f3; padding-top: 17px; font-weight: 600; }
+.gate-footnote { margin-top: 27px; text-align: center; font-size: 11px; color: #62556f; }
+.gate-footnote > span { display: block; margin-top: 6px; font-size: 10px; color: #746580; }
+@media (max-width: 639px) {
+  .gate-section { padding-block: 96px 38px; }
+  .gate-cards { margin-top: 28px; gap: 18px; }
+  .gate-card { padding: 22px; }
+  .gate-intro > p { font-size: 13px; }
+  .gate-visual { height: 205px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gate-card, .gate-visual img { transition: none; }
+  .gate-card:hover, .gate-card:hover .gate-visual img { transform: none; }
+}
+
+.gate-card { padding: 32px; border-top: 3px solid #b8a5ed; }
+.gate-card-manufacturer { border-top-color: #82738f; background: linear-gradient(145deg, #fff, #f6f3fa); }
+.gate-card-top { margin-bottom: 28px; gap: 12px; }
+.gate-card-icon { width: 44px; height: 44px; border-radius: 12px; }
+.gate-card-manufacturer .gate-card-icon { background: #eae4ef; color: #52435f; }
+.gate-card-manufacturer .gate-card-top .production-eyebrow { background: #eee8f3; color: #52435f; }
+.gate-card h2 { font-size: clamp(25px, 2.4vw, 30px); }
+.gate-card-desc { margin: 8px 0 0; font-size: 14px; color: #393041; }
+.gate-card-summary { margin: 16px 0 22px; font-size: 13px; max-width: 330px; }
+.gate-capabilities { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 28px; }
+.gate-capabilities > span { border: 1px solid #e2d9ed; border-radius: 6px; padding: 6px 8px; font-size: 10px; color: #62516f; background: #faf8fd; }
+.gate-card-cta { padding-top: 21px; }
+@media (max-width: 639px) {
+  .gate-card { padding: 24px; }
+  .gate-card-top { margin-bottom: 22px; }
+}
+
+.production-story-simple .story-explanation { font-size: 11px; line-height: 1.65; color: var(--production-muted); margin-block: 12px; }
+.production-story-simple .story-step { font-size: 9px; letter-spacing: .025em; }
+.production-story-simple .story-card-heading { font-size: 12px; }
+.production-story-simple .story-sketch { height: 130px; padding: 12px; }
+.production-story-simple .story-card-footer { justify-content: flex-start; gap: 6px; font-size: 9px; line-height: 1.5; }
+.production-story-simple .story-visibility-progress { font-size: 10px; margin-top: 18px; }
+.production-story-simple .story-live { font-size: 9px; }
+.production-story-simple .story-caption { font-size: 10px; }
+.production-story-simple .story-order span { font-size: 9px; }
+@media (max-width: 639px) {
+  .production-story-simple .story-step { font-size: 8px; }
+  .production-story-simple .story-card-heading { font-size: 10px; }
+  .production-story-simple .story-explanation { font-size: 10px; }
+  .production-story-simple .story-order span { font-size: 8px; }
+  .production-story-simple .story-caption { font-size: 9px; }
+  .production-story-simple .brand-sample-heading { align-items: flex-start; }
+}
+
 /* About page — the founder story, told with the same visual system as the rest of the site. */
 .about-hero { padding-block: 96px 40px; background: radial-gradient(ellipse at 30% 20%, #ece4fb, transparent 55%), radial-gradient(ellipse at 80% 60%, #f3effc, transparent 60%), #fbf9fe; text-align: center; }
 .about-hero-inner { max-width: 720px; margin-inline: auto; }
