@@ -1,6 +1,8 @@
 import { Routes, Route } from "react-router-dom";
 import { ScrollToTop } from "./components/ScrollToTop";
 import Index from "./pages/Index";
+import BrandsLanding from "./pages/BrandsLanding";
+import ManufacturersLanding from "./pages/ManufacturersLanding";
 import Templates from "./pages/Templates";
 import Marketplace from "./pages/Marketplace";
 import Checkout from "./pages/Checkout";
@@ -37,6 +39,8 @@ function App() {
         <ScrollToTop />
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/brands" element={<BrandsLanding />} />
+          <Route path="/manufacturers" element={<ManufacturersLanding />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/deme/signup" element={<Auth />} />
           <Route path="/profile" element={<Profile />} />
