@@ -1,4 +1,4 @@
-.visibility-preview { padding-top: 120px; background: radial-gradient(ellipse at 74% 35%, #ece5ff 0, transparent 48%), linear-gradient(130deg, #faf8ff, #f7f4ff); }
+.visibility-preview { padding-top: 120px; background: #fff; }
 .visibility-hero { display: grid; grid-template-columns: 1fr 1.1fr; gap: 38px; align-items: center; padding-block: 25px 65px; }
 .visibility-copy h1 { font-family: 'DM Sans', sans-serif; font-size: clamp(38px, 4.5vw, 62px); font-weight: 600; line-height: 1.08; letter-spacing: -.04em; margin-top: 18px; }
 .visibility-copy h1 em { display: block; font-family: 'Cormorant Garamond', Georgia, serif; font-size: .92em; line-height: 1.14; font-weight: 500; color: #6344c9; margin-top: 22px; letter-spacing: -.025em; }
@@ -9,7 +9,7 @@
 .visibility-connections circle { fill: #9875ec; stroke: #e3d7fc; stroke-width: 8px; stroke-dasharray: none; }
 .visibility-hub { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 31%; aspect-ratio: 1; display: grid; place-items: center; border: 1px solid #e2d6fb; border-radius: 50%; background: radial-gradient(circle, #dfd2ff, #f5f0ff); box-shadow: 0 15px 40px #7854cf14, 0 0 0 17px #f5f0ff65; }
 .visibility-hub img { height: 46%; width: auto; object-fit: contain; }
-.visibility-node { position: absolute; transform: translate(-50%, -50%); width: 29%; min-height: 112px; padding: 18px 9px; text-align: center; background: #ffffffeb; border: 1px solid #e8dffc; border-radius: 18px; box-shadow: 0 12px 28px -18px #7854cf35; }
+.visibility-node { position: absolute; transform: translate(-50%, -50%); width: 29%; min-height: 112px; padding: 18px 9px; text-align: center; background: #f5f2fc; border: 1px solid #e2d8f2; border-radius: 18px; box-shadow: 0 12px 28px -18px #7854cf35; }
 .visibility-node > svg { color: #6747d2; margin: 0 auto 9px; }
 .visibility-node h2 { font-size: 16px; font-weight: 600; letter-spacing: -.025em; }
 .visibility-node p { font-size: 12px; color: #62556f; margin-top: 4px; }

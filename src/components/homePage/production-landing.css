@@ -59,7 +59,7 @@
 .production-confirmed { display: inline-flex; align-items: center; gap: 5px; color: var(--production-success); }
 
 /* The garment is the hero; the surrounding UI explains how it gets made. */
-.production-hero { background: radial-gradient(ellipse at 62% 45%, #ebe4fa 0, transparent 57%), #f6f2fd; }
+.production-hero { background: #fff; }
 .production-hero-grid { display: grid; grid-template-columns: .78fr 1.4fr; gap: 42px; align-items: center; padding-block: 76px 62px; }
 .production-hero-copy { min-width: 0; }
 .production-hero h1 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: clamp(46px, 4.2vw, 63px); font-weight: 500; line-height: 1.03; letter-spacing: -.035em; }
@@ -310,7 +310,7 @@
 .brand-delivery strong { display: block; font-size: 11px; font-weight: 600; color: var(--production-ink); margin-top: 3px; }
 .story-card { border-color: #dfd5ed; box-shadow: 0 8px 22px -14px #59447b35; }
 .production-progress { background: #ddd5e9; }
-.production-landing-manufacturer .production-hero { background: radial-gradient(ellipse at 85% 40%, #e7e0f4, transparent 65%), #f6f4f9; }
+.production-landing-manufacturer .production-hero { background: #fff; }
 .production-landing .production-hero h1 { font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: clamp(43px, 3.8vw, 56px); line-height: 1.12; }
 .production-landing .production-hero h1 em { font-size: 1.14em; margin-top: 5px; }
 .brand-overview { border-color: #ffffff0c; background: #ffffff04; }
@@ -377,7 +377,7 @@
 .factory-hero-selection > span:first-child { display: flex; align-items: center; gap: 7px; }
 .factory-hero-selection strong { color: var(--production-ink); font-weight: 500; }
 .factory-hero-bottom { display: grid; grid-template-columns: 1.1fr 1fr; align-items: stretch; gap: 12px; margin-top: 14px; }
-.factory-hero-dispatch, .factory-hero-sync { display: flex; align-items: center; gap: 10px; padding: 17px 15px; border: 1px solid #dcd2e9; border-radius: 11px; background: #fff; box-shadow: 0 4px 12px #30204406; }
+.factory-hero-dispatch, .factory-hero-sync { display: flex; align-items: center; gap: 10px; padding: 17px 15px; border: 1px solid #ded4ec; border-radius: 11px; background: #f5f2fc; box-shadow: 0 4px 12px #30204406; }
 .factory-hero-dispatch > div > span { display: block; font-size: 7px; letter-spacing: .1em; color: var(--production-muted); }
 .factory-hero-dispatch strong, .factory-hero-sync strong { display: block; font-size: 10px; font-weight: 600; color: var(--production-ink); line-height: 1.5; }
 .factory-hero-dispatch small, .factory-hero-sync small { display: block; font-size: 8px; color: var(--production-muted); line-height: 1.6; margin-top: 3px; }
@@ -647,7 +647,7 @@
 }
 
 /* Audience gate — the first choice a visitor makes, with a short introduction to Formme. */
-.gate-section { padding-block: 96px 90px; background: radial-gradient(ellipse at 25% 15%, #ece4fb, transparent 55%), radial-gradient(ellipse at 82% 65%, #f3effc, transparent 60%), #fbf9fe; }
+.gate-section { padding-block: 96px 90px; background: #fff; }
 .gate-intro { max-width: 640px; margin-inline: auto; text-align: center; }
 .gate-intro h1 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 500; font-size: clamp(34px, 4.4vw, 52px); line-height: 1.14; letter-spacing: -.02em; margin-top: 6px; }
 .gate-intro h1 em { font-style: italic; }
@@ -657,7 +657,7 @@
 .gate-features svg { width: 16px; height: 16px; color: var(--production-accent-text); flex-shrink: 0; }
 .gate-prompt { text-align: center; margin-block: 52px 26px; font-size: 13px; font-weight: 500; color: var(--production-ink); }
 .gate-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; max-width: 900px; margin-inline: auto; }
-.gate-card { position: relative; width: 100%; text-align: left; background: #fff; border: 1.5px solid var(--production-border); border-radius: 18px; padding: 32px; display: flex; flex-direction: column; box-shadow: 0 10px 30px -22px rgba(30,15,60,.18); transition: border-color .25s, box-shadow .25s, opacity .25s, transform .25s; }
+.gate-card { position: relative; width: 100%; text-align: left; background: #f5f2fc; border: 1.5px solid #e2d8f2; border-radius: 18px; padding: 32px; display: flex; flex-direction: column; box-shadow: 0 10px 30px -22px rgba(30,15,60,.18); transition: border-color .25s, box-shadow .25s, opacity .25s, transform .25s; }
 .gate-card:hover { transform: translateY(-3px); box-shadow: 0 16px 34px -20px rgba(30,15,60,.22); }
 .gate-card[data-active='true'] { border-color: var(--production-purple); box-shadow: 0 18px 40px -20px rgba(89,68,203,.35); }
 .gate-card[data-dimmed='true'] { opacity: .45; transform: none; }
@@ -700,7 +700,7 @@
 .gate-card-top .production-eyebrow { margin: 0; font-size: 10px; letter-spacing: .1em; }
 .gate-card h2 { font-family: 'DM Sans', sans-serif; font-size: clamp(22px, 2.4vw, 28px); font-weight: 600; letter-spacing: -.035em; }
 .gate-card-desc { color: #62556f; font-size: 13px; margin-bottom: 20px; }
-.gate-visual { display: block; position: relative; height: 210px; border-radius: 12px; overflow: hidden; background: radial-gradient(ellipse at center, #e5dcf4, #f4f0fa); border: 1px solid #e8e0f1; }
+.gate-visual { display: block; position: relative; height: 210px; border-radius: 12px; overflow: hidden; background: #fff; border: 1px solid #e8e0f1; }
 .gate-visual-label { position: absolute; top: 15px; left: 16px; font-size: 8px; letter-spacing: .12em; color: #62556f; }
 .gate-visual img { display: block; height: 170px; width: 200px; object-fit: contain; margin: 13px auto 0; transition: transform .35s; }
 .gate-card:hover .gate-visual img { transform: rotate(-3deg) scale(1.04); }
@@ -778,13 +778,13 @@
 .brand-journey-arrow path { vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 2 5; }
 .brand-journey-arrow .brand-journey-arrowhead { stroke-dasharray: none; stroke: #7952de; }
 .brand-journey-icon { display: grid; place-items: center; width: 49px; height: 49px; border: 5px solid #ffffff80; background: #f8f4ff; border-radius: 50%; margin: 0 auto 9px; color: #7050db; }
-.brand-journey-step > strong { display: inline-block; font-size: 11px; line-height: 1.4; color: #6340c7; border-radius: 25px; background: #ffffffd9; padding: 6px 9px; }
+.brand-journey-step > strong { display: inline-block; font-size: 11px; line-height: 1.4; color: var(--production-ink); border-radius: 25px; background: #f2f1f4; padding: 6px 9px; }
 .brand-journey-step > p { font-size: 10px; line-height: 1.5; color: var(--production-muted); margin: 7px auto 0; max-width: 170px; }
 .brand-journey-body { display: grid; grid-template-columns: 1fr 1.08fr 1.08fr; gap: 12px; align-items: center; }
-.brand-journey-card { min-width: 0; padding: 15px; background: #ffffffed; border: 1px solid #e3d7fc; border-radius: 13px; box-shadow: 0 12px 28px -20px #8966d84a; }
+.brand-journey-card { min-width: 0; padding: 15px; background: #f5f2fc; border: 1px solid #e2d8f2; border-radius: 13px; box-shadow: 0 12px 28px -20px #8966d84a; }
 .brand-journey-card-title { display: flex; gap: 8px; align-items: center; font-size: 12px; }
 .brand-journey-card-title svg { color: #7652dc; }
-.brand-journey-sketch { height: 113px; margin-block: 14px; background: #f8f5fd; border-radius: 7px; padding: 10px; }
+.brand-journey-sketch { height: 113px; margin-block: 14px; background: #fff; border-radius: 7px; padding: 10px; }
 .brand-journey-sketch img { width: 100%; height: 100%; object-fit: contain; }
 .brand-journey-card h3 { font-family: 'DM Sans', sans-serif; font-size: 11px; line-height: 1.45; font-weight: 600; }
 .brand-journey-brief > p { font-size: 10px; line-height: 1.7; margin-top: 5px; color: var(--production-muted); }
@@ -811,7 +811,7 @@
 .brand-journey-timeline li[data-complete='true'] > span { background: #7950e5; color: #fff; border-color: #7950e5; }
 .brand-journey-timeline strong { font-weight: 400; }
 .brand-journey-timeline small { margin-left: auto; font-size: 8px; color: var(--production-muted); }
-.brand-journey-delivery { display: flex; align-items: center; gap: 6px; padding: 10px 8px; background: #f4effc; border-radius: 8px; font-size: 8px; color: var(--production-muted); }
+.brand-journey-delivery { display: flex; align-items: center; gap: 6px; padding: 10px 8px; background: #fff; border-radius: 8px; font-size: 8px; color: var(--production-muted); }
 .brand-journey-delivery svg, .brand-journey-delivery strong { color: #6d45cc; flex-shrink: 0; }
 .brand-journey-delivery strong { margin-left: auto; font-size: 10px; }
 .brand-journey-example { text-align: center; font-size: 9px; color: var(--production-muted); margin-top: 18px; }
@@ -833,7 +833,7 @@
 }
 
 /* About page — the founder story, told with the same visual system as the rest of the site. */
-.about-hero { padding-block: 96px 40px; background: radial-gradient(ellipse at 30% 20%, #ece4fb, transparent 55%), radial-gradient(ellipse at 80% 60%, #f3effc, transparent 60%), #fbf9fe; text-align: center; }
+.about-hero { padding-block: 96px 40px; background: #fff; text-align: center; }
 .about-hero-inner { max-width: 720px; margin-inline: auto; }
 .about-hero h1 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 500; font-size: clamp(38px, 4.8vw, 58px); line-height: 1.1; letter-spacing: -.02em; margin-top: 8px; }
 .about-hero h1 em { font-style: italic; color: var(--production-purple); }
@@ -850,7 +850,7 @@
 .about-story-media { position: sticky; top: 100px; }
 .about-story-media img { width: 100%; height: 340px; object-fit: cover; object-position: center 68%; border-radius: 16px; border: 1px solid var(--production-border); }
 .about-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 20px; }
-.about-stats > div { padding: 20px; border-radius: 14px; background: #fff; border: 1px solid var(--production-border); box-shadow: 0 10px 26px -22px rgba(30,15,60,.25); }
+.about-stats > div { padding: 20px; border-radius: 14px; background: #f5f2fc; border: 1px solid #e2d8f2; box-shadow: 0 10px 26px -22px rgba(30,15,60,.25); }
 .about-stats strong { display: block; font-family: 'DM Sans', sans-serif; font-size: 30px; font-weight: 600; letter-spacing: -.02em; color: var(--production-purple); }
 .about-stats span { display: block; margin-top: 6px; font-size: 11.5px; line-height: 1.5; color: var(--production-muted); }
 .about-pillars { background: #f6f2fd; border-block: 1px solid #efe5f8; }
